@@ -4,12 +4,15 @@ import { Moon, Menu, X, Search, ChevronDown } from "lucide-react";
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   
   const toggleDropdown = (dropdown) => {
     setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
   };
+
+  const toggleMobileSearch = () => setShowMobileSearch(!showMobileSearch);
 
   return (
     <nav className="bg-gradient-to-r from-[#0d1117] via-[#161b22] to-[#0b0f1c] text-white shadow-lg sticky top-0 z-50">
@@ -124,7 +127,7 @@ const Navbar = () => {
           {/* Mobile Controls - Compact design */}
           <div className="flex items-center lg:hidden space-x-2">
             {/* Mobile Search Icon */}
-            <button className="p-1.5 hover:bg-gray-700 rounded-md transition-colors">
+            <button onClick={toggleMobileSearch} className="p-1.5 hover:bg-gray-700 rounded-md transition-colors">
               <Search size={18} className="text-gray-300" />
             </button>
             
@@ -135,6 +138,18 @@ const Navbar = () => {
             >
               {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
+          </div>
+        </div>
+
+        {/* Mobile Search Bar - Toggleable */}
+        <div className={`lg:hidden transition-all duration-300 ease-in-out ${showMobileSearch ? 'max-h-20 opacity-100 pb-3' : 'max-h-0 opacity-0 overflow-hidden'}`}>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Tìm kiếm phim..."
+              className="bg-[#1f2a3a] text-white rounded-full pl-10 pr-4 py-2.5 w-full outline-none focus:ring-2 focus:ring-blue-500 focus:bg-[#2d3a4a] transition-all"
+            />
           </div>
         </div>
 
@@ -203,12 +218,14 @@ const Navbar = () => {
                       <ChevronDown size={18} className={`transition-transform duration-200 ${activeDropdown === 'genres' ? 'rotate-180' : ''}`} />
                     </button>
                     <div className={`overflow-hidden transition-all duration-300 ${activeDropdown === 'genres' ? 'max-h-96' : 'max-h-0'}`}>
-                      <div className="mt-2 space-y-1">
-                        {['Hành Động', 'Viễn Tưởng', 'Bí Ẩn', 'Tâm Lý', 'Âm Nhạc', 'Hài Hước', 'Khoa Học', 'Kinh Dị'].map(genre => (
-                          <a key={genre} href="#" className="block px-6 py-2 text-sm text-gray-300 hover:bg-[#1c2228] hover:text-white rounded-md transition-colors">
-                            {genre}
-                          </a>
-                        ))}
+                      <div className="mt-2 p-2 bg-[#0d1117] rounded-md">
+                        <div className="grid grid-cols-2 gap-2">
+                          {['Hành Động', 'Viễn Tưởng', 'Bí Ẩn', 'Tâm Lý', 'Âm Nhạc', 'Hài Hước', 'Khoa Học', 'Kinh Dị'].map(genre => (
+                            <a key={genre} href="#" className="block px-2 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white rounded-md transition-colors text-center">
+                              {genre}
+                            </a>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -223,12 +240,14 @@ const Navbar = () => {
                       <ChevronDown size={18} className={`transition-transform duration-200 ${activeDropdown === 'countries' ? 'rotate-180' : ''}`} />
                     </button>
                     <div className={`overflow-hidden transition-all duration-300 ${activeDropdown === 'countries' ? 'max-h-96' : 'max-h-0'}`}>
-                      <div className="mt-2 space-y-1">
-                        {['Việt Nam', 'Hàn Quốc', 'Nhật Bản', 'Trung Quốc', 'Thái Lan', 'Mỹ', 'Âu Mỹ'].map(country => (
-                          <a key={country} href="#" className="block px-6 py-2 text-sm text-gray-300 hover:bg-[#1c2228] hover:text-white rounded-md transition-colors">
-                            {country}
-                          </a>
-                        ))}
+                      <div className="mt-2 p-2 bg-[#0d1117] rounded-md">
+                        <div className="grid grid-cols-2 gap-2">
+                          {['Việt Nam', 'Hàn Quốc', 'Nhật Bản', 'Trung Quốc', 'Thái Lan', 'Mỹ', 'Âu Mỹ'].map(country => (
+                            <a key={country} href="#" className="block px-2 py-2 text-sm text-gray-300 hover:bg-gray-600 hover:text-white rounded-md transition-colors text-center">
+                              {country}
+                            </a>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
