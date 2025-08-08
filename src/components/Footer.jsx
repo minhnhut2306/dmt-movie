@@ -44,16 +44,6 @@ const Footer = () => {
               Từ phim bộ đình đám đến những tác phẩm kinh điển, chúng tôi mang đến 
               trải nghiệm giải trí tuyệt vời nhất.
             </p>
-            <div className="flex flex-wrap items-center gap-3 text-sm">
-              <div className="flex items-center space-x-1">
-                <Star className="w-4 h-4 text-yellow-400" />
-                <span>4.8/5 Rating</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Film className="w-4 h-4 text-blue-400" />
-                <span>10,000+ Movies</span>
-              </div>
-            </div>
             <div className="md:hidden border-b border-gray-600 pb-4"></div>
           </div>
 
@@ -132,11 +122,11 @@ const Footer = () => {
             <div className="space-y-3">
               <div className="flex items-start space-x-3 text-sm">
                 <Mail className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-                <span className="break-words">support@dmtmovie.vn</span>
+                <span className="break-words">mthu09062007@gmail.com</span>
               </div>
               <div className="flex items-center space-x-3 text-sm">
                 <Phone className="w-4 h-4 text-red-600 flex-shrink-0" />
-                <span>+84 123 456 789</span>
+                <span>+84 333 845 232</span>
               </div>
             </div>
           </div>
