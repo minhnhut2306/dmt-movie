@@ -99,7 +99,7 @@ const Home = () => {
       {/* Movie Sections */}
       <div className="container mx-auto px-4 py-8 sm:py-12">
         <MovieSection
-          title="🔥 Phim Hot Nhất"
+          title=" Phim Hot Nhất"
           sectionId="trending"
           movieList={movies}
           currentSlideIndex={currentSlideIndex}
@@ -113,7 +113,7 @@ const Home = () => {
           getItemsPerSlide={getItemsPerSlide}
         />
         <MovieSection
-          title="🇻🇳 Phim Việt Nam"
+          title=" Phim Việt Nam"
           sectionId="vietnam"
           movieList={movies.filter(movie => movie.country === "Việt Nam")}
           currentSlideIndex={currentSlideIndex}
@@ -127,7 +127,7 @@ const Home = () => {
           getItemsPerSlide={getItemsPerSlide}
         />
         <MovieSection
-          title="📺 Phim Bộ"
+          title=" Phim Bộ"
           sectionId="series"
           movieList={movies.filter(movie => movie.type === "Phim Bộ")}
           currentSlideIndex={currentSlideIndex}
@@ -141,7 +141,7 @@ const Home = () => {
           getItemsPerSlide={getItemsPerSlide}
         />
         <MovieSection
-          title="🎬 Phim Lẻ"
+          title=" Phim Lẻ"
           sectionId="movies"
           movieList={movies.filter(movie => movie.type === "Phim Lẻ")}
           currentSlideIndex={currentSlideIndex}
@@ -155,7 +155,7 @@ const Home = () => {
           getItemsPerSlide={getItemsPerSlide}
         />
         <MovieSection
-          title="📡 TV Shows"
+          title=" TV Shows"
           sectionId="tvshows"
           movieList={movies.filter(movie => movie.type === "TV Shows")}
           currentSlideIndex={currentSlideIndex}
@@ -169,7 +169,7 @@ const Home = () => {
           getItemsPerSlide={getItemsPerSlide}
         />
         <MovieSection
-          title="💥 Phim Hành Động"
+          title=" Phim Hành Động"
           sectionId="action"
           movieList={movies.filter(movie => movie.genre === "Hành động")}
           currentSlideIndex={currentSlideIndex}
@@ -183,7 +183,7 @@ const Home = () => {
           getItemsPerSlide={getItemsPerSlide}
         />
         <MovieSection
-          title="🎨 Phim Hoạt Hình"
+          title=" Phim Hoạt Hình"
           sectionId="animation"
           movieList={movies.filter(movie => movie.genre === "Hoạt hình")}
           currentSlideIndex={currentSlideIndex}
