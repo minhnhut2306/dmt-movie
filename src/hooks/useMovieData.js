@@ -38,7 +38,7 @@ export const useMovieData = () => {
   const movies = [
     {
       title: "Top Gun: Maverick",
-      poster: "https://play-lh.googleusercontent.com/UJHa0DJftoFAt7rj1M8w7OmVoPxcFoRJAAqV2hbbz8QI-p5xHTxbjidNKM7gE-jxKzDfCuCfIJ7VBxQIcQ=w240-h480-rw",
+      poster: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6j5bFyToN8130-qtTHdD1vEyTN3QX_PRIUw&s",
       rating: 8.3,
       year: 2022,
       genre: "Hành động",

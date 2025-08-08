@@ -57,7 +57,7 @@ const MovieSection = ({
         onTouchStart={(e) => handleSectionStart(e, sectionId)}
         onTouchMove={handleSectionMove}
         onTouchEnd={() => handleSectionEnd(movieList)}
-        style={{ touchAction: 'none' }}
+        style={{ touchAction: 'pan-y' }}
       >
         <div
           className="flex transition-transform duration-500 ease-in-out"

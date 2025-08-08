@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import Home from './pages/home/Home';
+import Footer from './components/Footer';
 
 
 
@@ -24,6 +25,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
         </Routes>
+        <Footer/>
       </BrowserRouter>
       <Toaster
         position="top-right"
