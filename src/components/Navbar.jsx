@@ -118,10 +118,6 @@ const Navbar = () => {
               </div>
             </div>
 
-            {/* Dark mode toggle */}
-            <button className="p-2 hover:bg-gray-700 rounded-full transition-colors">
-              <Moon size={20} />
-            </button>
           </div>
 
           {/* Mobile Controls - Compact design */}
@@ -190,9 +186,6 @@ const Navbar = () => {
             <div className="p-4 overflow-y-auto h-full pb-20">
               <div className="space-y-2">
                 {/* Basic Menu Items */}
-                <a href="#" className="block px-3 py-3 text-base font-medium hover:bg-[#1c2228] rounded-md transition-colors text-white">
-                  Duyệt Tìm
-                </a>
                 <a href="#" className="block px-3 py-3 text-base font-medium hover:bg-[#1c2228] rounded-md transition-colors text-white">
                   Phim Bộ
                 </a>
@@ -276,12 +269,7 @@ const Navbar = () => {
                 </div>
 
                 {/* Bottom section */}
-                <div className="mt-6 pt-4 border-t border-gray-600">
-                  <button className="flex items-center w-full px-3 py-3 text-base font-medium hover:bg-[#1c2228] rounded-md transition-colors text-white">
-                    <Moon size={18} className="mr-3" />
-                    Chế độ tối
-                  </button>
-                </div>
+  
               </div>
             </div>
           </div>
