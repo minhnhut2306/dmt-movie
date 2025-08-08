@@ -1,12 +1,12 @@
 /**
  * Trang chủ website xem phim - Home Page
  * Giao diện responsive với hero banner và danh mục phim
- * Tính năng: slider phim, rating, responsive design, swipe hero banner
+ * Tính năng: slider phim, rating, responsive design, swipe hero banner và movie sections
  * Coded by nhutdev
  */
 
 import React, { useState, useEffect } from 'react';
-import { Play, Star, Calendar, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, Star, Calendar, Clock } from 'lucide-react';
 
 const Home = () => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState({});
@@ -15,6 +15,7 @@ const Home = () => {
   const [startX, setStartX] = useState(0);
   const [currentX, setCurrentX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
+  const [activeSection, setActiveSection] = useState(null);
 
   // Dữ liệu phim hero banner (5 phim khác nhau)
   const featuredMovies = [
@@ -33,14 +34,6 @@ const Home = () => {
       year: 2022,
       duration: "192 phút",
       backgroundImage: "https://ntvb.tmsimg.com/assets/p12460960_v_h8_an.jpg?w=1280&h=720"
-    },
-    {
-      title: "Top Gun: Maverick",
-      description: "Sau hơn 30 năm phục vụ như một phi công hàng đầu của Hải quân, Pete 'Maverick' Mitchell đang ở nơi anh thuộc về, vượt qua những ranh giới như một phi công thử nghiệm dũng cảm và né tránh sự thăng tiến trong cấp bậc...",
-      rating: 8.3,
-      year: 2022,
-      duration: "131 phút",
-      backgroundImage: "https://thumbnails.cbsig.net/CBS_Production_Entertainment_VMS/2022/10/26/2091444291941/TGMAV_SAlone_16_9_1920x1080_1781067_1920x1080.jpg"
     },
     {
       title: "Black Panther: Wakanda Forever",
@@ -63,7 +56,7 @@ const Home = () => {
   // Auto slide hero banner mỗi 5 giây (tạm dừng khi đang kéo)
   useEffect(() => {
     if (isDragging) return;
-    
+
     const interval = setInterval(() => {
       setCurrentHeroIndex((prevIndex) =>
         (prevIndex + 1) % featuredMovies.length
@@ -74,29 +67,30 @@ const Home = () => {
   }, [featuredMovies.length, isDragging]);
 
   // Xử lý touch/mouse events cho hero banner
-  const handleStart = (e) => {
+  const handleHeroStart = (e) => {
     setIsDragging(true);
+    setActiveSection('hero');
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     setStartX(clientX);
     setCurrentX(clientX);
   };
 
-  const handleMove = (e) => {
-    if (!isDragging) return;
+  const handleHeroMove = (e) => {
+    if (!isDragging || activeSection !== 'hero') return;
     e.preventDefault();
-    
+
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     setCurrentX(clientX);
     const offset = clientX - startX;
     setDragOffset(offset);
   };
 
-  const handleEnd = () => {
-    if (!isDragging) return;
-    
+  const handleHeroEnd = () => {
+    if (!isDragging || activeSection !== 'hero') return;
+
     const threshold = 100; // Khoảng cách tối thiểu để chuyển slide
     const offset = currentX - startX;
-    
+
     if (Math.abs(offset) > threshold) {
       if (offset > 0) {
         // Kéo sang phải - về slide trước
@@ -110,8 +104,60 @@ const Home = () => {
         );
       }
     }
-    
+
     setIsDragging(false);
+    setActiveSection(null);
+    setDragOffset(0);
+    setStartX(0);
+    setCurrentX(0);
+  };
+
+  // Xử lý swipe cho movie sections
+  const handleSectionStart = (e, sectionId) => {
+    setIsDragging(true);
+    setActiveSection(sectionId);
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    setStartX(clientX);
+    setCurrentX(clientX);
+  };
+
+  const handleSectionMove = (e) => {
+    if (!isDragging || activeSection === 'hero') return;
+    e.preventDefault();
+
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    setCurrentX(clientX);
+    const offset = clientX - startX;
+    setDragOffset(offset);
+  };
+
+  const handleSectionEnd = (movieList) => {
+    if (!isDragging || activeSection === 'hero') return;
+
+    const threshold = 80; // Khoảng cách tối thiểu để chuyển slide
+    const offset = currentX - startX;
+    const itemsPerSlide = window.innerWidth >= 1024 ? 6 : window.innerWidth >= 768 ? 4 : window.innerWidth >= 640 ? 3 : 2;
+    const maxIndex = Math.max(0, movieList.length - itemsPerSlide);
+
+    if (Math.abs(offset) > threshold) {
+      setCurrentSlideIndex(prev => {
+        const currentIndex = prev[activeSection] || 0;
+        let newIndex;
+
+        if (offset > 0) {
+          // Kéo sang phải - về slide trước
+          newIndex = Math.max(currentIndex - itemsPerSlide, 0);
+        } else {
+          // Kéo sang trái - sang slide tiếp theo
+          newIndex = Math.min(currentIndex + itemsPerSlide, maxIndex);
+        }
+
+        return { ...prev, [activeSection]: newIndex };
+      });
+    }
+
+    setIsDragging(false);
+    setActiveSection(null);
     setDragOffset(0);
     setStartX(0);
     setCurrentX(0);
@@ -125,70 +171,225 @@ const Home = () => {
       poster: "https://play-lh.googleusercontent.com/UJHa0DJftoFAt7rj1M8w7OmVoPxcFoRJAAqV2hbbz8QI-p5xHTxbjidNKM7gE-jxKzDfCuCfIJ7VBxQIcQ=w240-h480-rw",
       rating: 8.3,
       year: 2022,
-      genre: "Hành động"
+      genre: "Hành động",
+      type: "Phim Lẻ",
+      country: "Nước ngoài"
     },
     {
       title: "Avatar: The Way of Water",
       poster: "https://m.media-amazon.com/images/M/MV5BNmQxNjZlZTctMWJiMC00NGMxLWJjNTctNTFiNjA1Njk3ZDQ5XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
       rating: 7.8,
       year: 2022,
-      genre: "Sci-Fi"
+      genre: "Sci-Fi",
+      type: "Phim Lẻ",
+      country: "Nước ngoài"
     },
     {
       title: "Black Panther",
       poster: "https://www.movienewsnet.com/wp-content/uploads/2022/11/WakandaForever.png",
       rating: 7.3,
       year: 2018,
-      genre: "Hành động"
+      genre: "Hành động",
+      type: "Phim Lẻ",
+      country: "Nước ngoài"
     },
     {
       title: "Dune",
       poster: "https://miro.medium.com/v2/resize:fit:1400/0*gmoNFDJEnzHEFzj5.jpg",
       rating: 8.0,
       year: 2021,
-      genre: "Sci-Fi"
+      genre: "Sci-Fi",
+      type: "Phim Lẻ",
+      country: "Nước ngoài"
     },
     {
       title: "No Time to Die",
       poster: "https://m.media-amazon.com/images/M/MV5BZGZiOGZhZDQtZmRkNy00ZmUzLTliMGEtZGU0NjExOGMxZDVkXkEyXkFqcGc@._V1_QL75_UX190_CR0,0,190,281_.jpg",
       rating: 7.4,
       year: 2021,
-      genre: "Hành động"
+      genre: "Hành động",
+      type: "Phim Lẻ",
+      country: "Nước ngoài"
     },
     {
       title: "The Batman",
       poster: "https://upload.wikimedia.org/wikipedia/vi/0/07/Batman_2022_CGV.jpg",
       rating: 7.8,
       year: 2022,
-      genre: "Hành động"
+      genre: "Hành động",
+      type: "Phim Lẻ",
+      country: "Nước ngoài"
     },
     {
-      title: "Doctor Strange 2",
-      poster: "https://upload.wikimedia.org/wikipedia/en/thumb/1/17/Doctor_Strange_in_the_Multiverse_of_Madness_poster.jpg/250px-Doctor_Strange_in_the_Multiverse_of_Madness_poster.jpg",
-      rating: 6.9,
-      year: 2022,
-      genre: "Siêu anh hùng"
+      title: "Game of Thrones",
+      poster: "https://m.media-amazon.com/images/M/MV5BN2IzYzBiOTQtNGZmMi00NDI5LTgxMzMtN2EzZjA1NjhlOGMxXkEyXkFqcGdeQXVyNjAwNDUxODI@._V1_FMjpg_UX1000_.jpg",
+      rating: 9.2,
+      year: 2011,
+      genre: "Fantasy",
+      type: "TV Shows",
+      country: "Nước ngoài"
     },
     {
-      title: "Thor: Love and Thunder",
-      poster: "https://upload.wikimedia.org/wikipedia/en/thumb/8/88/Thor_Love_and_Thunder_poster.jpeg/250px-Thor_Love_and_Thunder_poster.jpeg",
-      rating: 6.2,
-      year: 2022,
-      genre: "Hành động"
+      title: "Stranger Things",
+      poster: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwPKlpSF1q_Gw4Txv9sjUoJFAYRsNgMqZGdw&s",
+      rating: 8.7,
+      year: 2016,
+      genre: "Sci-Fi",
+      type: "TV Shows",
+      country: "Nước ngoài"
+    },
+    {
+      title: "Breaking Bad",
+      poster: "https://m.media-amazon.com/images/M/MV5BYmQ4YWMxYjUtNjZmYi00MDQ1LWFjMjMtNjA5ZDdiYjdiODU5XkEyXkFqcGdeQXVyMTMzNDExODE5._V1_FMjpg_UX1000_.jpg",
+      rating: 9.5,
+      year: 2008,
+      genre: "Drama",
+      type: "TV Shows",
+      country: "Nước ngoài"
+    },
+    {
+      title: "The Witcher",
+      poster: "https://m.media-amazon.com/images/M/MV5BMTQ5MDU5MTktMDZkMy00NDU1LWIxM2UtODg5OGFiNmRhNDBjXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+      rating: 8.2,
+      year: 2019,
+      genre: "Fantasy",
+      type: "TV Shows",
+      country: "Nước ngoài"
+    },
+    {
+      title: "One Piece",
+      poster: "https://m.media-amazon.com/images/M/MV5BODcwNWE3OTMtMDc3MS00NDFjLWE1OTAtNDU3NjgxODMxY2UyXkEyXkFqcGdeQXVyNTAyODkwOQ@@._V1_FMjpg_UX1000_.jpg",
+      rating: 8.9,
+      year: 1999,
+      genre: "Anime",
+      type: "Phim Bộ",
+      country: "Nước ngoài"
+    },
+    {
+      title: "Attack on Titan",
+      poster: "https://m.media-amazon.com/images/M/MV5BZjliODY5MzQtMmViZC00MTZmLWFhMWMtMjMwM2I3OGY1MTRiXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+      rating: 9.0,
+      year: 2013,
+      genre: "Anime",
+      type: "Phim Bộ",
+      country: "Nước ngoài"
+    },
+    {
+      title: "Naruto",
+      poster: "https://m.media-amazon.com/images/M/MV5BZTNjOWI0ZTAtOGY1OS00ZGU0LWEyOWYtMjhkYjdlYmVjMDk2XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+      rating: 8.4,
+      year: 2002,
+      genre: "Anime",
+      type: "Phim Bộ",
+      country: "Nước ngoài"
+    },
+    {
+      title: "Dragon Ball Z",
+      poster: "https://m.media-amazon.com/images/S/pv-target-images/334f00b53cf3ef848ea7048b25711bc98e8236ce1685a096990c80d0965835ea.png",
+      rating: 8.7,
+      year: 1989,
+      genre: "Anime",
+      type: "Phim Bộ",
+      country: "Nước ngoài"
     },
     {
       title: "Minions: The Rise of Gru",
       poster: "https://m.media-amazon.com/images/M/MV5BZTAzMTkyNmQtNTMzZS00MTM1LWI4YzEtMjVlYjU0ZWI5Y2IzXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
       rating: 6.5,
       year: 2022,
-      genre: "Hoạt hình"
+      genre: "Hoạt hình",
+      type: "Phim Lẻ",
+      country: "Nước ngoài"
     },
     {
       title: "Nữ Hoàng Băng Giá 2",
       poster: "https://upload.wikimedia.org/wikipedia/vi/thumb/8/8c/Frozen2phim.jpg/250px-Frozen2phim.jpg",
       rating: 6.8,
       year: 2019,
-      genre: "Hoạt hình"
+      genre: "Hoạt hình",
+      type: "Phim Lẻ",
+      country: "Nước ngoài"
+    },
+    {
+      title: "Bố Già",
+      poster: "https://iguov8nhvyobj.vcdn.cloud/media/catalog/product/cache/1/image/1800x/71252117777b696995f01934522c402d/b/o/bogia_mainposter_digital_lite_1_.jpg",
+      rating: 7.2,
+      year: 2021,
+      genre: "Hài hước",
+      type: "Phim Lẻ",
+      country: "Việt Nam"
+    },
+    {
+      title: "Hai Phượng",
+      poster: "https://homepage.momocdn.net/cinema/momo-cdn-api-220615130952-637908953921767257.jpg",
+      rating: 6.8,
+      year: 2019,
+      genre: "Hành động",
+      type: "Phim Lẻ",
+      country: "Việt Nam"
+    },
+    {
+      title: "Cô Ba Sài Gòn",
+      poster: "https://baokhanhhoa.vn/file/e7837c02857c8ca30185a8c39b582c03/dataimages/201803/original/images5328695_2.jpg",
+      rating: 7.5,
+      year: 2017,
+      genre: "Tình cảm",
+      type: "Phim Lẻ",
+      country: "Việt Nam"
+    },
+    {
+      title: "Thiên Linh Cái",
+      poster: "https://imgcdn.tapchicongthuong.vn/thumb/w_1000/tcct-media/19/9/18/phim-thien-linh-cai2.jpg",
+      rating: 6.9,
+      year: 2021,
+      genre: "Kinh dị",
+      type: "Phim Lẻ",
+      country: "Việt Nam"
+    },
+    {
+      title: "Lật Mặt: 48H",
+      poster: "https://upload.wikimedia.org/wikipedia/vi/6/62/L%E1%BA%ADt_m%E1%BA%B7t_48h_poster.jpg",
+      rating: 7.1,
+      year: 2021,
+      genre: "Hành động",
+      type: "Phim Lẻ",
+      country: "Việt Nam"
+    },
+    {
+      title: "Người Bất Tử",
+      poster: "https://metiz.vn/media/poster_film/nbt_1538646325929.JPG",
+      rating: 6.7,
+      year: 2018,
+      genre: "Hành động",
+      type: "Phim Lẻ",
+      country: "Việt Nam"
+    },
+    {
+      title: "Về Nhà Đi Con",
+      poster: "https://danviet.ex-cdn.com/files/f1/upload/2-2019/images/2019-06-04/Ve-nha-di-con-duoc-tang-so-tap-va-thoi-gian-dong-may-du-kien-dai-hon-56485547_2574630002822221_2523342287681880064_n-1559624631-width960height960.jpg",
+      rating: 8.8,
+      year: 2019,
+      genre: "Gia đình",
+      type: "Phim Bộ",
+      country: "Việt Nam"
+    },
+    {
+      title: "Hướng Dương Ngược Nắng",
+      poster: "https://media-cdn-v2.laodong.vn/Storage/NewsPortal/2021/3/27/893367/Huong-Duong-Nguoc-Na-01.jpg",
+      rating: 7.9,
+      year: 2022,
+      genre: "Tình cảm",
+      type: "Phim Bộ",
+      country: "Việt Nam"
+    },
+    {
+      title: "11 Tháng 5 Ngày",
+      poster: "https://cdn-images.vtv.vn/2021/7/27/21921650915034644233299677903239995620907537n-16273793553311945444485.jpg",
+      rating: 8.2,
+      year: 2018,
+      genre: "Tình cảm",
+      type: "Phim Bộ",
+      country: "Việt Nam"
     },
     {
       title: "Thanh Gươm Diệt Quỷ: Chuyến Tàu Vô Tận",
@@ -227,26 +428,6 @@ const Home = () => {
     }
   ];
 
-  // Hàm xử lý slide
-  const handleSlide = (sectionId, direction) => {
-    const itemsPerSlide = window.innerWidth >= 1024 ? 6 : window.innerWidth >= 768 ? 4 : window.innerWidth >= 640 ? 3 : 2;
-    const maxIndex = Math.max(0, movies.length - itemsPerSlide);
-
-    setCurrentSlideIndex(prev => {
-      const currentIndex = prev[sectionId] || 0;
-      let newIndex;
-
-      if (direction === 'next') {
-        newIndex = Math.min(currentIndex + itemsPerSlide, maxIndex);
-      } else {
-        newIndex = Math.max(currentIndex - itemsPerSlide, 0);
-      }
-
-      return { ...prev, [sectionId]: newIndex };
-    });
-  };
-
-  // Component Movie Card
   const MovieCard = ({ movie }) => (
     <div className="group cursor-pointer transform transition-all duration-300 hover:scale-105 flex-shrink-0 w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/6 px-1 sm:px-2">
       <div className="relative overflow-hidden rounded-lg shadow-lg">
@@ -278,12 +459,11 @@ const Home = () => {
     </div>
   );
 
-  // Component Movie Section
+  // Component Movie Section với swipe
   const MovieSection = ({ title, sectionId, movieList }) => {
     const currentIndex = currentSlideIndex[sectionId] || 0;
     const itemsPerSlide = typeof window !== 'undefined' ?
       (window.innerWidth >= 1024 ? 6 : window.innerWidth >= 768 ? 4 : window.innerWidth >= 640 ? 3 : 2) : 6;
-    const maxIndex = Math.max(0, movieList.length - itemsPerSlide);
 
     return (
       <div className="mb-8 sm:mb-12">
@@ -291,33 +471,28 @@ const Home = () => {
           <h2 className="text-white text-xl sm:text-2xl font-bold flex items-center">
             {title}
           </h2>
-          <div className="flex items-center space-x-3">
-            <button className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">
-              Xem thêm
-            </button>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handleSlide(sectionId, 'prev')}
-                disabled={currentIndex === 0}
-                className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
-              >
-                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-              <button
-                onClick={() => handleSlide(sectionId, 'next')}
-                disabled={currentIndex >= maxIndex}
-                className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
-              >
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            </div>
-          </div>
+          <button className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">
+            Xem thêm
+          </button>
         </div>
 
-        <div className="relative overflow-hidden">
+        <div
+          className="relative overflow-hidden cursor-grab active:cursor-grabbing select-none"
+          onMouseDown={(e) => handleSectionStart(e, sectionId)}
+          onMouseMove={handleSectionMove}
+          onMouseUp={() => handleSectionEnd(movieList)}
+          onMouseLeave={() => handleSectionEnd(movieList)}
+          onTouchStart={(e) => handleSectionStart(e, sectionId)}
+          onTouchMove={handleSectionMove}
+          onTouchEnd={() => handleSectionEnd(movieList)}
+          style={{ touchAction: 'none' }}
+        >
           <div
             className="flex transition-transform duration-500 ease-in-out"
-            style={{ transform: `translateX(-${currentIndex * (100 / itemsPerSlide)}%)` }}
+            style={{
+              transform: `translateX(-${currentIndex * (100 / itemsPerSlide)}%)${isDragging && activeSection === sectionId ? ` translateX(${dragOffset}px)` : ''
+                })`
+            }}
           >
             {movieList.map((movie, index) => (
               <MovieCard key={index} movie={movie} />
@@ -331,22 +506,22 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gray-900">
       {/* Hero Banner */}
-      <div 
+      <div
         className="relative h-[400px] sm:h-[500px] md:h-[600px] overflow-hidden cursor-grab active:cursor-grabbing select-none"
-        onMouseDown={handleStart}
-        onMouseMove={handleMove}
-        onMouseUp={handleEnd}
-        onMouseLeave={handleEnd}
-        onTouchStart={handleStart}
-        onTouchMove={handleMove}
-        onTouchEnd={handleEnd}
+        onMouseDown={handleHeroStart}
+        onMouseMove={handleHeroMove}
+        onMouseUp={handleHeroEnd}
+        onMouseLeave={handleHeroEnd}
+        onTouchStart={handleHeroStart}
+        onTouchMove={handleHeroMove}
+        onTouchEnd={handleHeroEnd}
         style={{ touchAction: 'none' }}
       >
         <div
           className="absolute inset-0 bg-cover bg-center transition-all duration-500 ease-out"
           style={{
             backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${currentFeaturedMovie.backgroundImage}')`,
-            transform: isDragging ? `translateX(${dragOffset}px)` : 'translateX(0)'
+            transform: isDragging && activeSection === 'hero' ? `translateX(${dragOffset}px)` : 'translateX(0)'
           }}
         />
 
@@ -363,11 +538,11 @@ const Home = () => {
         </div>
 
         <div className="relative z-10 container mx-auto px-4 h-full flex items-center">
-          <div 
+          <div
             className="max-w-2xl text-white transition-all duration-300"
             style={{
-              transform: isDragging ? `translateX(${dragOffset * 0.3}px)` : 'translateX(0)',
-              opacity: isDragging ? Math.max(0.7, 1 - Math.abs(dragOffset) / 400) : 1
+              transform: isDragging && activeSection === 'hero' ? `translateX(${dragOffset * 0.3}px)` : 'translateX(0)',
+              opacity: isDragging && activeSection === 'hero' ? Math.max(0.7, 1 - Math.abs(dragOffset) / 400) : 1
             }}
           >
             <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold mb-4 transition-all duration-500">
@@ -408,24 +583,29 @@ const Home = () => {
           movieList={movies}
         />
         <MovieSection
-          title=" Phim Mới Cập Nhật"
-          sectionId="latest"
-          movieList={movies.slice().reverse()}
+          title=" Phim Việt Nam"
+          sectionId="vietnam"
+          movieList={movies.filter(movie => movie.country === "Việt Nam")}
         />
         <MovieSection
-          title=" Phim Được Đánh Giá Cao"
-          sectionId="topRated"
-          movieList={movies.slice(2, 8)}
+          title=" Phim Bộ"
+          sectionId="series"
+          movieList={movies.filter(movie => movie.type === "Phim Bộ")}
+        />
+        <MovieSection
+          title=" Phim Lẻ"
+          sectionId="movies"
+          movieList={movies.filter(movie => movie.type === "Phim Lẻ")}
+        />
+        <MovieSection
+          title=" TV Shows"
+          sectionId="tvshows"
+          movieList={movies.filter(movie => movie.type === "TV Shows")}
         />
         <MovieSection
           title=" Phim Hành Động"
           sectionId="action"
           movieList={movies.filter(movie => movie.genre === "Hành động")}
-        />
-        <MovieSection
-          title=" Phim Sci-Fi"
-          sectionId="scifi"
-          movieList={movies.filter(movie => movie.genre === "Sci-Fi")}
         />
         <MovieSection
           title=" Phim Hoạt Hình"
