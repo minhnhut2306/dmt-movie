@@ -16,7 +16,7 @@ const Navbar = () => {
 
   return (
     <nav className="bg-gradient-to-r from-[#0d1117] via-[#161b22] to-[#0b0f1c] text-white shadow-lg sticky top-0 z-50">
-      <style jsx>{`
+      <style>{`
         .scrollbar-hide {
           -ms-overflow-style: none;
           scrollbar-width: none;

@@ -1,13 +1,88 @@
 import React, { useState, useEffect } from 'react';
 import HeroBanner from '../../components/HeroBanner';
-import MovieSection from '../../components/MovieSection';
+import GenericMoviesSection from '../../components/GenericMoviesSection';
 import { useMovieData } from '../../hooks/useMovieData';
 import { useSwipeHandler } from '../../hooks/useSwipeHandler';
+import {
+  useMovies,
+  useVietnamMovies,
+  useSeriesMovies,
+  useSingleMovies,
+  useTVShows,
+  useAnimationMovies,
+  useActionMovies,
+  transformLatestMovies,
+  transformVietnamMovies,
+  transformSeriesMovies,
+  transformSingleMovies,
+  transformTVShows,
+  transformAnimationMovies,
+  transformActionMovies
+} from '../../hooks/useMovies';
+
+// Movie sections configuration
+const MOVIE_SECTIONS = [
+  {
+    title: "Phim Mới Nhất",
+    emoji: "🔥",
+    sectionKey: "latest",
+    badgeColor: "bg-red-600",
+    useDataHook: () => useMovies(1),
+    transformFunction: transformLatestMovies
+  },
+  {
+    title: "Phim Việt Nam",
+    emoji: "🇻🇳",
+    sectionKey: "vietnam",
+    badgeColor: "bg-red-600",
+    useDataHook: () => useVietnamMovies(1),
+    transformFunction: transformVietnamMovies
+  },
+  {
+    title: "Phim Bộ",
+    emoji: "📺",
+    sectionKey: "series",
+    badgeColor: "bg-blue-600",
+    useDataHook: useSeriesMovies,
+    transformFunction: transformSeriesMovies
+  },
+  {
+    title: "Phim Lẻ",
+    emoji: "🎬",
+    sectionKey: "single",
+    badgeColor: "bg-green-600",
+    useDataHook: useSingleMovies,
+    transformFunction: transformSingleMovies
+  },
+  {
+    title: "TV Shows",
+    emoji: "📻",
+    sectionKey: "tvshows",
+    badgeColor: "bg-purple-600",
+    useDataHook: useTVShows,
+    transformFunction: transformTVShows
+  },
+  {
+    title: "Phim Hoạt Hình",
+    emoji: "🎨",
+    sectionKey: "animation",
+    badgeColor: "bg-pink-600",
+    useDataHook: useAnimationMovies,
+    transformFunction: transformAnimationMovies
+  },
+  {
+    title: "Phim Hành Động",
+    emoji: "💥",
+    sectionKey: "action",
+    badgeColor: "bg-orange-600",
+    useDataHook: useActionMovies,
+    transformFunction: transformActionMovies
+  }
+];
 
 const Home = () => {
-  const [currentSlideIndex, setCurrentSlideIndex] = useState({});
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
-  const { featuredMovies, movies } = useMovieData();
+  const { featuredMovies } = useMovieData();
   const {
     isDragging,
     activeSection,
@@ -23,7 +98,7 @@ const Home = () => {
 
   // Wrap handlers to pass required parameters
   const handleHeroEnd = () => originalHandleHeroEnd(featuredMovies, setCurrentHeroIndex);
-  const handleSectionEnd = (movieList) => originalHandleSectionEnd(movieList, setCurrentSlideIndex);
+  const handleSectionEnd = (movieList, updateFn) => originalHandleSectionEnd(movieList, updateFn);
 
   // Auto slide hero banner
   useEffect(() => {
@@ -37,49 +112,6 @@ const Home = () => {
 
     return () => clearInterval(interval);
   }, [featuredMovies.length, isDragging]);
-
-  // Handle slide for button navigation
-  const handleSlide = (sectionId, direction) => {
-    const itemsPerSlide = getItemsPerSlide();
-    const currentIndex = currentSlideIndex[sectionId] || 0;
-    
-    // Get movie list based on sectionId
-    let movieList = movies;
-    switch(sectionId) {
-      case 'vietnam':
-        movieList = movies.filter(movie => movie.country === "Việt Nam");
-        break;
-      case 'series':
-        movieList = movies.filter(movie => movie.type === "Phim Bộ");
-        break;
-      case 'movies':
-        movieList = movies.filter(movie => movie.type === "Phim Lẻ");
-        break;
-      case 'tvshows':
-        movieList = movies.filter(movie => movie.type === "TV Shows");
-        break;
-      case 'action':
-        movieList = movies.filter(movie => movie.genre === "Hành động");
-        break;
-      case 'animation':
-        movieList = movies.filter(movie => movie.genre === "Hoạt hình");
-        break;
-      default:
-        movieList = movies;
-    }
-    
-    const maxIndex = Math.max(0, movieList.length - itemsPerSlide);
-
-    setCurrentSlideIndex(prev => {
-      let newIndex;
-      if (direction === 'next') {
-        newIndex = Math.min(currentIndex + itemsPerSlide, maxIndex);
-      } else {
-        newIndex = Math.max(currentIndex - itemsPerSlide, 0);
-      }
-      return { ...prev, [sectionId]: newIndex };
-    });
-  };
 
   return (
     <div className="min-h-screen bg-gray-900">
@@ -98,104 +130,25 @@ const Home = () => {
 
       {/* Movie Sections */}
       <div className="container mx-auto px-4 py-8 sm:py-12">
-        <MovieSection
-          title=" Phim Hot Nhất"
-          sectionId="trending"
-          movieList={movies}
-          currentSlideIndex={currentSlideIndex}
-          handleSlide={handleSlide}
-          isDragging={isDragging}
-          activeSection={activeSection}
-          dragOffset={dragOffset}
-          handleSectionStart={handleSectionStart}
-          handleSectionMove={handleSectionMove}
-          handleSectionEnd={handleSectionEnd}
-          getItemsPerSlide={getItemsPerSlide}
-        />
-        <MovieSection
-          title=" Phim Việt Nam"
-          sectionId="vietnam"
-          movieList={movies.filter(movie => movie.country === "Việt Nam")}
-          currentSlideIndex={currentSlideIndex}
-          handleSlide={handleSlide}
-          isDragging={isDragging}
-          activeSection={activeSection}
-          dragOffset={dragOffset}
-          handleSectionStart={handleSectionStart}
-          handleSectionMove={handleSectionMove}
-          handleSectionEnd={handleSectionEnd}
-          getItemsPerSlide={getItemsPerSlide}
-        />
-        <MovieSection
-          title=" Phim Bộ"
-          sectionId="series"
-          movieList={movies.filter(movie => movie.type === "Phim Bộ")}
-          currentSlideIndex={currentSlideIndex}
-          handleSlide={handleSlide}
-          isDragging={isDragging}
-          activeSection={activeSection}
-          dragOffset={dragOffset}
-          handleSectionStart={handleSectionStart}
-          handleSectionMove={handleSectionMove}
-          handleSectionEnd={handleSectionEnd}
-          getItemsPerSlide={getItemsPerSlide}
-        />
-        <MovieSection
-          title=" Phim Lẻ"
-          sectionId="movies"
-          movieList={movies.filter(movie => movie.type === "Phim Lẻ")}
-          currentSlideIndex={currentSlideIndex}
-          handleSlide={handleSlide}
-          isDragging={isDragging}
-          activeSection={activeSection}
-          dragOffset={dragOffset}
-          handleSectionStart={handleSectionStart}
-          handleSectionMove={handleSectionMove}
-          handleSectionEnd={handleSectionEnd}
-          getItemsPerSlide={getItemsPerSlide}
-        />
-        <MovieSection
-          title=" TV Shows"
-          sectionId="tvshows"
-          movieList={movies.filter(movie => movie.type === "TV Shows")}
-          currentSlideIndex={currentSlideIndex}
-          handleSlide={handleSlide}
-          isDragging={isDragging}
-          activeSection={activeSection}
-          dragOffset={dragOffset}
-          handleSectionStart={handleSectionStart}
-          handleSectionMove={handleSectionMove}
-          handleSectionEnd={handleSectionEnd}
-          getItemsPerSlide={getItemsPerSlide}
-        />
-        <MovieSection
-          title=" Phim Hành Động"
-          sectionId="action"
-          movieList={movies.filter(movie => movie.genre === "Hành động")}
-          currentSlideIndex={currentSlideIndex}
-          handleSlide={handleSlide}
-          isDragging={isDragging}
-          activeSection={activeSection}
-          dragOffset={dragOffset}
-          handleSectionStart={handleSectionStart}
-          handleSectionMove={handleSectionMove}
-          handleSectionEnd={handleSectionEnd}
-          getItemsPerSlide={getItemsPerSlide}
-        />
-        <MovieSection
-          title=" Phim Hoạt Hình"
-          sectionId="animation"
-          movieList={movies.filter(movie => movie.genre === "Hoạt hình")}
-          currentSlideIndex={currentSlideIndex}
-          handleSlide={handleSlide}
-          isDragging={isDragging}
-          activeSection={activeSection}
-          dragOffset={dragOffset}
-          handleSectionStart={handleSectionStart}
-          handleSectionMove={handleSectionMove}
-          handleSectionEnd={handleSectionEnd}
-          getItemsPerSlide={getItemsPerSlide}
-        />
+        {MOVIE_SECTIONS.map((section) => (
+          <GenericMoviesSection
+            key={section.sectionKey}
+            title={section.title}
+            emoji={section.emoji}
+            sectionKey={section.sectionKey}
+            badgeColor={section.badgeColor}
+            countText={section.countText}
+            useDataHook={section.useDataHook}
+            transformFunction={section.transformFunction}
+            isDragging={isDragging}
+            activeSection={activeSection}
+            dragOffset={dragOffset}
+            handleSectionStart={handleSectionStart}
+            handleSectionMove={handleSectionMove}
+            handleSectionEnd={handleSectionEnd}
+            getItemsPerSlide={getItemsPerSlide}
+          />
+        ))}
       </div>
     </div>
   );

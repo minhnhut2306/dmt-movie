@@ -31,9 +31,7 @@ const Footer = () => {
           {/* Brand & Description */}
           <div className="space-y-4 md:pr-6 md:border-r md:border-gray-600">
             <div className="flex items-center space-x-2">
-              <div className="bg-gradient-to-r from-orange-500 to-blue-500 p-2 rounded-lg">
-                <Play className="w-6 h-6 text-white" />
-              </div>
+             
               <span className="text-2xl font-bold">
                 <span className="text-orange-500">DMT</span>
                 <span className="text-blue-500">Movie</span>
