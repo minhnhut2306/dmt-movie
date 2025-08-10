@@ -1,24 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Play, Star, Calendar, Clock, Globe, Users, Film, Eye, ArrowLeft, Maximize, Minimize } from 'lucide-react';
+import React, { useState } from 'react';
+import { Play, Star, Calendar, Clock, Globe, Users, Film, Eye } from 'lucide-react';
 
 const MoviePlayer = () => {
   const [activeLayout, setActiveLayout] = useState('detail');
   const [currentEpisode, setCurrentEpisode] = useState(0);
   const [currentServer, setCurrentServer] = useState(0);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Detect mobile screen
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
 
   // Dữ liệu thực từ API bạn cung cấp
   const movieData = {
@@ -27,6 +13,7 @@ const MoviePlayer = () => {
     content: "Một trường cấp ba trở thành điểm bùng phát virus thây ma. Các học sinh mắc kẹt phải nỗ lực thoát ra – hoặc biến thành một trong những người nhiễm bệnh hung tợn.",
     poster_url: "https://phimimg.com/upload/vod/20250325-1/6db202d6161c123d96b0180c2da9b1e5.jpg",
     thumb_url: "https://phimimg.com/upload/vod/20250325-1/6985255433cba78af7f28fe63c5126c9.jpg",
+    trailer_url: "https://www.youtube.com/watch?v=IN5TD4VRcSM",
     time: "65 phút/tập",
     episode_current: "Hoàn Tất (12/12)",
     episode_total: "12",
@@ -236,149 +223,8 @@ const MoviePlayer = () => {
     { name: "Zombie Detective", poster: "/api/placeholder/200/300", year: 2020, rating: 7.4 }
   ];
 
-  // Mobile Detail Layout Component
-  const MobileDetailLayout = () => (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
-      <div className="px-3 py-4">
-        {/* Hero Image */}
-        <div className="relative mb-6">
-          <div 
-            className="h-64 sm:h-80 bg-cover bg-center rounded-xl relative overflow-hidden"
-            style={{ backgroundImage: `url(${movieData.thumb_url})` }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
-            <div className="absolute bottom-4 left-4 right-4 z-10">
-              <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-white">{movieData.name}</h1>
-              <p className="text-lg text-gray-200 mb-3">{movieData.origin_name}</p>
-              <div className="flex items-center gap-3 text-sm text-gray-300 flex-wrap">
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-400" fill="currentColor" />
-                  <span>{movieData.vote_average}/10</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
-                  <span>{movieData.vote_count.toLocaleString()}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
-                  <span>{movieData.year}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Poster and Quick Info */}
-        <div className="flex gap-4 mb-6">
-          <div className="w-28 sm:w-32 flex-shrink-0">
-            <img 
-              src={movieData.poster_url} 
-              alt={movieData.name}
-              className="w-full rounded-xl shadow-xl"
-            />
-          </div>
-          <div className="flex-1 space-y-3">
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-blue-400" />
-                <span className="text-gray-400">Thời lượng:</span>
-                <span className="text-white font-medium">{movieData.time}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Film className="w-4 h-4 text-green-400" />
-                <span className="text-gray-400">Số tập:</span>
-                <span className="text-white font-medium">{movieData.episode_current}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4 text-purple-400" />
-                <span className="text-gray-400">Chất lượng:</span>
-                <span className="text-white font-medium">{movieData.quality}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-yellow-400" />
-                <span className="text-gray-400">Ngôn ngữ:</span>
-                <span className="text-white font-medium">{movieData.lang}</span>
-              </div>
-            </div>
-            
-            <button 
-              onClick={() => setActiveLayout('watch')}
-              className="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
-            >
-              <Play className="w-5 h-5" fill="currentColor" />
-              Xem Phim
-            </button>
-          </div>
-        </div>
-
-        {/* Description */}
-        <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
-          <h2 className="text-lg font-bold mb-3 text-white">Nội Dung Phim</h2>
-          <p className="text-gray-300 leading-relaxed text-sm">{movieData.content}</p>
-        </div>
-
-        {/* Categories */}
-        <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
-          <h3 className="text-lg font-bold mb-3 text-white">Thể Loại</h3>
-          <div className="flex flex-wrap gap-2">
-            {movieData.category.map((cat, index) => (
-              <span 
-                key={index}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-2 rounded-full text-xs font-medium shadow-lg"
-              >
-                {cat.name}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Cast */}
-        <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
-          <h3 className="text-lg font-bold mb-3 text-white">Diễn Viên</h3>
-          <div className="grid grid-cols-2 gap-2">
-            {movieData.actor.slice(0, 6).map((actor, index) => (
-              <span 
-                key={index}
-                className="bg-gradient-to-r from-gray-700 to-gray-600 text-gray-200 px-3 py-2 rounded-lg text-xs text-center"
-              >
-                {actor}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Suggested Movies */}
-        <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl">
-          <h2 className="text-lg font-bold mb-4 text-white">Phim Gợi Ý</h2>
-          <div className="grid grid-cols-3 gap-3">
-            {suggestedMovies.slice(0, 6).map((movie, index) => (
-              <div 
-                key={index}
-                className="group cursor-pointer transition-all duration-300"
-              >
-                <div className="aspect-[2/3] bg-gray-600 rounded-lg mb-2 overflow-hidden shadow-lg">
-                  <div className="w-full h-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white text-xs font-bold">
-                    {movie.name.split(' ').map(word => word[0]).join('').slice(0, 2)}
-                  </div>
-                </div>
-                <h4 className="text-white font-medium text-xs mb-1 leading-tight">{movie.name}</h4>
-                <div className="flex items-center gap-1 text-xs">
-                  <span className="text-gray-400">{movie.year}</span>
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3 text-yellow-400" fill="currentColor" />
-                    <span className="text-gray-400">{movie.rating}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Desktop Detail Layout Component
-  const DesktopDetailLayout = () => (
+  // Detail Layout Component
+  const DetailLayout = () => (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
       <div className="container mx-auto px-4 py-8">
         {/* Hero Section */}
@@ -425,6 +271,15 @@ const MoviePlayer = () => {
               <Play className="w-5 h-5" fill="currentColor" />
               Xem Phim
             </button>
+            <a 
+              href={movieData.trailer_url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="w-full mt-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+            >
+              <Film className="w-5 h-5" />
+              Trailer
+            </a>
           </div>
 
           {/* Details */}
@@ -528,244 +383,8 @@ const MoviePlayer = () => {
     </div>
   );
 
-  // Mobile Watch Layout Component
-  const MobileWatchLayout = () => {
-    const currentVideoUrl = movieData.episodes[currentServer]?.server_data[currentEpisode]?.link_m3u8;
-    const currentEpisodeName = movieData.episodes[currentServer]?.server_data[currentEpisode]?.name;
-    
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
-        {/* Mobile Header */}
-        <div className="px-3 py-3 border-b border-gray-700/50">
-          <div className="flex items-center gap-3 mb-2">
-            <button 
-              onClick={() => setActiveLayout('detail')}
-              className="text-blue-400 hover:text-blue-300 transition-colors duration-300 p-2 rounded-lg hover:bg-gray-800/50"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold text-white truncate">{movieData.name}</h1>
-              <p className="text-sm text-gray-300 truncate">{movieData.origin_name}</p>
-            </div>
-            <button
-              onClick={() => setIsFullscreen(!isFullscreen)}
-              className="text-gray-400 hover:text-white transition-colors duration-300 p-2 rounded-lg hover:bg-gray-800/50"
-            >
-              {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
-            </button>
-          </div>
-          <p className="text-xs text-gray-400 px-2">
-            Đang xem: {currentEpisodeName} - {movieData.episodes[currentServer]?.server_name}
-          </p>
-        </div>
-
-        {/* Video Player - Full Width on Mobile */}
-        <div className={`${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''}`}>
-          <div className={`bg-black ${isFullscreen ? 'h-full' : 'aspect-video'} relative`}>
-            {currentVideoUrl ? (
-              <iframe
-                src={movieData.episodes[currentServer]?.server_data[currentEpisode]?.link_embed}
-                className="w-full h-full"
-                frameBorder="0"
-                allowFullScreen
-                title={currentEpisodeName}
-              />
-            ) : (
-              <div className="bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center h-full">
-                <div className="text-center text-white p-4">
-                  <Play className="w-16 h-16 mx-auto mb-4 text-red-500" fill="currentColor" />
-                  <p className="text-xl font-semibold">Không tìm thấy video</p>
-                  <p className="text-gray-400 mt-2">Vui lòng chọn tập khác</p>
-                </div>
-              </div>
-            )}
-            
-            {/* Fullscreen controls */}
-            {isFullscreen && (
-              <div className="absolute top-4 right-4 z-10">
-                <button
-                  onClick={() => setIsFullscreen(false)}
-                  className="bg-black/50 text-white p-2 rounded-lg hover:bg-black/70 transition-all duration-300"
-                >
-                  <Minimize className="w-5 h-5" />
-                </button>
-              </div>
-            )}
-          </div>
-          
-          {/* Video Info - Only show when not fullscreen */}
-          {!isFullscreen && currentVideoUrl && (
-            <div className="px-3 py-3 bg-gradient-to-r from-gray-800/50 to-gray-700/50 backdrop-blur-sm border-b border-gray-600/30">
-              <div className="flex flex-wrap items-center gap-3 text-xs text-gray-300">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span>Đang phát: {currentEpisodeName}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Globe className="w-4 h-4 text-blue-400" />
-                  <span>{movieData.episodes[currentServer]?.server_name}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Eye className="w-4 h-4 text-purple-400" />
-                  <span>{movieData.quality}</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Content - Hide when fullscreen */}
-        {!isFullscreen && (
-          <div className="px-3 py-4">
-            {/* Episode List - Compact Mobile Version */}
-            <div className="mb-6">
-              {movieData.episodes.map((server, serverIndex) => (
-                <div key={serverIndex} className="mb-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-1 h-5 bg-gradient-to-b from-orange-400 to-red-500 rounded-full"></div>
-                    <h3 className="text-lg font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent">
-                      {server.server_name}
-                    </h3>
-                  </div>
-                  
-                  <div className="bg-gradient-to-r from-gray-800/50 to-gray-700/50 backdrop-blur-sm rounded-xl p-3 border border-gray-600/30 shadow-xl">
-                    <div className="grid grid-cols-4 gap-2">
-                      {server.server_data.map((episode, episodeIndex) => (
-                        <button
-                          key={episodeIndex}
-                          onClick={() => {
-                            setCurrentServer(serverIndex);
-                            setCurrentEpisode(episodeIndex);
-                          }}
-                          className={`group relative overflow-hidden rounded-lg font-medium text-xs transition-all duration-300 transform ${
-                            currentServer === serverIndex && currentEpisode === episodeIndex
-                              ? 'bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 text-white shadow-lg shadow-orange-500/30 scale-105 z-10'
-                              : 'bg-gradient-to-br from-gray-700 to-gray-600 text-gray-200 hover:from-gray-600 hover:to-gray-500 hover:scale-105'
-                          } px-2 py-3 min-h-[44px] flex items-center justify-center`}
-                        >
-                          <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                          <span className="relative z-10 whitespace-nowrap text-center">
-                            {episode.name}
-                          </span>
-                          
-                          {/* Active episode indicator */}
-                          {currentServer === serverIndex && currentEpisode === episodeIndex && (
-                            <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Quick Info Cards */}
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-3 rounded-xl shadow-xl">
-                <h3 className="text-sm font-bold text-white mb-2">Thông Tin</h3>
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3 text-yellow-400" fill="currentColor" />
-                    <span className="text-gray-400">Đánh giá:</span>
-                    <span className="text-white font-medium">{movieData.vote_average}/10</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-blue-400" />
-                    <span className="text-gray-400">Năm:</span>
-                    <span className="text-white font-medium">{movieData.year}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-3 rounded-xl shadow-xl">
-                <h3 className="text-sm font-bold text-white mb-2">Chi Tiết</h3>
-                <div className="space-y-2 text-xs">
-                  <div className="flex items-center gap-1">
-                    <Eye className="w-3 h-3 text-purple-400" />
-                    <span className="text-gray-400">Chất lượng:</span>
-                    <span className="text-white font-medium">{movieData.quality}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Film className="w-3 h-3 text-green-400" />
-                    <span className="text-gray-400">Số tập:</span>
-                    <span className="text-white font-medium">{movieData.episode_current}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
-              <h3 className="text-sm font-bold text-white mb-2">Nội Dung Phim</h3>
-              <p className="text-gray-300 leading-relaxed text-xs">{movieData.content}</p>
-            </div>
-
-            {/* Categories - Compact */}
-            <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
-              <h3 className="text-sm font-bold text-white mb-2">Thể Loại</h3>
-              <div className="flex flex-wrap gap-1">
-                {movieData.category.map((cat, index) => (
-                  <span 
-                    key={index}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-2 py-1 rounded-full text-xs font-medium"
-                  >
-                    {cat.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Cast - Compact Grid */}
-            <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
-              <h3 className="text-sm font-bold text-white mb-3">Diễn Viên</h3>
-              <div className="grid grid-cols-2 gap-2">
-                {movieData.actor.slice(0, 6).map((actor, index) => (
-                  <div 
-                    key={index}
-                    className="bg-gradient-to-r from-gray-700 to-gray-600 text-gray-200 px-2 py-2 rounded-lg text-xs text-center"
-                  >
-                    {actor}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Suggested Movies - Mobile Grid */}
-            <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl">
-              <h2 className="text-sm font-bold mb-3 text-white">Phim Gợi Ý</h2>
-              <div className="grid grid-cols-3 gap-2">
-                {suggestedMovies.slice(0, 6).map((movie, index) => (
-                  <div 
-                    key={index}
-                    className="group cursor-pointer transition-all duration-300"
-                  >
-                    <div className="aspect-[2/3] bg-gray-600 rounded-lg mb-1 overflow-hidden shadow-lg">
-                      <div className="w-full h-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center text-white text-xs font-bold">
-                        {movie.name.split(' ').map(word => word[0]).join('').slice(0, 2)}
-                      </div>
-                    </div>
-                    <h4 className="text-white font-medium text-xs mb-1 leading-tight">{movie.name}</h4>
-                    <div className="flex items-center gap-1 text-xs">
-                      <span className="text-gray-400">{movie.year}</span>
-                      <div className="flex items-center gap-1">
-                        <Star className="w-2 h-2 text-yellow-400" fill="currentColor" />
-                        <span className="text-gray-400">{movie.rating}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  // Desktop Watch Layout Component 
-  const DesktopWatchLayout = () => {
+  // Watch Layout Component
+  const WatchLayout = () => {
     const currentVideoUrl = movieData.episodes[currentServer]?.server_data[currentEpisode]?.link_m3u8;
     const currentEpisodeName = movieData.episodes[currentServer]?.server_data[currentEpisode]?.name;
     
@@ -827,6 +446,13 @@ const MoviePlayer = () => {
                     <Eye className="w-4 h-4 text-purple-400" />
                     <span>{movieData.quality}</span>
                   </div>
+                  <a 
+                    href={currentVideoUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors duration-300"
+                  >
+                  </a>
                 </div>
               </div>
             )}
@@ -988,11 +614,9 @@ const MoviePlayer = () => {
 
   return (
     <div>
-      {/* Render Active Layout based on screen size */}
-      {activeLayout === 'detail' 
-        ? (isMobile ? <MobileDetailLayout /> : <DesktopDetailLayout />)
-        : (isMobile ? <MobileWatchLayout /> : <DesktopWatchLayout />)
-      }
+
+      {/* Render Active Layout */}
+      {activeLayout === 'detail' ? <DetailLayout /> : <WatchLayout />}
     </div>
   );
 };
