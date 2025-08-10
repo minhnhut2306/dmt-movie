@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import Home from './pages/home/Home';
+import MovieLayouts from './pages/Movie/MovieLayouts';
 import Footer from './components/Footer';
 
 
@@ -24,6 +25,7 @@ const App = () => {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/movie" element={<MovieLayouts />} />
         </Routes>
         <Footer/>
       </BrowserRouter>
