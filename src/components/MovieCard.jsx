@@ -11,6 +11,7 @@ const MovieCard = ({ movie }) => {
   const handleClick = () => {
     // Truyền slug qua URL params
     navigate(`/movie/${movie.slug}`);
+    window.scrollTo(0, 0); // Scroll to top khi chuyển trang
   };
 
   const handleImageLoad = () => {
@@ -25,7 +26,9 @@ const MovieCard = ({ movie }) => {
 
   return (
     <div 
-      className="group cursor-pointer transform transition-all duration-300 hover:scale-105 flex-shrink-0 w-full sm:w-1/2 md:w-1/3 lg:w-1/5 px-2"
+      className="group cursor-pointer transform transition-all duration-300 hover:scale-105 flex-shrink-0 
+                 w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 
+                 px-2 mb-4"
       onClick={handleClick}
     >
       <div className="relative overflow-hidden rounded-xl shadow-2xl">
@@ -51,22 +54,25 @@ const MovieCard = ({ movie }) => {
         
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
 
-        {/* Play button overlay - chỉ hiện khi ảnh đã load */}
+        {/* Play button overlay - responsive size */}
         {imageLoaded && (
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <Play className="w-16 h-16 sm:w-20 sm:h-20 text-white drop-shadow-lg" />
           </div>
         )}
 
-        {/* Rating badge - chỉ hiện khi ảnh đã load */}
+        {/* Rating badge - smaller on mobile */}
         {imageLoaded && (
-          <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm px-3 py-2 rounded-lg text-yellow-400 text-sm sm:text-base flex items-center shadow-lg">
+          <div className="absolute top-3 right-3 
+                         bg-black/80 backdrop-blur-sm px-3 py-2 
+                         rounded-lg text-yellow-400 text-sm sm:text-base 
+                         flex items-center shadow-lg">
             <Star className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />
-            {movie.rating}
+            <span className="font-medium">{movie.rating}</span>
           </div>
         )}
 
-        {/* Title overlay - chỉ hiện khi ảnh đã load */}
+        {/* Title overlay - responsive padding and text */}
         {imageLoaded && (
           <div className="absolute bottom-0 left-0 right-0">
             <div className="bg-gray-800/40 backdrop-blur-sm border-t border-gray-400/30 p-3 sm:p-4">
@@ -74,8 +80,12 @@ const MovieCard = ({ movie }) => {
                 {movie.title}
               </h3>
               <div className="flex items-center text-gray-200 text-sm sm:text-base space-x-3">
-                <span className="bg-gray-800/50 px-1 py-1 rounded whitespace-nowrap">{movie.year}</span>
-                <span className="bg-gray-800/50 px-1 py-1 rounded whitespace-nowrap">{movie.genre}</span>
+                <span className="bg-gray-800/50 px-1 py-1 rounded whitespace-nowrap">
+                  {movie.year}
+                </span>
+                <span className="bg-gray-800/50 px-1 py-1 rounded whitespace-nowrap truncate">
+                  {movie.genre}
+                </span>
               </div>
             </div>
           </div>
