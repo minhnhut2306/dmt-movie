@@ -6,8 +6,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/home/Home';
 import MovieLayouts from './pages/Movie/MovieLayouts';
 import Footer from './components/Footer';
-
-
+import ScrollToTop from './components/ScrollToTop'; // Import component mới
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,6 +21,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        <ScrollToTop /> {/* Thêm component này */}
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
