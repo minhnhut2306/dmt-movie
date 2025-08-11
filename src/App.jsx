@@ -25,7 +25,7 @@ const App = () => {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/movie" element={<MovieLayouts />} />
+          <Route path="/movie/:slug" element={<MovieLayouts />} />
         </Routes>
         <Footer/>
       </BrowserRouter>

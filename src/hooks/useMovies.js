@@ -4,6 +4,23 @@ import { movieApi } from "../api";
 
 // ==================== HOOKS ====================
 
+// Hook để lấy chi tiết phim
+export const useMovieDetail = (slug) => {
+  return useQuery({
+    queryKey: ["movie-detail", slug],
+    queryFn: () => movieApi.getMovieDetail(slug),
+    //logging the data for debugging
+    onSuccess: (data) => {
+      console.log("Fetched movie detail:", data);
+    },
+    enabled: !!slug, // Chỉ gọi API khi có slug
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 10 * 60 * 1000,
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  });
+};
+
 // 1. Hook for latest movies
 export const useMovies = (page = 1) => {
   return useQuery({
@@ -100,6 +117,7 @@ export const useAnimationMovies = (page) => {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 };
+
 // 7. Hook for Action movies
 export const useActionMovies = (page) => {
   const actualPage = page !== undefined ? page : 1;
@@ -117,6 +135,39 @@ export const useActionMovies = (page) => {
 };
 
 // ==================== TRANSFORM FUNCTIONS ====================
+
+// Transform function cho movie detail
+export const transformMovieDetail = (data) => {
+  if (!data || !data.movie) return null;
+  
+  const movie = data.movie;
+  
+  return {
+    id: movie._id,
+    name: movie.name,
+    origin_name: movie.origin_name,
+    content: movie.content,
+    poster_url: movie.poster_url,
+    thumb_url: movie.thumb_url,
+    time: movie.time,
+    episode_current: movie.episode_current,
+    episode_total: movie.episode_total,
+    quality: movie.quality,
+    lang: movie.lang,
+    year: movie.year,
+    vote_average: movie.tmdb?.vote_average || 0,
+    vote_count: movie.tmdb?.vote_count || 0,
+    actor: movie.actor || [],
+    director: movie.director || [],
+    category: movie.category || [],
+    country: movie.country || [],
+    episodes: data.episodes || [],
+    type: movie.type,
+    slug: movie.slug,
+    created: movie.created,
+    modified: movie.modified,
+  };
+};
 
 // 1. Transform function for latest movies
 export const transformLatestMovies = (data) => {

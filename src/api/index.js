@@ -18,6 +18,18 @@ api.interceptors.response.use(
 );
 
 export const movieApi = {
+  // Thêm function để lấy chi tiết phim
+  getMovieDetail: async (slug) => {
+    try {
+      const { data } = await api.get(`/phim/${slug}`);
+      console.log("Movie detail data:", data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching movie detail:", error);
+      throw error;
+    }
+  },
+
   getLatestMovies: async (page = 2) => {
     try {
       const { data } = await api.get(
