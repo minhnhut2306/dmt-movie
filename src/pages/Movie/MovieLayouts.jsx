@@ -8,7 +8,7 @@ import MobileWatchLayout from '../../components/MobileWatchLayout';
 import DesktopWatchLayout from '../../components/DesktopWatchLayout';
 import { formatServerName } from '../../utils/serverUtils';
 
-const MoviePlayer = () => {
+const MoviePlay = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const [activeLayout, setActiveLayout] = useState('detail');
@@ -136,4 +136,4 @@ const MoviePlayer = () => {
   );
 };
 
-export default MoviePlayer;
+export default MoviePlay;
