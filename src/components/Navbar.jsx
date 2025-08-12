@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Moon, Menu, X, Search, ChevronDown } from "lucide-react";
+import SearchInput from "./SearchInput";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,21 +31,20 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-12 sm:h-14 lg:h-20">
           {/* Logo - Smaller on mobile */}
           <div className="flex-shrink-0">
-            <h1 className="text-lg sm:text-xl lg:text-3xl font-bold text-orange-500 cursor-pointer hover:text-orange-400 transition-colors">
-              DMT<span className="text-sky-300">Movie</span>
-            </h1>
+            <a href="/" className="block">
+              <h1 className="text-lg sm:text-xl lg:text-3xl font-bold text-orange-500 cursor-pointer hover:text-orange-400 transition-colors">
+                DMT<span className="text-sky-300">Movie</span>
+              </h1>
+            </a>
           </div>
 
-          {/* Desktop Search - Hidden on mobile */}
+          {/* Desktop Search - ALWAYS SHOW - Using SearchInput component */}
           <div className="hidden lg:flex items-center flex-1 max-w-md mx-8">
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-              <input
-                type="text"
-                placeholder="Tìm kiếm phim..."
-                className="bg-[#1f2a3a] text-white rounded-full pl-10 pr-4 py-2.5 w-full outline-none focus:ring-2 focus:ring-blue-500 focus:bg-[#2d3a4a] transition-all text-sm lg:text-base"
-              />
-            </div>
+             <SearchInput 
+              placeholder="Tìm kiếm phim..."
+              className="w-full"
+              variant="navbar"
+            />
           </div>
 
           {/* Desktop Menu */}
@@ -122,7 +122,7 @@ const Navbar = () => {
 
           {/* Mobile Controls - Compact design */}
           <div className="flex items-center lg:hidden space-x-2">
-            {/* Mobile Search Icon */}
+            {/* Mobile Search Icon - ALWAYS SHOW */}
             <button onClick={toggleMobileSearch} className="p-1.5 hover:bg-gray-700 rounded-md transition-colors">
               <Search size={18} className="text-gray-300" />
             </button>
@@ -137,16 +137,13 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Search Bar - Toggleable */}
+        {/* Mobile Search Bar - ALWAYS FUNCTIONAL - Using SearchInput component */}
         <div className={`lg:hidden transition-all duration-300 ease-in-out ${showMobileSearch ? 'max-h-20 opacity-100 pb-3' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              type="text"
-              placeholder="Tìm kiếm phim..."
-              className="bg-[#1f2a3a] text-white rounded-full pl-10 pr-4 py-2.5 w-full outline-none focus:ring-2 focus:ring-blue-500 focus:bg-[#2d3a4a] transition-all"
-            />
-          </div>
+           <SearchInput 
+            placeholder="Tìm kiếm phim..."
+            className="w-full"
+            variant="navbar"
+          />
         </div>
 
         {/* Mobile Sidebar Overlay */}
@@ -170,16 +167,13 @@ const Navbar = () => {
               </button>
             </div>
 
-            {/* Search Bar */}
+            {/* Sidebar Search - ALWAYS SHOW */}
             <div className="p-4 border-b border-gray-600">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-                <input
-                  type="text"
-                  placeholder="Tìm kiếm phim..."
-                  className="bg-[#1f2a3a] text-white rounded-lg pl-9 pr-3 py-2.5 w-full outline-none focus:ring-2 focus:ring-blue-500 focus:bg-[#2d3a4a] transition-all text-sm"
-                />
-              </div>
+               <SearchInput 
+                placeholder="Tìm kiếm phim..."
+                className="w-full"
+                variant="navbar"
+              />
             </div>
 
             {/* Sidebar Content */}
@@ -267,9 +261,6 @@ const Navbar = () => {
                     </div>
                   </div>
                 </div>
-
-                {/* Bottom section */}
-  
               </div>
             </div>
           </div>

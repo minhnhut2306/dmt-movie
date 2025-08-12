@@ -3,7 +3,7 @@ import { useState } from 'react';
 export const useSwipeHandler = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
-  const [startY, setStartY] = useState(0); // Thêm để theo dõi vị trí Y
+  const [startY, setStartY] = useState(0);
   const [currentX, setCurrentX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
   const [activeSection, setActiveSection] = useState(null);

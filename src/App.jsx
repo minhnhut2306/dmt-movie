@@ -7,6 +7,7 @@ import Home from './pages/home/Home';
 import MovieLayouts from './pages/Movie/MovieLayouts';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop'; // Import component mới
+import SearchPage from './pages/Search/SearchPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,6 +27,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/movie/:slug" element={<MovieLayouts />} />
+           <Route path="/search" element={<SearchPage />} />
         </Routes>
         <Footer/>
       </BrowserRouter>
