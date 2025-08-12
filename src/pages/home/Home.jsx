@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import HeroBanner from '../../components/HeroBanner';
-import GenericMoviesSection from '../../components/GenericMoviesSection';
+import HeroBanner from '../../components/Home/HeroBanner';
+import GenericMoviesSection from '../../components/Home/GenericMoviesSection';
 import { useMovieData } from '../../hooks/useMovieData';
 import { useSwipeHandler } from '../../hooks/useSwipeHandler';
 import {

@@ -1,8 +1,8 @@
 // components/SearchResults.jsx
 import React from 'react';
 import { ChevronLeft, ChevronRight, Loader2, Search } from 'lucide-react';
-import { useSearchMovies, transformSearchResults } from '../hooks/userSearchMovie';
-import { searchUtils } from '../utils/searchUtils';
+import { useSearchMovies, transformSearchResults } from '../../hooks/userSearchMovie';
+import { searchUtils } from '../../utils/searchUtils';
 import SearchMovieCard from './SearchMovieCard'; // Import component mới
 
 const SearchResults = ({ 
@@ -157,7 +157,7 @@ const SearchResults = ({
       </div>
 
       {/* Movies Grid - Responsive grid với proper spacing */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-8 gap-4 mb-8">
         {movies.map((movie) => (
           <SearchMovieCard key={movie.id} movie={movie} />
         ))}

@@ -1,7 +1,7 @@
 // components/GenericMoviesSection.jsx
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import MovieCard from './MovieCard';
+import MovieCard from '../MovieCard';
 
 const GenericMoviesSection = ({ 
   // Section config

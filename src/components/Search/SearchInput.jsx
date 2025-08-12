@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { Search, X, Loader2 } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
-import { useSearchState, useSmartNavigation } from '../utils/searchUtils';
+import { useSearchState, useSmartNavigation } from '../../utils/searchUtils';
 
 const SearchInput = ({ 
   placeholder = "Tìm kiếm phim...", 

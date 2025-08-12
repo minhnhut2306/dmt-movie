@@ -1,7 +1,7 @@
 import React from 'react';
 import { Star, Calendar, Clock, Globe, Users, Film, Eye } from 'lucide-react';
 import VideoPlayer from './VideoPlayer';
-import EpisodeList from './EpisodeList';
+import EpisodeList from '../EpisodeList';
 
 const DesktopWatchLayout = ({
   movieData,

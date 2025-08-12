@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Search } from 'lucide-react';
 import { useSmartNavigation } from '../../utils/searchUtils';
-import SearchResults from '../../components/SearchResults';
+import SearchResults from '../../components/Search/SearchResults';
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();

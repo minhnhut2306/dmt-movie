@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Moon, Menu, X, Search, ChevronDown } from "lucide-react";
-import SearchInput from "./SearchInput";
+import SearchInput from "./Search/SearchInput";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

@@ -2,10 +2,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useMovieDetail, transformMovieDetail } from '../../hooks/useMovies';
-import MobileDetailLayout from '../../components/MobileDetailLayout';
-import DesktopDetailLayout from '../../components/DesktopDetailLayout';
-import MobileWatchLayout from '../../components/MobileWatchLayout';
-import DesktopWatchLayout from '../../components/DesktopWatchLayout';
+import MobileDetailLayout from '../../components/DetailWatchMovie/MobileDetailLayout';
+import DesktopDetailLayout from '../../components/DetailWatchMovie/DesktopDetailLayout';
+import MobileWatchLayout from '../../components/DetailWatchMovie/MobileWatchLayout';
+import DesktopWatchLayout from '../../components/DetailWatchMovie/DesktopWatchLayout';
 import { formatServerName } from '../../utils/serverUtils';
 
 const MoviePlay = () => {

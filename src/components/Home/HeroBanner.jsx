@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Star, Calendar, Clock, Loader2 } from 'lucide-react';
-import { movieApi } from '../api';
+import { movieApi } from '../../api';
 
 const HeroBanner = ({ 
   isDragging, 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Star, Calendar, Eye, Globe, Film } from 'lucide-react';
 import VideoPlayer from './VideoPlayer';
-import EpisodeList from './EpisodeList';
+import EpisodeList from '../EpisodeList';
 
 const MobileWatchLayout = ({
   movieData,
