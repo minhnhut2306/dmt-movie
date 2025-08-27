@@ -110,7 +110,7 @@ const MovieCardDetail = ({ movie }) => {
               {movie.episode && movie.episode !== "Full" && (
                 <div className="mt-1 sm:mt-2">
                   <span className="bg-green-600/80 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-xs sm:text-sm text-white font-medium">
-                    Tập {movie.episode}
+                    {movie.episode}
                   </span>
                 </div>
               )}
