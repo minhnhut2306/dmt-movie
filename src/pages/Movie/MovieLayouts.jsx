@@ -17,15 +17,14 @@ const MoviePlay = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Debug log để kiểm tra slug
+
   useEffect(() => {
     console.log('Current slug from URL params:', slug);
   }, [slug]);
 
-  // Gọi API để lấy chi tiết phim
+
   const { data: movieDetailData, isLoading, error, isError } = useMovieDetail(slug);
-  
-  // Transform dữ liệu từ API và format server names - SỬ DỤNG USEMEMO
+ 
   const movieData = useMemo(() => {
     if (!movieDetailData) return null;
     
@@ -38,7 +37,7 @@ const MoviePlay = () => {
     };
   }, [movieDetailData]);
 
-  // Debug log để kiểm tra data
+
   useEffect(() => {
     if (movieDetailData) {
       console.log('Raw movie detail data:', movieDetailData);
@@ -49,7 +48,6 @@ const MoviePlay = () => {
     }
   }, [movieDetailData, movieData, error]);
 
-  // Detect mobile screen
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -61,13 +59,11 @@ const MoviePlay = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Reset episode chỉ khi slug thay đổi (tức là chuyển sang phim khác)
   useEffect(() => {
     setCurrentEpisode(0);
     setCurrentServer(0);
-  }, [slug]); // Chỉ phụ thuộc vào slug thay vì movieData
+  }, [slug]);
 
-  // Loading state
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
@@ -80,7 +76,6 @@ const MoviePlay = () => {
     );
   }
 
-  // Error state với thông tin chi tiết
   if (isError || error || !movieData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
@@ -127,7 +122,6 @@ const MoviePlay = () => {
 
   return (
     <div>
-      {/* Render Active Layout based on screen size */}
       {activeLayout === 'detail'
         ? (isMobile ? <MobileDetailLayout {...commonProps} /> : <DesktopDetailLayout {...commonProps} />)
         : (isMobile ? <MobileWatchLayout {...commonProps} /> : <DesktopWatchLayout {...commonProps} />)

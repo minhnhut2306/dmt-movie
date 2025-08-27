@@ -51,7 +51,6 @@ const EpisodeList = ({
                     {episode.name}
                   </span>
 
-                  {/* Active episode indicator */}
                   {currentServer === serverIndex && currentEpisode === episodeIndex && (
                     <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
                   )}

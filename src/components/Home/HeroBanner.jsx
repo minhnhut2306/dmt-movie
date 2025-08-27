@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Star, Calendar, Clock, Loader2 } from 'lucide-react';
-import { movieApi } from '../../api';
+import { movieApi } from '../../api/movieApi.js';
 
 const HeroBanner = ({ 
   isDragging, 
@@ -13,15 +13,9 @@ const HeroBanner = ({
   const [featuredMovies, setFeaturedMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Hoàn toàn độc lập - không dùng props từ parent
   const [currentIndex, setCurrentIndex] = useState(0);
-  
-  // Ref để track interval
   const intervalRef = useRef(null);
   const startTimeRef = useRef(Date.now());
-
-  // Fetch featured movies
   useEffect(() => {
     const fetchFeaturedMovies = async () => {
       try {

@@ -3,14 +3,14 @@ import React from 'react';
 import { ChevronLeft, ChevronRight, Loader2, Search } from 'lucide-react';
 import { useSearchMovies, transformSearchResults } from '../../hooks/userSearchMovie';
 import { searchUtils } from '../../utils/searchUtils';
-import SearchMovieCard from './SearchMovieCard'; // Import component mới
+import SearchMovieCard from './SearchMovieCard'; 
 
 const SearchResults = ({ 
   keyword, 
   currentPage = 1, 
   onPageChange
 }) => {
-  // Get search results - removed sortField parameter
+ 
   const { data: apiData, isLoading, error } = useSearchMovies(keyword, currentPage);
   const movies = transformSearchResults(apiData);
   const pagination = apiData?.data?.params?.pagination;
@@ -18,7 +18,7 @@ const SearchResults = ({
   const totalItems = pagination?.totalItems || 0;
   const itemsPerPage = pagination?.totalItemsPerPage || 24;
 
-  // Handle page change
+
   const handlePageChange = (page) => {
     if (onPageChange) {
       onPageChange(page);
@@ -26,7 +26,7 @@ const SearchResults = ({
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Render pagination
+
   const renderPagination = () => {
     if (totalPages <= 1) return null;
 
@@ -98,7 +98,7 @@ const SearchResults = ({
     );
   };
 
-  // Loading state
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -110,7 +110,7 @@ const SearchResults = ({
     );
   }
 
-  // Error state
+
   if (error) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
@@ -128,7 +128,7 @@ const SearchResults = ({
     );
   }
 
-  // No results
+
   if (!movies || movies.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
@@ -146,7 +146,7 @@ const SearchResults = ({
 
   return (
     <div>
-      {/* Results Header - removed sort options */}
+
       <div className="mb-6">
         <p className="text-gray-300">
           Kết quả cho: <span className="text-white font-semibold">"{keyword}"</span>
@@ -156,14 +156,11 @@ const SearchResults = ({
         </p>
       </div>
 
-      {/* Movies Grid - Responsive grid với proper spacing */}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-8 gap-4 mb-8">
         {movies.map((movie) => (
           <SearchMovieCard key={movie.id} movie={movie} />
         ))}
       </div>
-
-      {/* Pagination */}
       {renderPagination()}
     </div>
   );

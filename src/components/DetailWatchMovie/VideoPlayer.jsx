@@ -85,7 +85,6 @@ const VideoPlayer = ({
           Trình duyệt của bạn không hỗ trợ video này.
         </video>
 
-        {/* Fullscreen controls */}
         {isFullscreen && (
           <div className="absolute top-4 right-4 z-10">
             <button

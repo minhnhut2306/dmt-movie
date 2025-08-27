@@ -7,23 +7,21 @@ export const useSwipeHandler = () => {
   const [currentX, setCurrentX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
   const [activeSection, setActiveSection] = useState(null);
-  const [isHorizontalSwipe, setIsHorizontalSwipe] = useState(false); // Thêm để xác định hướng kéo
-
+  const [isHorizontalSwipe, setIsHorizontalSwipe] = useState(false); 
   const getItemsPerSlide = () => {
     if (typeof window === 'undefined') return 6;
     return window.innerWidth >= 1024 ? 6 : window.innerWidth >= 768 ? 4 : window.innerWidth >= 640 ? 3 : 2;
   };
 
-  // Hero banner handlers
   const handleHeroStart = (e) => {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY; // Lưu vị trí Y
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY; 
     setStartX(clientX);
     setStartY(clientY);
     setCurrentX(clientX);
     setIsDragging(true);
     setActiveSection('hero');
-    setIsHorizontalSwipe(false); // Reset hướng kéo
+    setIsHorizontalSwipe(false); 
     setDragOffset(0);
   };
 
@@ -34,14 +32,12 @@ export const useSwipeHandler = () => {
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     const deltaX = clientX - startX;
     const deltaY = clientY - startY;
-
-    // Xác định hướng kéo
     if (!isHorizontalSwipe && Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-      setIsHorizontalSwipe(true); // Xác định là kéo ngang
+      setIsHorizontalSwipe(true); 
     }
 
     if (isHorizontalSwipe) {
-      e.preventDefault(); // Chỉ ngăn cuộn dọc khi kéo ngang
+      e.preventDefault(); 
       setCurrentX(clientX);
       const offset = clientX - startX;
       setDragOffset(offset);
@@ -86,16 +82,15 @@ export const useSwipeHandler = () => {
     setIsHorizontalSwipe(false);
   };
 
-  // Section handlers
   const handleSectionStart = (e, sectionId) => {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY; // Lưu vị trí Y
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY; 
     setStartX(clientX);
     setStartY(clientY);
     setCurrentX(clientX);
     setIsDragging(true);
     setActiveSection(sectionId);
-    setIsHorizontalSwipe(false); // Reset hướng kéo
+    setIsHorizontalSwipe(false); 
     setDragOffset(0);
   };
 
@@ -107,13 +102,13 @@ export const useSwipeHandler = () => {
     const deltaX = clientX - startX;
     const deltaY = clientY - startY;
 
-    // Xác định hướng kéo
+  
     if (!isHorizontalSwipe && Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
       setIsHorizontalSwipe(true);
     }
 
     if (isHorizontalSwipe) {
-      e.preventDefault(); // Chỉ ngăn cuộn dọc khi kéo ngang
+      e.preventDefault(); 
       setCurrentX(clientX);
       const offset = clientX - startX;
       setDragOffset(offset);

@@ -1,15 +1,14 @@
 import React from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play } from 'lucide-react';
 
-const DesktopDetailLayout = ({ 
-  movieData, 
-  navigate, 
-  setActiveLayout 
+const DesktopDetailLayout = ({
+  movieData,
+  navigate,
+  setActiveLayout
 }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
       <div className="container mx-auto px-4 py-8">
-        {/* Back button */}
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-6 transition-colors duration-300"
@@ -18,7 +17,6 @@ const DesktopDetailLayout = ({
           <span>Quay lại</span>
         </button>
 
-        {/* Hero Section */}
         <div className="relative mb-12">
           <div
             className="h-96 bg-cover bg-center rounded-2xl relative overflow-hidden"
@@ -45,10 +43,8 @@ const DesktopDetailLayout = ({
             </div>
           </div>
         </div>
-
-        {/* Movie Info Grid */}
         <div className="grid lg:grid-cols-4 gap-8 mb-12">
-          {/* Poster */}
+
           <div className="lg:col-span-1">
             <img
               src={movieData.poster_url}
@@ -64,7 +60,6 @@ const DesktopDetailLayout = ({
             </button>
           </div>
 
-          {/* Details */}
           <div className="lg:col-span-3 space-y-6">
             <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold mb-4 text-white">Thông Tin Phim</h2>
@@ -103,7 +98,6 @@ const DesktopDetailLayout = ({
               </div>
             </div>
 
-            {/* Categories */}
             <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
               <h3 className="text-xl font-bold mb-4 text-white">Thể Loại</h3>
               <div className="flex flex-wrap gap-2">
@@ -118,7 +112,6 @@ const DesktopDetailLayout = ({
               </div>
             </div>
 
-            {/* Cast */}
             <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
               <h3 className="text-xl font-bold mb-4 text-white">Diễn Viên</h3>
               <div className="flex flex-wrap gap-2">

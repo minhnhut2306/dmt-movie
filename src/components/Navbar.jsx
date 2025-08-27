@@ -8,7 +8,7 @@ const Navbar = () => {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  
+
   const toggleDropdown = (dropdown) => {
     setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
   };
@@ -27,9 +27,9 @@ const Navbar = () => {
         }
       `}</style>
       <div className="max-w-full px-3 sm:px-6 lg:px-8 xl:px-12 2xl:px-16">
-        {/* Main navbar content */}
+
         <div className="flex items-center justify-between h-12 sm:h-14 lg:h-20">
-          {/* Logo - Smaller on mobile */}
+
           <div className="flex-shrink-0">
             <a href="/" className="block">
               <h1 className="text-lg sm:text-xl lg:text-3xl font-bold text-orange-500 cursor-pointer hover:text-orange-400 transition-colors">
@@ -38,16 +38,16 @@ const Navbar = () => {
             </a>
           </div>
 
-          {/* Desktop Search - ALWAYS SHOW - Using SearchInput component */}
+
           <div className="hidden lg:flex items-center flex-1 max-w-md mx-8">
-             <SearchInput 
+            <SearchInput
               placeholder="Tìm kiếm phim..."
               className="w-full"
               variant="navbar"
             />
           </div>
 
-          {/* Desktop Menu */}
+
           <div className="hidden lg:flex items-center space-x-2 xl:space-x-6">
             <div className="flex items-center space-x-1 xl:space-x-4">
               <a href="#" className="px-3 py-2 text-sm xl:text-base font-medium hover:text-blue-400 transition-colors whitespace-nowrap">
@@ -63,9 +63,8 @@ const Navbar = () => {
                 Hoạt Hình
               </a>
 
-              {/* Desktop Dropdowns */}
+
               <div className="flex items-center space-x-1 xl:space-x-4">
-                {/* Thể Loại Dropdown */}
                 <div className="relative group">
                   <button className="flex items-center px-3 py-2 text-sm xl:text-base font-medium hover:text-violet-400 transition-colors whitespace-nowrap">
                     Thể Loại
@@ -82,7 +81,7 @@ const Navbar = () => {
                   </div>
                 </div>
 
-                {/* Quốc Gia Dropdown */}
+
                 <div className="relative group">
                   <button className="flex items-center px-3 py-2 text-sm xl:text-base font-medium hover:text-violet-400 transition-colors whitespace-nowrap">
                     Quốc Gia
@@ -99,7 +98,7 @@ const Navbar = () => {
                   </div>
                 </div>
 
-                {/* Năm Dropdown */}
+
                 <div className="relative group">
                   <button className="flex items-center px-3 py-2 text-sm xl:text-base font-medium hover:text-violet-400 transition-colors whitespace-nowrap">
                     Năm
@@ -107,7 +106,7 @@ const Navbar = () => {
                   </button>
                   <div className="absolute invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 bg-[#1a252f] rounded-lg shadow-xl mt-2 z-20 w-80 xl:w-96 max-h-80 overflow-y-auto scrollbar-hide right-0">
                     <div className="p-4 grid grid-cols-3 xl:grid-cols-4 gap-3">
-                      {Array.from({length: 27}, (_, i) => 2026 - i).map(year => (
+                      {Array.from({ length: 27 }, (_, i) => 2026 - i).map(year => (
                         <div key={year} className="px-4 py-3 bg-[#0d1117] hover:bg-gray-600 rounded-lg cursor-pointer text-sm xl:text-base transition-colors text-center whitespace-nowrap border border-gray-700">
                           {year}
                         </div>
@@ -120,14 +119,14 @@ const Navbar = () => {
 
           </div>
 
-          {/* Mobile Controls - Compact design */}
+
           <div className="flex items-center lg:hidden space-x-2">
-            {/* Mobile Search Icon - ALWAYS SHOW */}
+
             <button onClick={toggleMobileSearch} className="p-1.5 hover:bg-gray-700 rounded-md transition-colors">
               <Search size={18} className="text-gray-300" />
             </button>
-            
-            {/* Mobile menu button - smaller */}
+
+
             <button
               onClick={toggleMenu}
               className="p-1.5 rounded-md hover:bg-gray-700 transition-colors"
@@ -137,27 +136,25 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Mobile Search Bar - ALWAYS FUNCTIONAL - Using SearchInput component */}
         <div className={`lg:hidden transition-all duration-300 ease-in-out ${showMobileSearch ? 'max-h-20 opacity-100 pb-3' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-           <SearchInput 
+          <SearchInput
             placeholder="Tìm kiếm phim..."
             className="w-full"
             variant="navbar"
           />
         </div>
 
-        {/* Mobile Sidebar Overlay */}
+
         <div className={`lg:hidden fixed inset-0 z-50 transition-all duration-300 ${isMenuOpen ? 'visible' : 'invisible'}`}>
-          {/* Background overlay */}
-          <div 
+
+          <div
             className={`absolute inset-0 bg-black transition-opacity duration-300 ${isMenuOpen ? 'opacity-50' : 'opacity-0'}`}
             onClick={toggleMenu}
           ></div>
-          
-          {/* Sidebar */}
+
           <div className={`absolute left-0 top-0 h-full w-80 bg-gradient-to-b from-[#0d1117] to-[#161b22] shadow-2xl transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-            
-            {/* Sidebar Header */}
+
+
             <div className="flex items-center justify-between p-4 border-b border-gray-600">
               <h2 className="text-lg font-bold text-orange-500">
                 DMT<span className="text-sky-300">Movie</span>
@@ -167,16 +164,16 @@ const Navbar = () => {
               </button>
             </div>
 
-            {/* Sidebar Search - ALWAYS SHOW */}
+
             <div className="p-4 border-b border-gray-600">
-               <SearchInput 
+              <SearchInput
                 placeholder="Tìm kiếm phim..."
                 className="w-full"
                 variant="navbar"
               />
             </div>
 
-            {/* Sidebar Content */}
+
             <div className="p-4 overflow-y-auto h-full pb-20">
               <div className="space-y-2">
                 {/* Basic Menu Items */}
@@ -193,11 +190,11 @@ const Navbar = () => {
                   Hoạt Hình
                 </a>
 
-                {/* Dropdown Sections */}
+
                 <div className="mt-4 space-y-2">
-                  {/* Thể Loại */}
+
                   <div>
-                    <button 
+                    <button
                       onClick={() => toggleDropdown('genres')}
                       className="flex items-center justify-between w-full px-3 py-3 text-base font-medium hover:bg-[#1c2228] rounded-md transition-colors text-white"
                     >
@@ -217,9 +214,9 @@ const Navbar = () => {
                     </div>
                   </div>
 
-                  {/* Quốc Gia */}
+
                   <div>
-                    <button 
+                    <button
                       onClick={() => toggleDropdown('countries')}
                       className="flex items-center justify-between w-full px-3 py-3 text-base font-medium hover:bg-[#1c2228] rounded-md transition-colors text-white"
                     >
@@ -239,9 +236,9 @@ const Navbar = () => {
                     </div>
                   </div>
 
-                  {/* Năm */}
+
                   <div>
-                    <button 
+                    <button
                       onClick={() => toggleDropdown('years')}
                       className="flex items-center justify-between w-full px-3 py-3 text-base font-medium hover:bg-[#1c2228] rounded-md transition-colors text-white"
                     >
@@ -251,7 +248,7 @@ const Navbar = () => {
                     <div className={`overflow-hidden transition-all duration-300 ${activeDropdown === 'years' ? 'max-h-64' : 'max-h-0'}`}>
                       <div className="mt-2 max-h-48 overflow-y-auto scrollbar-hide">
                         <div className="grid grid-cols-3 gap-2">
-                          {Array.from({length: 27}, (_, i) => 2026 - i).map(year => (
+                          {Array.from({ length: 27 }, (_, i) => 2026 - i).map(year => (
                             <a key={year} href="#" className="block px-2 py-2 text-sm text-gray-300 hover:bg-[#1c2228] hover:text-white rounded-md transition-colors text-center">
                               {year}
                             </a>

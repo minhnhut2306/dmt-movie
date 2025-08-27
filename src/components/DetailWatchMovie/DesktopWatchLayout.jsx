@@ -19,7 +19,6 @@ const DesktopWatchLayout = ({
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
       <div className="container mx-auto px-4 py-6">
-        {/* Movie Title */}
         <div className="mb-6">
           <button
             onClick={() => setActiveLayout('detail')}
@@ -34,7 +33,7 @@ const DesktopWatchLayout = ({
           </p>
         </div>
 
-        {/* Video Player */}
+      
         <div className="mb-6">
           <div className="bg-black rounded-2xl overflow-hidden shadow-2xl">
             <VideoPlayer 
@@ -44,7 +43,7 @@ const DesktopWatchLayout = ({
             />
           </div>
 
-          {/* Video Info */}
+
           {currentVideoUrl && (
             <div className="mt-4 p-4 bg-gradient-to-r from-gray-800/50 to-gray-700/50 backdrop-blur-sm rounded-xl border border-gray-600/30">
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
@@ -65,7 +64,7 @@ const DesktopWatchLayout = ({
           )}
         </div>
 
-        {/* Episode List */}
+
         <EpisodeList
           episodes={movieData.episodes}
           currentServer={currentServer}
@@ -75,7 +74,7 @@ const DesktopWatchLayout = ({
           isMobile={false}
         />
 
-        {/* Movie Info */}
+
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
             <h3 className="text-lg font-bold text-white mb-4">Thông Tin Phim</h3>
@@ -134,13 +133,13 @@ const DesktopWatchLayout = ({
           </div>
         </div>
 
-        {/* Description */}
+ 
         <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl mb-8">
           <h3 className="text-lg font-bold text-white mb-4">Nội Dung Phim</h3>
           <p className="text-gray-300 leading-relaxed">{movieData.content}</p>
         </div>
 
-        {/* Cast */}
+
         <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl mb-8">
           <h3 className="text-lg font-bold text-white mb-4">Diễn Viên</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">

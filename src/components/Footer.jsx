@@ -24,11 +24,10 @@ const Footer = () => {
 
   return (
     <footer className="bg-gray-900 text-gray-300">
-      {/* Main Footer Content */}
+
       <div className="container mx-auto px-4 py-12 max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           
-          {/* Brand & Description */}
           <div className="space-y-4 md:pr-6 md:border-r md:border-gray-600">
             <div className="flex items-center space-x-2">
              
@@ -45,10 +44,10 @@ const Footer = () => {
             <div className="md:hidden border-b border-gray-600 pb-4"></div>
           </div>
 
-          {/* Combined Section for Mobile - B & C (Danh Mục Phim & Thể Loại) */}
+
           <div className="md:hidden space-y-4">
             <div className="grid grid-cols-2 gap-8">
-              {/* Danh Mục Phim */}
+
               <div className="space-y-4">
                 <h3 className="text-base font-semibold text-red-400">
                   <span className="text-sm">Danh Mục Phim</span>
@@ -63,7 +62,7 @@ const Footer = () => {
                 </ul>
               </div>
 
-              {/* Thể Loại */}
+  
               <div className="space-y-4">
                 <h3 className="text-base font-semibold text-red-400">
                   <span className="text-sm">Thể Loại</span>
@@ -81,7 +80,6 @@ const Footer = () => {
             <div className="border-b border-gray-600 pb-4"></div>
           </div>
 
-          {/* Danh Mục Phim - Hidden on mobile */}
           <div className="hidden md:block space-y-4 md:px-6 md:border-r md:border-gray-600">
             <h3 className="text-lg font-semibold text-red-400 flex items-center space-x-2">
               <Tv className="w-5 h-5" />
@@ -97,7 +95,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Thể Loại - Hidden on mobile */}
           <div className="hidden md:block space-y-4 md:px-6 md:border-r md:border-gray-600">
             <h3 className="text-lg font-semibold text-red-400 flex items-center space-x-2">
               <Film className="w-5 h-5" />
@@ -113,7 +110,7 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact Info */}
+
           <div className="space-y-4 md:pl-6">
             <h3 className="text-lg font-semibold text-white">Thông Tin Liên Hệ</h3>
             
@@ -131,19 +128,18 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Bottom Section */}
       <div className="border-t border-gray-800">
         <div className="container mx-auto px-4 py-6 max-w-7xl">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             
-            {/* Copyright & Developer */}
+
             <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-6 text-sm text-center md:text-left">
               <div className="text-gray-400">
                 Được tạo bởi <span className="text-red-400 font-semibold">nhut-dev</span>
               </div>
             </div>
 
-            {/* Social Links */}
+   
             <div className="flex items-center space-x-4">
               <div className="flex space-x-3">
                 {socialLinks.map((social, index) => {
@@ -165,7 +161,6 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Mobile-specific bottom padding for iOS Safari */}
       <div className="h-safe-bottom md:h-0"></div>
     </footer>
   );

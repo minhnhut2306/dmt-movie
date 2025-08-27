@@ -1,6 +1,5 @@
 // components/GenericMoviesSection.jsx
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import MovieCard from '../MovieCard';
 
@@ -17,16 +16,12 @@ const GenericMoviesSection = ({
   handleSectionStart,
   handleSectionMove,
   handleSectionEnd,
-  getItemsPerSlide,
-  // New props for "View More" functionality
-  viewMoreLink
+  getItemsPerSlide
 }) => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
-  const navigate = useNavigate();
   const { data: apiData, isLoading: loading, error: queryError } = useDataHook();
   const movies = transformFunction(apiData);
   const error = queryError?.message;
-  
   const handleSlide = (direction) => {
     const itemsPerSlide = getItemsPerSlide();
     const maxIndex = Math.max(0, movies.length - itemsPerSlide);
@@ -38,17 +33,10 @@ const GenericMoviesSection = ({
       }
     });
   };
-  
   const handleSectionEndLocal = () => {
     handleSectionEnd(movies, (updates) => {
       setCurrentSlideIndex(prev => updates[sectionKey] ?? prev);
     });
-  };
-
-  const handleViewMore = () => {
-    if (viewMoreLink) {
-      navigate(viewMoreLink);
-    }
   };
 
   if (loading) {
@@ -118,16 +106,12 @@ const GenericMoviesSection = ({
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <h2 className="text-white text-xl sm:text-2xl font-bold flex items-center">
           {emoji} {title}
+        
         </h2>
         <div className="flex items-center space-x-3">
-          {viewMoreLink && (
-            <button 
-              onClick={handleViewMore}
-              className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base hover:underline"
-            >
-              Xem thêm
-            </button>
-          )}
+          <button className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base">
+            Xem thêm
+          </button>
           <div className="flex space-x-2">
             <button
               onClick={() => handleSlide('prev')}

@@ -18,7 +18,6 @@ const MobileWatchLayout = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
-      {/* Mobile Header */}
       <div className="px-3 py-3 border-b border-gray-700/50">
         <div className="flex items-center gap-3 mb-2">
           <button
@@ -37,14 +36,12 @@ const MobileWatchLayout = ({
         </p>
       </div>
 
-      {/* Video Player - Full Width on Mobile */}
       <VideoPlayer 
         currentVideoUrl={currentVideoUrl}
         isFullscreen={isFullscreen}
         setIsFullscreen={setIsFullscreen}
       />
 
-      {/* Video Info - Only show when not fullscreen */}
       {!isFullscreen && currentVideoUrl && (
         <div className="px-3 py-3 bg-gradient-to-r from-gray-800/50 to-gray-700/50 backdrop-blur-sm border-b border-gray-600/30">
           <div className="flex flex-wrap items-center gap-3 text-xs text-gray-300">
@@ -64,10 +61,8 @@ const MobileWatchLayout = ({
         </div>
       )}
 
-      {/* Content - Hide when fullscreen */}
       {!isFullscreen && (
         <div className="px-3 py-4">
-          {/* Episode List - Compact Mobile Version */}
           <EpisodeList
             episodes={movieData.episodes}
             currentServer={currentServer}
@@ -76,8 +71,6 @@ const MobileWatchLayout = ({
             setCurrentEpisode={setCurrentEpisode}
             isMobile={true}
           />
-
-          {/* Quick Info Cards */}
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-3 rounded-xl shadow-xl">
               <h3 className="text-sm font-bold text-white mb-2">Thông Tin</h3>
@@ -112,13 +105,11 @@ const MobileWatchLayout = ({
             </div>
           </div>
 
-          {/* Description */}
           <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
             <h3 className="text-sm font-bold text-white mb-2">Nội Dung Phim</h3>
             <p className="text-gray-300 leading-relaxed text-xs">{movieData.content}</p>
           </div>
 
-          {/* Categories - Compact */}
           <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
             <h3 className="text-sm font-bold text-white mb-2">Thể Loại</h3>
             <div className="flex flex-wrap gap-1">
@@ -133,7 +124,6 @@ const MobileWatchLayout = ({
             </div>
           </div>
 
-          {/* Cast - Compact Grid */}
           <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
             <h3 className="text-sm font-bold text-white mb-3">Diễn Viên</h3>
             <div className="grid grid-cols-2 gap-2">

@@ -31,9 +31,8 @@ const SearchMovieCard = ({ movie }) => {
           "focus-visible:ring-2 focus-visible:ring-sky-400/60",
         ].join(" ")}
       >
-        {/* Aspect box */}
         <div className="relative w-full aspect-[3/3]">
-          {/* Skeleton shimmer */}
+
           {!loaded && (
             <div className="absolute inset-0">
               <div className="h-full w-full bg-slate-800 animate-pulse rounded-2xl" />
@@ -41,7 +40,7 @@ const SearchMovieCard = ({ movie }) => {
             </div>
           )}
 
-          {/* Poster */}
+
           <img
             src={posterSrc}
             alt={movie?.title || "Poster"}
@@ -59,7 +58,6 @@ const SearchMovieCard = ({ movie }) => {
             ].join(" ")}
           />
 
-          {/* Top gradient & badges */}
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
           {loaded && movie?.rating && (
             <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-lg bg-black/70 backdrop-blur px-2.5 py-1.5 text-amber-300 text-sm font-medium shadow">
@@ -68,7 +66,6 @@ const SearchMovieCard = ({ movie }) => {
             </div>
           )}
 
-          {/* Play overlay */}
           {loaded && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="pointer-events-none opacity-0 transition-opacity duration-300 group-hover:opacity-100">
@@ -80,7 +77,6 @@ const SearchMovieCard = ({ movie }) => {
           )}
         </div>
 
-        {/* Info panel */}
         <div className="relative p-4 bg-slate-950/85 backdrop-blur-sm border-t border-white/5">
           <h3 className="mb-2 line-clamp-2 text-white text-base font-bold leading-snug">
             {movie?.title || "Đang cập nhật"}
@@ -103,10 +99,3 @@ const SearchMovieCard = ({ movie }) => {
 };
 
 export default SearchMovieCard;
-
-/* Tailwind extra (add to globals if you want the shimmer keyframes)
-@keyframes shimmer {
-  0%   { background-position-x: 200%; }
-  100% { background-position-x: -200%; }
-}
-*/

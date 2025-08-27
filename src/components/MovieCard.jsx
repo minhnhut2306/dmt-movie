@@ -9,9 +9,8 @@ const MovieCard = ({ movie }) => {
   const [imageError, setImageError] = useState(false);
 
   const handleClick = () => {
-    // Truyền slug qua URL params
     navigate(`/movie/${movie.slug}`);
-    window.scrollTo(0, 0); // Scroll to top khi chuyển trang
+    window.scrollTo(0, 0);
   };
 
   const handleImageLoad = () => {
@@ -25,14 +24,13 @@ const MovieCard = ({ movie }) => {
   };
 
   return (
-    <div 
+    <div
       className="group cursor-pointer transform transition-all duration-300 hover:scale-105 flex-shrink-0 
                  w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 
                  px-2 mb-4"
       onClick={handleClick}
     >
       <div className="relative overflow-hidden rounded-xl shadow-2xl">
-        {/* Loading placeholder */}
         {!imageLoaded && (
           <div className="absolute inset-0 bg-gray-800 flex items-center justify-center aspect-[2/3]">
             <div className="flex flex-col items-center space-y-3">
@@ -45,23 +43,19 @@ const MovieCard = ({ movie }) => {
         <img
           src={movie.poster}
           alt={movie.title}
-          className={`w-full aspect-[2/3] object-cover object-center transition-opacity duration-300 ${
-            imageLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
+          className={`w-full aspect-[2/3] object-cover object-center transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
           onLoad={handleImageLoad}
           onError={handleImageError}
         />
-        
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
 
-        {/* Play button overlay - responsive size */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
         {imageLoaded && (
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
             <Play className="w-16 h-16 sm:w-20 sm:h-20 text-white drop-shadow-lg" />
           </div>
         )}
 
-        {/* Rating badge - smaller on mobile */}
         {imageLoaded && (
           <div className="absolute top-3 right-3 
                          bg-black/80 backdrop-blur-sm px-3 py-2 
@@ -71,8 +65,6 @@ const MovieCard = ({ movie }) => {
             <span className="font-medium">{movie.rating}</span>
           </div>
         )}
-
-        {/* Title overlay - responsive padding and text */}
         {imageLoaded && (
           <div className="absolute bottom-0 left-0 right-0">
             <div className="bg-gray-800/40 backdrop-blur-sm border-t border-gray-400/30 p-3 sm:p-4">

@@ -1,15 +1,15 @@
 import React from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play } from 'lucide-react';
 
-const MobileDetailLayout = ({ 
-  movieData, 
-  navigate, 
-  setActiveLayout 
+const MobileDetailLayout = ({
+  movieData,
+  navigate,
+  setActiveLayout
 }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
       <div className="px-3 py-4">
-        {/* Back button */}
+
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-4 transition-colors duration-300"
@@ -17,8 +17,6 @@ const MobileDetailLayout = ({
           <ArrowLeft className="w-5 h-5" />
           <span>Quay lại</span>
         </button>
-
-        {/* Hero Image */}
         <div className="relative mb-6">
           <div
             className="h-64 sm:h-80 bg-cover bg-center rounded-xl relative overflow-hidden"
@@ -46,7 +44,6 @@ const MobileDetailLayout = ({
           </div>
         </div>
 
-        {/* Poster and Quick Info */}
         <div className="flex gap-4 mb-6">
           <div className="w-28 sm:w-32 flex-shrink-0">
             <img
@@ -89,13 +86,11 @@ const MobileDetailLayout = ({
           </div>
         </div>
 
-        {/* Description */}
         <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
           <h2 className="text-lg font-bold mb-3 text-white">Nội Dung Phim</h2>
           <p className="text-gray-300 leading-relaxed text-sm">{movieData.content}</p>
         </div>
 
-        {/* Categories */}
         <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
           <h3 className="text-lg font-bold mb-3 text-white">Thể Loại</h3>
           <div className="flex flex-wrap gap-2">
@@ -110,7 +105,6 @@ const MobileDetailLayout = ({
           </div>
         </div>
 
-        {/* Cast */}
         <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
           <h3 className="text-lg font-bold mb-3 text-white">Diễn Viên</h3>
           <div className="grid grid-cols-2 gap-2">

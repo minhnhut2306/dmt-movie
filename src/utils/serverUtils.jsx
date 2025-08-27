@@ -1,29 +1,19 @@
-/**
- * Xử lý và format tên server
- * @param {string} serverName - Tên server gốc
- * @returns {string} - Tên server đã được format
- */
+
 export const formatServerName = (serverName) => {
   if (!serverName) return '';
 
-  // Loại bỏ # và tên địa điểm (Hà Nội, TP.HCM, etc.)
   let formatted = serverName.replace(/^#[^(]*\(/, '').replace(/\)$/, '');
-  
-  // Nếu không có dấu ngoặc, kiểm tra pattern khác
+
   if (formatted === serverName) {
-    // Pattern: #Hà Nội - Vietsub -> Vietsub
     formatted = serverName.replace(/^#[^-]*-\s*/, '');
-    
-    // Pattern: #Server1 Vietsub -> Vietsub
+
     if (formatted === serverName) {
       formatted = serverName.replace(/^#\w+\s+/, '');
     }
   }
 
-  // Làm sạch và chuẩn hóa
   formatted = formatted.trim();
-  
-  // Chuẩn hóa các từ khóa phổ biến
+
   if (formatted.toLowerCase().includes('vietsub')) {
     formatted = 'Vietsub';
   } else if (formatted.toLowerCase().includes('lồng tiếng') || formatted.toLowerCase().includes('thuyết minh')) {
@@ -37,15 +27,9 @@ export const formatServerName = (serverName) => {
   return formatted || 'Server';
 };
 
-/**
- * Lọc và sắp xếp servers theo độ ưu tiên
- * @param {Array} servers - Danh sách servers
- * @returns {Array} - Danh sách servers đã được lọc và sắp xếp
- */
 export const prioritizeServers = (servers) => {
   if (!servers || !Array.isArray(servers)) return [];
 
-  // Độ ưu tiên server (số càng thấp càng ưu tiên)
   const serverPriority = {
     'Vietsub': 1,
     'Lồng Tiếng': 2,
@@ -66,15 +50,10 @@ export const prioritizeServers = (servers) => {
     });
 };
 
-/**
- * Lấy server mặc định (Vietsub nếu có, không thì server đầu tiên)
- * @param {Array} servers - Danh sách servers
- * @returns {number} - Index của server mặc định
- */
 export const getDefaultServerIndex = (servers) => {
   if (!servers || !Array.isArray(servers) || servers.length === 0) return 0;
 
-  const vietsubIndex = servers.findIndex(server => 
+  const vietsubIndex = servers.findIndex(server =>
     formatServerName(server.server_name) === 'Vietsub'
   );
 

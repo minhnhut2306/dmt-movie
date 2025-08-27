@@ -9,21 +9,18 @@ const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { navigateBack } = useSmartNavigation();
   
-  // Get URL params - removed sort
   const urlKeyword = searchParams.get('q') || '';
   const urlPage = parseInt(searchParams.get('page')) || 1;
   
-  // Local state - sync với URL, removed sortField
+
   const [keyword, setKeyword] = useState(urlKeyword);
   const [currentPage, setCurrentPage] = useState(urlPage);
 
-  // Sync local state với URL params khi URL thay đổi
   useEffect(() => {
     setKeyword(urlKeyword);
     setCurrentPage(urlPage);
   }, [urlKeyword, urlPage]);
 
-  // Update URL khi params thay đổi - removed sortField
   useEffect(() => {
     if (keyword.trim()) {
       const params = new URLSearchParams();
@@ -33,13 +30,10 @@ const SearchPage = () => {
     }
   }, [keyword, currentPage, setSearchParams]);
 
-  // Handle page change
   const handlePageChange = (page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
-  // Handle back button
   const handleBack = () => {
     navigateBack();
   };
@@ -47,7 +41,6 @@ const SearchPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
       <div className="container mx-auto px-4 py-6">
-        {/* Header */}
         <div className="flex items-center mb-6">
           <button 
             onClick={handleBack}
@@ -60,8 +53,6 @@ const SearchPage = () => {
             Tìm kiếm phim
           </h1>
         </div>
-
-        {/* Search Results or Empty State */}
         {keyword.trim() ? (
           <SearchResults
             keyword={keyword}
@@ -69,7 +60,6 @@ const SearchPage = () => {
             onPageChange={handlePageChange}
           />
         ) : (
-          // Empty state - khi chưa có keyword
           <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
             <div className="text-white text-center">
               <Search className="w-16 h-16 mx-auto mb-4 text-gray-400" />

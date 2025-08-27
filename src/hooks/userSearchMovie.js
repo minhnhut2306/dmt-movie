@@ -6,7 +6,7 @@ export const useSearchMovies = (keyword, page = 1, sortField = "created.time") =
   return useQuery({
     queryKey: ["search-movies", keyword, page, sortField],
     queryFn: () => searchApi.searchMovies(keyword, page, sortField),
-    enabled: !!keyword && keyword.trim().length > 0, // Chỉ gọi API khi có keyword
+    enabled: !!keyword && keyword.trim().length > 0,
     staleTime: 2 * 60 * 1000, // 2 phút
     cacheTime: 5 * 60 * 1000, // 5 phút
     retry: 2,
@@ -14,23 +14,20 @@ export const useSearchMovies = (keyword, page = 1, sortField = "created.time") =
   });
 };
 
-// Hook gợi ý tìm kiếm (debounced)
 export const useSearchSuggestions = (keyword) => {
   return useQuery({
     queryKey: ["search-suggestions", keyword],
     queryFn: () => searchApi.getSuggestions(keyword),
-    enabled: !!keyword && keyword.trim().length >= 2, // Ít nhất 2 ký tự
+    enabled: !!keyword && keyword.trim().length >= 2, 
     staleTime: 1 * 60 * 1000, // 1 phút
     cacheTime: 3 * 60 * 1000, // 3 phút
     retry: 1,
   });
 };
 
-// Transform function cho kết quả tìm kiếm
 export const transformSearchResults = (data) => {
   return (
     data?.data?.items?.map((movie) => {
-      // Helper function để xử lý poster URL
       const getPosterUrl = (posterUrl) => {
         if (!posterUrl) return "https://via.placeholder.com/300x450/374151/ffffff?text=No+Image";
         return posterUrl.startsWith("http") 
@@ -38,13 +35,11 @@ export const transformSearchResults = (data) => {
           : `https://phimimg.com/${posterUrl}`;
       };
 
-      // Helper function để xử lý rating
       const getRating = (tmdb) => {
         if (!tmdb || !tmdb.vote_average || tmdb.vote_average <= 0) return null;
         return tmdb.vote_average.toFixed(1);
       };
 
-      // Helper function để xử lý type
       const getMovieType = (type) => {
         const typeMap = {
           'hoathinh': 'Hoạt Hình',
