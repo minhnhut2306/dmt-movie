@@ -10,7 +10,6 @@ import {
   useAnimationMovies,
   useActionMovies,
   useHorrorMovies,
-  useAdventureMovies,
   useHistoryMovies,
   transformLatestMovies,
   transformVietnamMovies,
@@ -22,7 +21,6 @@ import {
   transformAnimationMovies,
   transformActionMovies,
   transformHorrorMovies,
-  transformAdventureMovies,
   transformHistoryMovies,
 } from '../hooks/useMovies';
 
@@ -116,15 +114,6 @@ export const MOVIE_SECTIONS = [
     useDataHook: useHorrorMovies,
     transformFunction: transformHorrorMovies,
     viewMoreLink: "/category/the-loai/kinh-di"
-  },
-  {
-    title: "Phim Phiêu Lưu",
-    emoji: "🗺️",
-    sectionKey: "adventure",
-    badgeColor: "bg-yellow-600",
-    useDataHook: useAdventureMovies,
-    transformFunction: transformAdventureMovies,
-    viewMoreLink: "/category/the-loai/phieu-luu"
   },
   {
     title: "Phim Cổ Trang",

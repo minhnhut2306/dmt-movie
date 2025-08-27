@@ -104,5 +104,4 @@ export const transformTVShows = createMovieTransform("Chưa phân loại", "TV S
 export const transformAnimationMovies = createMovieTransform("Hoạt hình", "Phim Hoạt Hình");
 export const transformActionMovies = createMovieTransform("Hành động", "Phim Hành Động");
 export const transformHorrorMovies = createMovieTransform("Kinh dị", "Phim Kinh Dị");
-export const transformAdventureMovies = createMovieTransform("Phiêu lưu", "Phim Phiêu Lưu");
 export const transformHistoryMovies = createMovieTransform("Cổ trang", "Phim Cổ Trang");
