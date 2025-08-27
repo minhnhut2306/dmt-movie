@@ -94,6 +94,7 @@ export const CATEGORY_TYPES = {
       if (slug === 'phim-moi-cap-nhat') {
         return `/danh-sach/phim-moi-cap-nhat-v3?page=${page}`;
       }
+      // All other danh-sach categories use v1 API
       return `/v1/api/danh-sach/${slug}?page=${page}`;
     },
     categories: {

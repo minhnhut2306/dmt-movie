@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import MovieCardDetail from '../../components/MovieCardDetail';
 import { getCategoryInfo } from '../../utils/CategoryConfig';
-import { movieApi } from '../../api/movieApi.js';
+import { movieApi } from '../../api'; // Import từ api/index.js
 
 const CategoryPage = () => {
   const { categoryType, categorySlug } = useParams();
@@ -16,87 +16,122 @@ const CategoryPage = () => {
   
   const { data, isLoading, error } = useQuery({
     queryKey: ['category', categoryType, categorySlug, currentPage],
-    queryFn: () => {
+    queryFn: async () => {
       console.log(`Fetching ${categoryType}/${categorySlug} - Page: ${currentPage}`);
       
-      let endpoint;
-      switch (categoryType) {
-        case 'the-loai':
-          endpoint = `/v1/api/the-loai/${categorySlug}?page=${currentPage}`;
-          break;
-        case 'quoc-gia':
-          endpoint = `/v1/api/quoc-gia/${categorySlug}?page=${currentPage}`;
-          break;
-        case 'nam':
-          endpoint = `/v1/api/nam/${categorySlug}?page=${currentPage}`;
-          break;
-        case 'danh-sach':
-          if (categorySlug === 'phim-moi-cap-nhat') {
-            endpoint = `/danh-sach/phim-moi-cap-nhat-v3?page=${currentPage}`;
-          } else {
-            endpoint = `/v1/api/danh-sach/${categorySlug}?page=${currentPage}`;
-          }
-          break;
-        default:
-          throw new Error(`Unsupported category type: ${categoryType}`);
+      try {
+        // Xử lý đặc biệt cho phim-moi-cap-nhat
+        if (categorySlug === 'phim-moi-cap-nhat') {
+          const response = await movieApi.getCategoryMovies(categoryType, categorySlug, currentPage);
+          console.log('Phim mới cập nhật response:', response);
+          return response;
+        }
+        
+        // Sử dụng method đã được refactor cho các category khác
+        return movieApi.getCategoryMovies(categoryType, categorySlug, currentPage);
+      } catch (error) {
+        console.error('Error fetching category data:', error);
+        throw error;
       }
-      
-      return movieApi.request(endpoint);
     },
     staleTime: 5 * 60 * 1000,
     cacheTime: 10 * 60 * 1000,
+    retry: (failureCount, error) => {
+      // Không retry cho lỗi 404 hoặc 400
+      if (error?.status === 404 || error?.status === 400) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
     enabled: !!categoryInfo
   });
+
   const transformMovieData = (rawData) => {
     if (!rawData) return [];
     
-    const items = rawData.items || rawData.data?.items || [];
+    console.log('Raw data structure:', rawData);
     
-    return items.map((movie) => ({
-      id: movie._id,
-      title: movie.name,
-      originalTitle: movie.origin_name,
-      poster: movie.poster_url?.startsWith("http")
-        ? movie.poster_url
-        : `https://phimimg.com/${movie.poster_url}`,
-      thumbnail: movie.thumb_url?.startsWith("http")
-        ? movie.thumb_url
-        : `https://phimimg.com/${movie.thumb_url}`,
-      rating: movie.tmdb?.vote_average > 0 
-        ? movie.tmdb.vote_average.toFixed(1) 
-        : "N/A",
-      year: movie.year,
-      duration: movie.time,
-      genre: movie.category?.[0]?.name || "Chưa phân loại",
-      country: movie.country?.[0]?.name || "Chưa xác định",
-      type: movie.type === "series" 
-        ? "Phim Bộ" 
-        : movie.type === "single" 
-        ? "Phim Lẻ" 
-        : movie.type === "tvshows" 
-        ? "TV Shows" 
-        : movie.type,
-      quality: movie.quality,
-      language: movie.lang,
-      episode: movie.episode_current,
-      slug: movie.slug,
-      isExclusive: movie.sub_docquyen,
-      isInCinema: movie.chieurap,
-      modifiedTime: movie.modified?.time,
-      createdTime: movie.created?.time,
-    }));
+    // Xử lý nhiều cấu trúc dữ liệu khác nhau
+    let items = [];
+    
+    if (rawData.items) {
+      items = rawData.items;
+    } else if (rawData.data?.items) {
+      items = rawData.data.items;
+    } else if (rawData.data && Array.isArray(rawData.data)) {
+      items = rawData.data;
+    } else if (Array.isArray(rawData)) {
+      items = rawData;
+    } else {
+      console.warn('Unknown data structure:', rawData);
+      return [];
+    }
+    
+    return items.map((movie) => {
+      // Xử lý poster URL
+      let posterUrl = movie.poster_url || movie.poster || movie.thumb_url || movie.thumbnail;
+      if (posterUrl && !posterUrl.startsWith("http")) {
+        posterUrl = `https://phimimg.com/${posterUrl}`;
+      }
+      
+      // Xử lý thumbnail URL
+      let thumbnailUrl = movie.thumb_url || movie.thumbnail || movie.poster_url || movie.poster;
+      if (thumbnailUrl && !thumbnailUrl.startsWith("http")) {
+        thumbnailUrl = `https://phimimg.com/${thumbnailUrl}`;
+      }
+      
+      return {
+        id: movie._id || movie.id,
+        title: movie.name || movie.title,
+        originalTitle: movie.origin_name || movie.original_title || movie.originalTitle,
+        poster: posterUrl,
+        thumbnail: thumbnailUrl,
+        rating: movie.tmdb?.vote_average > 0 
+          ? movie.tmdb.vote_average.toFixed(1) 
+          : movie.rating || movie.vote_average || "N/A",
+        year: movie.year,
+        duration: movie.time || movie.duration,
+        genre: movie.category?.[0]?.name || movie.genres?.[0] || "Chưa phân loại",
+        country: movie.country?.[0]?.name || movie.countries?.[0] || "Chưa xác định",
+        type: movie.type === "series" 
+          ? "Phim Bộ" 
+          : movie.type === "single" 
+          ? "Phim Lẻ" 
+          : movie.type === "tvshows" 
+          ? "TV Shows" 
+          : movie.type || "Chưa xác định",
+        quality: movie.quality,
+        language: movie.lang || movie.language,
+        episode: movie.episode_current || movie.current_episode,
+        slug: movie.slug,
+        isExclusive: movie.sub_docquyen || movie.exclusive,
+        isInCinema: movie.chieurap || movie.cinema,
+        modifiedTime: movie.modified?.time || movie.updated_at,
+        createdTime: movie.created?.time || movie.created_at,
+      };
+    });
   };
 
   const movies = transformMovieData(data);
   
-
-  const paginationInfo = data?.data?.params?.pagination || 
-                         data?.pagination || 
-                         data?.data?.params || 
-                         {};
-                         
+  // Xử lý pagination với nhiều cấu trúc khác nhau
+  const getPaginationInfo = (rawData) => {
+    if (!rawData) return {};
+    
+    // Thử các cấu trúc pagination khác nhau
+    return rawData.data?.params?.pagination || 
+           rawData.pagination || 
+           rawData.data?.params || 
+           rawData.params ||
+           {};
+  };
+  
+  const paginationInfo = getPaginationInfo(data);
+  
   const totalPages = paginationInfo?.totalPages || 
-                    Math.ceil((paginationInfo?.totalItems || movies.length) / 24) ||
+                    paginationInfo?.total_page ||
+                    Math.ceil((paginationInfo?.totalItems || paginationInfo?.total || movies.length) / 24) ||
                     1;
 
   const handlePageChange = (newPage) => {
@@ -212,6 +247,7 @@ const CategoryPage = () => {
       </div>
     );
   }
+
   if (error) {
     return (
       <div className="min-h-screen bg-gray-900">
@@ -219,7 +255,12 @@ const CategoryPage = () => {
           <div className="flex items-center justify-center h-64">
             <div className="text-white text-center">
               <p className="text-red-400 mb-2 text-lg">Lỗi tải dữ liệu</p>
-              <p className="text-gray-400 text-sm mb-4">{error.message}</p>
+              <p className="text-gray-400 text-sm mb-4">
+                {error.message || 'Không thể tải dữ liệu danh mục'}
+              </p>
+              <p className="text-gray-500 text-xs mb-4">
+                Category: {categoryType}/{categorySlug}
+              </p>
               <button 
                 onClick={() => window.location.reload()}
                 className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg text-sm font-medium transition-colors"
@@ -233,10 +274,14 @@ const CategoryPage = () => {
     );
   }
 
+  // Debug info
+  console.log('Category Info:', categoryInfo);
+  console.log('Movies Count:', movies.length);
+  console.log('Pagination Info:', paginationInfo);
+
   return (
     <div className="min-h-screen bg-gray-900">
       <div className="container mx-auto px-4 py-6 sm:py-8">
-
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <span 
@@ -255,11 +300,15 @@ const CategoryPage = () => {
             </p>
           </div>
         </div>
+
         {movies.length > 0 ? (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
-              {movies.map((movie) => (
-                <MovieCardDetail key={movie.id} movie={movie} />
+              {movies.map((movie, index) => (
+                <MovieCardDetail 
+                  key={movie.id || `${movie.slug}-${index}`} 
+                  movie={movie} 
+                />
               ))}
             </div>
           

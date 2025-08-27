@@ -1,4 +1,3 @@
-// api/movieApi.js
 import { api, apiRequest } from "./baseApi";
 
 export const movieApi = {
@@ -48,14 +47,45 @@ export const movieApi = {
           endpoint = `/v1/api/nam/${categorySlug}?page=${page}`;
           break;
         case 'danh-sach':
-          endpoint = `/v1/api/danh-sach/${categorySlug}?page=${page}`;
+          // Xử lý đặc biệt cho từng slug trong danh-sach
+          switch (categorySlug) {
+            case 'phim-moi-cap-nhat':
+              endpoint = `/danh-sach/phim-moi-cap-nhat-v3?page=${page}`;
+              break;
+            case 'phim-bo':
+              endpoint = `/v1/api/danh-sach/phim-bo?page=${page}`;
+              break;
+            case 'phim-le':
+              endpoint = `/v1/api/danh-sach/phim-le?page=${page}`;
+              break;
+            case 'tv-shows':
+              endpoint = `/v1/api/danh-sach/tv-shows?page=${page}`;
+              break;
+            case 'hoat-hinh':
+              endpoint = `/v1/api/danh-sach/hoat-hinh?page=${page}`;
+              break;
+            case 'phim-chieu-rap':
+              endpoint = `/v1/api/danh-sach/phim-chieu-rap?page=${page}`;
+              break;
+            case 'phim-thuyet-minh':
+              endpoint = `/v1/api/danh-sach/phim-thuyet-minh?page=${page}`;
+              break;
+            case 'phim-vietsub':
+              endpoint = `/v1/api/danh-sach/phim-vietsub?page=${page}`;
+              break;
+            default:
+              // Fallback cho các slug khác
+              endpoint = `/v1/api/danh-sach/${categorySlug}?page=${page}`;
+          }
           break;
         default:
           throw new Error(`Unsupported category type: ${categoryType}`);
       }
       
+      console.log(`Fetching category: ${categoryType}/${categorySlug} from endpoint: ${endpoint}`);
+      
       const { data } = await api.get(endpoint);
-      console.log(`Category API: ${endpoint}`, data);
+      console.log(`Category API Response:`, data);
       return data;
     } catch (error) {
       console.error(`Error fetching category ${categoryType}/${categorySlug}:`, error);
