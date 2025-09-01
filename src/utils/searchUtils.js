@@ -143,14 +143,11 @@ export const useSearchState = () => {
   const syncTimeoutRef = useRef(null);
 
   const setSearchInput = useCallback((value) => {
-    // Clear timeout cũ
     if (syncTimeoutRef.current) {
       clearTimeout(syncTimeoutRef.current);
     }
 
     setSearchInputState(value);
-
-    // Set timeout ngắn để đảm bảo đồng bộ
     syncTimeoutRef.current = setTimeout(() => {
       // eslint-disable-next-line no-unused-vars
       setSearchInputState((prev) => {
@@ -160,7 +157,6 @@ export const useSearchState = () => {
   }, []);
 
   const clearSearch = useCallback(() => {
-    // Clear timeout
     if (syncTimeoutRef.current) {
       clearTimeout(syncTimeoutRef.current);
     }

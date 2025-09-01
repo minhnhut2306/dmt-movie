@@ -18,7 +18,6 @@ const GenericMoviesSection = ({
   handleSectionMove,
   handleSectionEnd,
   getItemsPerSlide,
-  // New props for "View More" functionality
   viewMoreLink
 }) => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);

@@ -106,4 +106,8 @@ export const movieApi = {
   getHorrorMovies: (page = 1) => apiRequest(`/v1/api/the-loai/kinh-di?page=${page}`),
   getAdventureMovies: (page = 1) => apiRequest(`/v1/api/the-loai/phieu-luu?page=${page}`),
   getHistoryMovies: (page = 1) => apiRequest(`/v1/api/the-loai/co-trang?page=${page}`),
+
+  getDubbedMovies: (page = 1) => apiRequest(`/v1/api/danh-sach/phim-thuyet-minh?page=${page}`),
+  getVoiceoverMovies: (page = 1) => apiRequest(`/v1/api/danh-sach/phim-long-tieng?page=${page}`),
+  getVietsubMovies: (page = 1) => apiRequest(`/v1/api/danh-sach/phim-vietsub?page=${page}`),
 };

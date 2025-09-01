@@ -58,3 +58,7 @@ export const useActionMovies = createMovieHook("action-movies", movieApi.getActi
 export const useHorrorMovies = createMovieHook("horror-movies", movieApi.getHorrorMovies);
 export const useAdventureMovies = createMovieHook("adventure-movies", movieApi.getAdventureMovies);
 export const useHistoryMovies = createMovieHook("history-movies", movieApi.getHistoryMovies);
+
+export const useDubbedMovies = createMovieHook("dubbed-movies", movieApi.getDubbedMovies);
+export const useVoiceoverMovies = createMovieHook("voiceover-movies", movieApi.getVoiceoverMovies);
+export const useVietsubMovies = createMovieHook("vietsub-movies", movieApi.getVietsubMovies);

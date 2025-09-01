@@ -105,3 +105,7 @@ export const transformAnimationMovies = createMovieTransform("Hoạt hình", "Ph
 export const transformActionMovies = createMovieTransform("Hành động", "Phim Hành Động");
 export const transformHorrorMovies = createMovieTransform("Kinh dị", "Phim Kinh Dị");
 export const transformHistoryMovies = createMovieTransform("Cổ trang", "Phim Cổ Trang");
+
+export const transformDubbedMovies = createMovieTransform("Thuyết minh", "Phim Thuyết Minh");
+export const transformVoiceoverMovies = createMovieTransform("Lồng tiếng", "Phim Lồng Tiếng");
+export const transformVietsubMovies = createMovieTransform("Vietsub", "Phim Vietsub");
