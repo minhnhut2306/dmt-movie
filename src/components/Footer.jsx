@@ -1,20 +1,22 @@
 import React from 'react';
-import { 
-  Play, 
-  Mail, 
-  Phone, 
-  Facebook,  
+import {
+  Play,
+  Mail,
+  Phone,
+  Facebook,
   Youtube,
   Film,
   Tv,
-  Clock
+  Clock,
+  MessageCircle
 } from 'lucide-react';
 import { CATEGORY_TYPES } from '../utils/CategoryConfig';
 
 const Footer = () => {
   const socialLinks = [
     { icon: Facebook, href: 'https://www.facebook.com/nhut2306', label: 'Facebook' },
-    { icon: Youtube, href: '#', label: 'YouTube' }
+    { icon: Youtube, href: '#', label: 'YouTube' },
+    { icon: MessageCircle, href: 'https://zalo.me/0345093534', label: 'Zalo' }
   ];
 
   const popularMovieCategories = Object.entries(CATEGORY_TYPES["danh-sach"].categories).slice(0, 6);
@@ -24,7 +26,7 @@ const Footer = () => {
     <footer className="bg-gray-900 text-gray-300">
       <div className="container mx-auto px-4 py-12 max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          
+
           <div className="space-y-4 md:pr-6 md:border-r md:border-gray-600">
             <div className="flex items-center space-x-2">
               <span className="text-2xl font-bold">
@@ -33,8 +35,8 @@ const Footer = () => {
               </span>
             </div>
             <p className="text-sm leading-relaxed">
-              Khám phá thế giới điện ảnh với hàng ngàn bộ phim chất lượng cao. 
-              Từ phim bộ đình đám đến những tác phẩm kinh điển, chúng tôi mang đến 
+              Khám phá thế giới điện ảnh với hàng ngàn bộ phim chất lượng cao.
+              Từ phim bộ đình đám đến những tác phẩm kinh điển, chúng tôi mang đến
               trải nghiệm giải trí tuyệt vời nhất.
             </p>
             <div className="md:hidden border-b border-gray-600 pb-4"></div>
@@ -51,8 +53,8 @@ const Footer = () => {
                 <ul className="space-y-3">
                   {popularMovieCategories.map(([slug, category]) => (
                     <li key={slug}>
-                      <a 
-                        href={`/category/danh-sach/${slug}`} 
+                      <a
+                        href={`/category/danh-sach/${slug}`}
                         className="text-xs leading-relaxed hover:text-orange-400 transition-colors duration-200 hover:translate-x-1 inline-block"
                       >
                         {category.name}
@@ -70,8 +72,8 @@ const Footer = () => {
                 <ul className="space-y-3">
                   {popularGenres.map(([slug, genre]) => (
                     <li key={slug}>
-                      <a 
-                        href={`/category/the-loai/${slug}`} 
+                      <a
+                        href={`/category/the-loai/${slug}`}
                         className="text-xs leading-relaxed hover:text-orange-400 transition-colors duration-200 hover:translate-x-1 inline-block"
                       >
                         {genre.name}
@@ -93,8 +95,8 @@ const Footer = () => {
             <ul className="space-y-2">
               {popularMovieCategories.map(([slug, category]) => (
                 <li key={slug}>
-                  <a 
-                    href={`/category/danh-sach/${slug}`} 
+                  <a
+                    href={`/category/danh-sach/${slug}`}
                     className="text-sm hover:text-orange-400 transition-colors duration-200 hover:translate-x-1 inline-block"
                   >
                     {category.name}
@@ -113,8 +115,8 @@ const Footer = () => {
             <ul className="space-y-2">
               {popularGenres.map(([slug, genre]) => (
                 <li key={slug}>
-                  <a 
-                    href={`/category/the-loai/${slug}`} 
+                  <a
+                    href={`/category/the-loai/${slug}`}
                     className="text-sm hover:text-orange-400 transition-colors duration-200 hover:translate-x-1 inline-block"
                   >
                     {genre.name}
@@ -127,7 +129,7 @@ const Footer = () => {
           {/* Contact Info */}
           <div className="space-y-4 md:pl-6">
             <h3 className="text-lg font-semibold text-white">Thông Tin Liên Hệ</h3>
-            
+
             <div className="space-y-3">
               <div className="flex items-start space-x-3 text-sm">
                 <Mail className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
@@ -136,6 +138,12 @@ const Footer = () => {
               <div className="flex items-center space-x-3 text-sm">
                 <Phone className="w-4 h-4 text-red-600 flex-shrink-0" />
                 <span>+84 345 093 534</span>
+              </div>
+              <div className="flex items-center space-x-3 text-sm">
+                <MessageCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+                <a href="https://zalo.me/0345093534" className="hover:text-orange-400 transition-colors duration-200">
+                  Zalo: +84 345 093 534
+                </a>
               </div>
             </div>
           </div>
