@@ -134,6 +134,7 @@ export const CATEGORY_TYPES = {
       return `/v1/api/danh-sach/${slug}?page=${page}`;
     },
     categories: {
+      "phim-moi-cap-nhat": { name: "Phim Mới Cập Nhật", color: "bg-gray-700" },
       "phim-bo": { name: "Phim Bộ", color: "bg-gray-700" },
       "phim-le": { name: "Phim Lẻ", color: "bg-gray-700" },
       "tv-shows": { name: "TV Shows", color: "bg-gray-700" },
