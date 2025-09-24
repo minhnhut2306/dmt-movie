@@ -6,19 +6,20 @@ import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import MovieCardDetail from '../../components/MovieCardDetail';
 import { getCategoryInfo } from '../../utils/CategoryConfig';
 import { movieApi } from '../../api'; // Import từ api/index.js
+import { getSafeImageUrl } from '../../utils/imageHelper';
 
 const CategoryPage = () => {
   const { categoryType, categorySlug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentPage = parseInt(searchParams.get('page') || '1');
-  
+
   const categoryInfo = getCategoryInfo(categoryType, categorySlug);
-  
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['category', categoryType, categorySlug, currentPage],
     queryFn: async () => {
       console.log(`Fetching ${categoryType}/${categorySlug} - Page: ${currentPage}`);
-      
+
       try {
         // Xử lý đặc biệt cho phim-moi-cap-nhat
         if (categorySlug === 'phim-moi-cap-nhat') {
@@ -26,7 +27,7 @@ const CategoryPage = () => {
           console.log('Phim mới cập nhật response:', response);
           return response;
         }
-        
+
         // Sử dụng method đã được refactor cho các category khác
         return movieApi.getCategoryMovies(categoryType, categorySlug, currentPage);
       } catch (error) {
@@ -49,12 +50,12 @@ const CategoryPage = () => {
 
   const transformMovieData = (rawData) => {
     if (!rawData) return [];
-    
+
     console.log('Raw data structure:', rawData);
-    
+
     // Xử lý nhiều cấu trúc dữ liệu khác nhau
     let items = [];
-    
+
     if (rawData.items) {
       items = rawData.items;
     } else if (rawData.data?.items) {
@@ -67,40 +68,32 @@ const CategoryPage = () => {
       console.warn('Unknown data structure:', rawData);
       return [];
     }
-    
+
     return items.map((movie) => {
       // Xử lý poster URL
-      let posterUrl = movie.poster_url || movie.poster || movie.thumb_url || movie.thumbnail;
-      if (posterUrl && !posterUrl.startsWith("http")) {
-        posterUrl = `https://phimimg.com/${posterUrl}`;
-      }
-      
-      // Xử lý thumbnail URL
-      let thumbnailUrl = movie.thumb_url || movie.thumbnail || movie.poster_url || movie.poster;
-      if (thumbnailUrl && !thumbnailUrl.startsWith("http")) {
-        thumbnailUrl = `https://phimimg.com/${thumbnailUrl}`;
-      }
-      
+      const posterUrl = getSafeImageUrl(movie.poster_url || movie.poster || movie.thumb_url || movie.thumbnail, movie.name || movie.title);
+      const thumbnailUrl = getSafeImageUrl(movie.thumb_url || movie.thumbnail || movie.poster_url || movie.poster, movie.name || movie.title);
+
       return {
         id: movie._id || movie.id,
         title: movie.name || movie.title,
         originalTitle: movie.origin_name || movie.original_title || movie.originalTitle,
         poster: posterUrl,
         thumbnail: thumbnailUrl,
-        rating: movie.tmdb?.vote_average > 0 
-          ? movie.tmdb.vote_average.toFixed(1) 
+        rating: movie.tmdb?.vote_average > 0
+          ? movie.tmdb.vote_average.toFixed(1)
           : movie.rating || movie.vote_average || "N/A",
         year: movie.year,
         duration: movie.time || movie.duration,
         genre: movie.category?.[0]?.name || movie.genres?.[0] || "Chưa phân loại",
         country: movie.country?.[0]?.name || movie.countries?.[0] || "Chưa xác định",
-        type: movie.type === "series" 
-          ? "Phim Bộ" 
-          : movie.type === "single" 
-          ? "Phim Lẻ" 
-          : movie.type === "tvshows" 
-          ? "TV Shows" 
-          : movie.type || "Chưa xác định",
+        type: movie.type === "series"
+          ? "Phim Bộ"
+          : movie.type === "single"
+            ? "Phim Lẻ"
+            : movie.type === "tvshows"
+              ? "TV Shows"
+              : movie.type || "Chưa xác định",
         quality: movie.quality,
         language: movie.lang || movie.language,
         episode: movie.episode_current || movie.current_episode,
@@ -114,25 +107,25 @@ const CategoryPage = () => {
   };
 
   const movies = transformMovieData(data);
-  
+
   // Xử lý pagination với nhiều cấu trúc khác nhau
   const getPaginationInfo = (rawData) => {
     if (!rawData) return {};
-    
+
     // Thử các cấu trúc pagination khác nhau
-    return rawData.data?.params?.pagination || 
-           rawData.pagination || 
-           rawData.data?.params || 
-           rawData.params ||
-           {};
+    return rawData.data?.params?.pagination ||
+      rawData.pagination ||
+      rawData.data?.params ||
+      rawData.params ||
+      {};
   };
-  
+
   const paginationInfo = getPaginationInfo(data);
-  
-  const totalPages = paginationInfo?.totalPages || 
-                    paginationInfo?.total_page ||
-                    Math.ceil((paginationInfo?.totalItems || paginationInfo?.total || movies.length) / 24) ||
-                    1;
+
+  const totalPages = paginationInfo?.totalPages ||
+    paginationInfo?.total_page ||
+    Math.ceil((paginationInfo?.totalItems || paginationInfo?.total || movies.length) / 24) ||
+    1;
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -147,7 +140,7 @@ const CategoryPage = () => {
     const maxVisiblePages = 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
+
     if (endPage - startPage < maxVisiblePages - 1) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
@@ -186,11 +179,10 @@ const CategoryPage = () => {
           <button
             key={page}
             onClick={() => handlePageChange(page)}
-            className={`px-3 py-2 text-sm font-medium border rounded-lg transition-colors ${
-              currentPage === page
+            className={`px-3 py-2 text-sm font-medium border rounded-lg transition-colors ${currentPage === page
                 ? 'text-white bg-red-600 border-red-600'
                 : 'text-gray-300 bg-gray-800 border-gray-700 hover:bg-gray-700 hover:text-white'
-            }`}
+              }`}
           >
             {page}
           </button>
@@ -261,7 +253,7 @@ const CategoryPage = () => {
               <p className="text-gray-500 text-xs mb-4">
                 Category: {categoryType}/{categorySlug}
               </p>
-              <button 
+              <button
                 onClick={() => window.location.reload()}
                 className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg text-sm font-medium transition-colors"
               >
@@ -284,7 +276,7 @@ const CategoryPage = () => {
       <div className="container mx-auto px-4 py-6 sm:py-8">
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-wrap items-center gap-3 mb-4">
-            <span 
+            <span
               className={`px-3 py-1 rounded-full text-sm font-medium text-white ${categoryInfo.color}`}
             >
               {categoryInfo.type}
@@ -293,7 +285,7 @@ const CategoryPage = () => {
               {categoryInfo.name}
             </h1>
           </div>
-          
+
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="text-gray-400 text-sm sm:text-base">
               Trang {currentPage} / {totalPages} - Tổng cộng {movies.length} phim
@@ -305,13 +297,13 @@ const CategoryPage = () => {
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
               {movies.map((movie, index) => (
-                <MovieCardDetail 
-                  key={movie.id || `${movie.slug}-${index}`} 
-                  movie={movie} 
+                <MovieCardDetail
+                  key={movie.id || `${movie.slug}-${index}`}
+                  movie={movie}
                 />
               ))}
             </div>
-          
+
             {renderPagination()}
           </>
         ) : (

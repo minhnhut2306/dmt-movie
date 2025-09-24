@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play } from 'lucide-react';
+import { getSafeImageUrl } from '../../utils/imageHelper';
 
 const DesktopDetailLayout = ({
   movieData,
@@ -20,7 +21,7 @@ const DesktopDetailLayout = ({
         <div className="relative mb-12">
           <div
             className="h-96 bg-cover bg-center rounded-2xl relative overflow-hidden"
-            style={{ backgroundImage: `url(${movieData.thumb_url})` }}
+            style={{ backgroundImage: `url(${getSafeImageUrl(movieData.thumb_url, movieData.name)})` }}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
             <div className="absolute bottom-6 left-6 z-10">
@@ -47,9 +48,10 @@ const DesktopDetailLayout = ({
 
           <div className="lg:col-span-1">
             <img
-              src={movieData.poster_url}
+              src={getSafeImageUrl(movieData.poster_url, movieData.name)}
               alt={movieData.name}
               className="w-full rounded-2xl shadow-2xl transition-transform duration-300 hover:scale-105"
+              referrerPolicy="no-referrer"
             />
             <button
               onClick={() => setActiveLayout('watch')}

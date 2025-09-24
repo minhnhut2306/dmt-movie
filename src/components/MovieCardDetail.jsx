@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Play, Star, Loader2 } from 'lucide-react';
+import { getSafeImageUrl } from '../utils/imageHelper';
 
 const MovieCardDetail = ({ movie }) => {
   const navigate = useNavigate();
@@ -43,17 +44,15 @@ const MovieCardDetail = ({ movie }) => {
           </div>
         )}
 
-
         <img
-          src={movie.poster || movie.poster_url || `https://via.placeholder.com/300x450/374151/ffffff?text=${encodeURIComponent(displayTitle)}`}
+          src={getSafeImageUrl(movie.poster || movie.poster_url, displayTitle)}
           alt={displayTitle}
-          className={`w-full aspect-[2/3] object-cover object-center transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
+          className={`w-full aspect-[2/3] object-cover object-center transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           onLoad={handleImageLoad}
           onError={handleImageError}
           loading="lazy"
+          referrerPolicy="no-referrer"
         />
-
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
 

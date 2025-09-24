@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Star, Calendar, Clock, Loader2 } from 'lucide-react';
 import { movieApi } from '../../api/movieApi.js';
+import { getSafeImageUrl } from '../../utils/imageHelper.js';
 
 const HeroBanner = ({
   isDragging,
@@ -36,7 +37,7 @@ const HeroBanner = ({
           id: movie._id,
           title: movie.name,
           description: movie.origin_name,
-          backgroundImage: movie.poster_url,
+          backgroundImage: getSafeImageUrl(movie.poster_url, movie.name),
           rating: movie.tmdb?.vote_average?.toFixed(1),
           year: movie.year,
           duration: movie.time,

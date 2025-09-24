@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play } from 'lucide-react';
+import { getSafeImageUrl } from '../../utils/imageHelper';
 
 const MobileDetailLayout = ({
   movieData,
@@ -20,7 +21,7 @@ const MobileDetailLayout = ({
         <div className="relative mb-6">
           <div
             className="h-64 sm:h-80 bg-cover bg-center rounded-xl relative overflow-hidden"
-            style={{ backgroundImage: `url(${movieData.thumb_url})` }}
+            style={{ backgroundImage: `url(${getSafeImageUrl(movieData.thumb_url, movieData.name)})` }}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
             <div className="absolute bottom-4 left-4 right-4 z-10">
@@ -46,10 +47,11 @@ const MobileDetailLayout = ({
 
         <div className="flex gap-4 mb-6">
           <div className="w-28 sm:w-32 flex-shrink-0">
-            <img
-              src={movieData.poster_url}
+            + <img
+              src={getSafeImageUrl(movieData.poster_url, movieData.name)}
               alt={movieData.name}
               className="w-full rounded-xl shadow-xl"
+              referrerPolicy="no-referrer"
             />
           </div>
           <div className="flex-1 space-y-3">
