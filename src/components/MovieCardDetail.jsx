@@ -14,7 +14,7 @@ const buildImgCandidates = (raw, text = 'No Image') => {
     const u = new URL(full);
     const hostPath = `${u.hostname}${u.pathname}${u.search}`;
     weserv = `https://images.weserv.nl/?url=${encodeURIComponent(hostPath)}`;
-    wsrv = `https://wsrv.nl/?url=${encodeURIComponent(hostPath)}`;
+    wsrv   = `https://wsrv.nl/?url=${encodeURIComponent(hostPath)}`;
   } catch {
     // bỏ qua
   }
@@ -22,7 +22,6 @@ const buildImgCandidates = (raw, text = 'No Image') => {
   // Thứ tự: link gốc -> proxy 1 -> proxy 2 -> placeholder (lọc trùng)
   return Array.from(new Set([full, weserv, wsrv, placeholder])).filter(Boolean);
 };
-
 
 const MovieCardDetail = ({ movie }) => {
   const navigate = useNavigate();
@@ -34,10 +33,6 @@ const MovieCardDetail = ({ movie }) => {
   const displayRating = movie.rating && movie.rating !== 'N/A' ? movie.rating : null;
   const displayYear = movie.year || 'N/A';
   const displayGenre = movie.genre || 'Chưa phân loại';
-  const isFacebookInApp = /FBAN|FBAV|FB_IAB|FB4A|FBAN\/Messenger|Instagram/i.test(
-    navigator.userAgent || ''
-  );
-  const loadingAttr = isFacebookInApp ? 'eager' : 'lazy';
 
   // === Danh sách URL ảnh để thử
   const imgCandidates = buildImgCandidates(
@@ -80,19 +75,18 @@ const MovieCardDetail = ({ movie }) => {
             </div>
           </div>
         )}
+
         <img
-          key={imgCandidates[srcIdx]}
           src={imgCandidates[srcIdx]}
           alt={displayTitle}
-          className={`w-full aspect-[2/3] object-cover object-center transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
+          className={`w-full aspect-[2/3] object-cover object-center transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           onLoad={handleImgLoad}
           onError={handleImgError}
-          loading={loadingAttr}
-          fetchpriority="high"
+          loading="lazy"
           referrerPolicy="no-referrer"
           decoding="async"
         />
+
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
 
         {imageLoaded && (
