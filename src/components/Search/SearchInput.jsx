@@ -1,8 +1,9 @@
 // components/SearchInput.jsx
 import React, { useEffect, useRef, useCallback } from 'react';
-import { Search, X, Loader2 } from 'lucide-react';
+import { Search, X, Loader2, Ban } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useSearchState, useSmartNavigation } from '../../utils/searchUtils';
+import { isBlockedKeyword } from './BlockedSearchAlert';
 
 const SearchInput = ({ 
   placeholder = "Tìm kiếm phim...", 
@@ -18,6 +19,9 @@ const SearchInput = ({
   const { navigateBack, navigateToSearch, isOnSearchPage } = useSmartNavigation();
   const timeoutRef = useRef(null);
 
+  // Kiểm tra nếu input hiện tại bị chặn
+  const isBlocked = isBlockedKeyword(searchInput);
+
   useEffect(() => {
     if (variant === "page") {
       const urlParams = new URLSearchParams(location.search);
@@ -28,7 +32,6 @@ const SearchInput = ({
     }
   }, [location.search, variant, searchInput, setSearchInput]);
 
-
   useEffect(() => {
     if (autoFocus && inputRef.current) {
       const timeout = setTimeout(() => {
@@ -38,7 +41,6 @@ const SearchInput = ({
     }
   }, [autoFocus]);
 
-
   useEffect(() => {
     return () => {
       if (timeoutRef.current) {
@@ -46,12 +48,24 @@ const SearchInput = ({
       }
     };
   }, []);
+
   const handleInputChange = useCallback((e) => {
     const value = e.target.value;
     setSearchInput(value);
     
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
+    }
+
+    // Kiểm tra từ khóa bị chặn
+    if (isBlockedKeyword(value)) {
+      // Nếu bị chặn, vẫn navigate để hiển thị trang cảnh báo
+      if (variant === "navbar" && value.trim()) {
+        timeoutRef.current = setTimeout(() => {
+          navigateToSearch(value.trim());
+        }, 500);
+      }
+      return;
     }
 
     if (variant === "navbar") {
@@ -96,6 +110,7 @@ const SearchInput = ({
       }
       
       if (variant === "navbar") {
+        // Cho phép navigate ngay cả khi bị chặn để hiển thị cảnh báo
         navigateToSearch(searchInput.trim());
       }
       return;
@@ -103,10 +118,8 @@ const SearchInput = ({
     
     if (e.key === 'Backspace' || e.key === 'Delete') {
       const currentValue = e.target.value;
-      
 
       if (currentValue.length === 1) {
-        // Clear timeout cũ
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
@@ -114,7 +127,6 @@ const SearchInput = ({
         timeoutRef.current = setTimeout(() => {
           const newValue = inputRef.current?.value || '';
           if (!newValue.trim()) {
-      
             if (isOnSearchPage) {
               navigateBack();
             }
@@ -138,12 +150,22 @@ const SearchInput = ({
         onChange={handleInputChange}
         onKeyDown={handleKeyPress}
         placeholder={placeholder}
-        className="bg-[#1f2a3a] text-white rounded-full pl-10 pr-12 py-2.5 w-full outline-none focus:ring-2 focus:ring-blue-500 focus:bg-[#2d3a4a] transition-all text-sm lg:text-base"
+        className={`bg-[#1f2a3a] text-white rounded-full pl-10 pr-12 py-2.5 w-full outline-none transition-all text-sm lg:text-base ${
+          isBlocked 
+            ? 'ring-2 ring-red-500 focus:ring-red-600 focus:bg-[#2d1a1a]' 
+            : 'focus:ring-2 focus:ring-blue-500 focus:bg-[#2d3a4a]'
+        }`}
       />
       
       {isLoading && (
         <div className="absolute right-10 top-1/2 transform -translate-y-1/2">
           <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+        </div>
+      )}
+      
+      {isBlocked && !isLoading && (
+        <div className="absolute right-10 top-1/2 transform -translate-y-1/2">
+          <Ban className="w-4 h-4 text-red-500" />
         </div>
       )}
       

@@ -156,6 +156,8 @@ const Footer = () => {
             <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-6 text-sm text-center md:text-left">
               <div className="text-gray-400">
                 Được tạo bởi <span className="text-red-400 font-semibold">nhut-dev</span>
+                <p className="mt-1">Web này làm chơi cho vui </p>
+
               </div>
             </div>
 

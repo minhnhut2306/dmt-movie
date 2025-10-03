@@ -1,16 +1,18 @@
-import React from 'react';
-import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
 import { getSafeImageUrl } from '../../utils/imageHelper';
+import TrailerModal from './TrailerModal';
 
 const MobileDetailLayout = ({
   movieData,
   navigate,
   setActiveLayout
 }) => {
+  const [showTrailer, setShowTrailer] = useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
       <div className="px-3 py-4">
-
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-4 transition-colors duration-300"
@@ -18,6 +20,7 @@ const MobileDetailLayout = ({
           <ArrowLeft className="w-5 h-5" />
           <span>Quay lại</span>
         </button>
+
         <div className="relative mb-6">
           <div
             className="h-64 sm:h-80 bg-cover bg-center rounded-xl relative overflow-hidden"
@@ -47,7 +50,7 @@ const MobileDetailLayout = ({
 
         <div className="flex gap-4 mb-6">
           <div className="w-28 sm:w-32 flex-shrink-0">
-            + <img
+            <img
               src={getSafeImageUrl(movieData.poster_url, movieData.name)}
               alt={movieData.name}
               className="w-full rounded-xl shadow-xl"
@@ -85,6 +88,16 @@ const MobileDetailLayout = ({
               <Play className="w-5 h-5" fill="currentColor" />
               Xem Phim
             </button>
+
+            {movieData.trailer_url && (
+              <button
+                onClick={() => setShowTrailer(true)}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-2.5 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+              >
+                <Youtube className="w-4 h-4" />
+                Xem Trailer
+              </button>
+            )}
           </div>
         </div>
 
@@ -121,6 +134,13 @@ const MobileDetailLayout = ({
           </div>
         </div>
       </div>
+
+      <TrailerModal
+        isOpen={showTrailer}
+        onClose={() => setShowTrailer(false)}
+        trailerUrl={movieData.trailer_url}
+        movieName={movieData.name}
+      />
     </div>
   );
 };

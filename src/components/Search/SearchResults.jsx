@@ -3,14 +3,20 @@ import React from 'react';
 import { ChevronLeft, ChevronRight, Loader2, Search } from 'lucide-react';
 import { useSearchMovies, transformSearchResults } from '../../hooks/userSearchMovie';
 import { searchUtils } from '../../utils/searchUtils';
-import SearchMovieCard from './SearchMovieCard'; 
+import SearchMovieCard from './SearchMovieCard';
+import BlockedSearchAlert, { isBlockedKeyword } from './BlockedSearchAlert';
 
 const SearchResults = ({ 
   keyword, 
   currentPage = 1, 
   onPageChange
 }) => {
- 
+  // Kiểm tra từ khóa bị chặn TRƯỚC KHI gọi API
+  if (isBlockedKeyword(keyword)) {
+    return <BlockedSearchAlert />;
+  }
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { data: apiData, isLoading, error } = useSearchMovies(keyword, currentPage);
   const movies = transformSearchResults(apiData);
   const pagination = apiData?.data?.params?.pagination;
@@ -18,14 +24,12 @@ const SearchResults = ({
   const totalItems = pagination?.totalItems || 0;
   const itemsPerPage = pagination?.totalItemsPerPage || 24;
 
-
   const handlePageChange = (page) => {
     if (onPageChange) {
       onPageChange(page);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
 
   const renderPagination = () => {
     if (totalPages <= 1) return null;
@@ -98,7 +102,6 @@ const SearchResults = ({
     );
   };
 
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -109,7 +112,6 @@ const SearchResults = ({
       </div>
     );
   }
-
 
   if (error) {
     return (
@@ -128,7 +130,6 @@ const SearchResults = ({
     );
   }
 
-
   if (!movies || movies.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
@@ -146,7 +147,6 @@ const SearchResults = ({
 
   return (
     <div>
-
       <div className="mb-6">
         <p className="text-gray-300">
           Kết quả cho: <span className="text-white font-semibold">"{keyword}"</span>

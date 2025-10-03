@@ -1,12 +1,15 @@
-import React from 'react';
-import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
 import { getSafeImageUrl } from '../../utils/imageHelper';
+import TrailerModal from './TrailerModal';
 
 const DesktopDetailLayout = ({
   movieData,
   navigate,
   setActiveLayout
 }) => {
+  const [showTrailer, setShowTrailer] = useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
       <div className="container mx-auto px-4 py-8">
@@ -44,8 +47,8 @@ const DesktopDetailLayout = ({
             </div>
           </div>
         </div>
-        <div className="grid lg:grid-cols-4 gap-8 mb-12">
 
+        <div className="grid lg:grid-cols-4 gap-8 mb-12">
           <div className="lg:col-span-1">
             <img
               src={getSafeImageUrl(movieData.poster_url, movieData.name)}
@@ -60,6 +63,16 @@ const DesktopDetailLayout = ({
               <Play className="w-5 h-5" fill="currentColor" />
               Xem Phim
             </button>
+            
+            {movieData.trailer_url && (
+              <button
+                onClick={() => setShowTrailer(true)}
+                className="w-full mt-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+              >
+                <Youtube className="w-5 h-5" />
+                Xem Trailer
+              </button>
+            )}
           </div>
 
           <div className="lg:col-span-3 space-y-6">
@@ -130,6 +143,13 @@ const DesktopDetailLayout = ({
           </div>
         </div>
       </div>
+
+      <TrailerModal
+        isOpen={showTrailer}
+        onClose={() => setShowTrailer(false)}
+        trailerUrl={movieData.trailer_url}
+        movieName={movieData.name}
+      />
     </div>
   );
 };
