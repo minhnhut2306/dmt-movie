@@ -1,13 +1,25 @@
 import React from 'react';
-import { Ban, AlertTriangle } from 'lucide-react';
+import { Ban, AlertTriangle, ShieldCheck } from 'lucide-react';
 
 // Danh sách từ khóa bị chặn
 const BLOCKED_KEYWORDS = [
+  // Cụm cũ
   "hãy để tôi tỏa sáng",
   "hay de toi toa sang",
-  "let me shine"
-];
+  "let me shine",
 
+  // 🎬 Phim / series bị cấm do có đường lưỡi bò
+  "everest: người tuyết bé nhỏ",
+  "everest nguoi tuyet be nho",
+  "abominable",
+  "uncharted",
+  "barbie",
+  "pine gap",
+  "put your head on my shoulder",
+  "hãy để tôi tỏa sáng (love's ambition)",
+  "hay de toi toa sang (love's ambition)",
+  "love's ambition",
+];
 // Hàm chuẩn hóa chuỗi: loại bỏ dấu tiếng Việt
 const normalizeVietnamese = (str) => {
   if (!str) return '';
@@ -24,9 +36,9 @@ const normalizeVietnamese = (str) => {
 // eslint-disable-next-line react-refresh/only-export-components
 export const isBlockedKeyword = (keyword) => {
   if (!keyword) return false;
-  
+
   const normalizedKeyword = normalizeVietnamese(keyword);
-  
+
   return BLOCKED_KEYWORDS.some(blockedPhrase => {
     const normalizedBlocked = normalizeVietnamese(blockedPhrase);
     return normalizedKeyword.includes(normalizedBlocked);
@@ -36,38 +48,36 @@ export const isBlockedKeyword = (keyword) => {
 const BlockedSearchAlert = () => {
   return (
     <div className="flex items-center justify-center min-h-[400px] p-4">
-      <div className="max-w-md w-full bg-gradient-to-br from-red-900/50 to-red-950/50 backdrop-blur-sm rounded-2xl p-8 border border-red-500/30 shadow-2xl">
-        <div className="flex flex-col items-center text-center space-y-4">
-          <div className="relative">
-            <div className="absolute inset-0 bg-red-500/20 blur-xl rounded-full animate-pulse" />
-            <div className="relative bg-red-600/30 p-4 rounded-full border-2 border-red-500">
-              <Ban className="w-16 h-16 text-red-400" strokeWidth={2.5} />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white flex items-center justify-center gap-2">
-              <AlertTriangle className="w-6 h-6 text-yellow-400" />
-              Nội dung bị hạn chế
+      <div className="max-w-md w-full bg-gradient-to-br from-red-900/50 to-red-950/50 backdrop-blur-sm rounded-2xl p-8 border">
+        <div className="flex flex-col items-center text-center">
+
+          {/* 🇻🇳 Cờ Việt Nam */}
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/2/21/Flag_of_Vietnam.svg"
+            alt="Cờ Việt Nam"
+            className="w-12 h-8 mb-4 rounded-sm border border-yellow-300 shadow-sm"
+          />
+
+          {/* Icon & text */}
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <ShieldCheck className="w-6 h-6 text-yellow-300" />
+            <h2 className="text-xl font-bold text-yellow-300 tracking-wide">
+              Hoàng Sa và Trường Sa
             </h2>
-            <p className="text-red-300 font-semibold text-lg">
-              Phim này đã bị cấm chiếu
-            </p>
           </div>
-          
-          <div className="bg-red-950/50 rounded-lg p-4 border border-red-500/20">
-            <p className="text-gray-300 text-sm leading-relaxed">
-              Phim có chứa <span className="text-red-400 font-semibold">đường lưỡi bò</span> vi phạm chủ quyền lãnh thổ Việt Nam, do đó đã bị chặn hiển thị trên hệ thống của chúng tôi.
-            </p>
-          </div>
-          
-          <div className="pt-2">
-            <p className="text-gray-400 text-xs">
-              Vui lòng tìm kiếm nội dung khác
-            </p>
-          </div>
+
+          <p className="text-base text-white font-medium">
+            là của <span className="text-yellow-300 font-semibold">Việt Nam</span>
+          </p>
+
+          <div className="mt-4 w-20 h-[2px] bg-yellow-400 rounded-full" />
+
+          <p className="mt-2 text-xs text-yellow-200 italic">
+            Chủ quyền thiêng liêng – Không thể tách rời.
+          </p>
         </div>
       </div>
+      
     </div>
   );
 };

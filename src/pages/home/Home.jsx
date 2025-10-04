@@ -24,10 +24,19 @@ const Home = () => {
   const handleSectionEnd = (movieList, updateFn) => originalHandleSectionEnd(movieList, updateFn);
 
   const notificationContent = {
-    title: "Phiên bản mới",
-    message: "Xóa phim Hãy để tôi tỏa sáng khỏi trang web chặn mọi thứ liên quan tới phim phong sát phim =))). Bổ sung tính năng lưu lại tập phim đã xem trước đó. Bổ sung thêm trailer vô cho đẹp Tôi thấy nếu phim quá 100 tập thì khá bất tiện nên tôi đã nhóm lại tập 1-20, 21-40, 41-60... k chịu cũng phải chịu ",
+    title: "Thông báo cấm phim",
+    message:
+      "🚫 Các phim sau đã bị cấm chiếu và gỡ bỏ khỏi hệ thống do chứa hình ảnh 'đường lưỡi bò' vi phạm chủ quyền Việt Nam " +
+      "1. Everest: Người Tuyết Bé Nhỏ (Abominable)\n" +
+      "- 2. Uncharted (2022)\n" +
+      "- 3. Barbie\n" +
+      "- 4. Pine Gap (Netflix series)\n" +
+      "- 5. Put Your Head On My Shoulder\n" +
+      "- 6. Hãy để tôi tỏa sáng (Love’s Ambition)\n\n" +
+      "Tất cả nội dung liên quan đến các phim này đều bị chặn hoàn toàn trong hệ thống.",
     type: "info"
   };
+
   const getNotificationStyle = (type) => {
     switch (type) {
       case 'success':
