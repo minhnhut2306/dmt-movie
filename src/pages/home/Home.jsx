@@ -22,14 +22,14 @@ const Home = () => {
   } = useSwipeHandler();
 
   const handleSectionEnd = (movieList, updateFn) => originalHandleSectionEnd(movieList, updateFn);
-
   const notificationContent = {
-    title: "Thông báo",
+    title: "Thông báo Chia Ly",
     message:
-      "Bên server kia sập r mấy ní ơi nên bên đây cũng ảnh hưởng theo" +
-      "bái bai mấy ní mình dừng lại ở đây được rồi." +
-      "thanks mấy ní đã ủng hộ mình suốt thời gian qua ❤" +
-      "Mình sẽ kím server mới rồi hồi sinh lại!!!",
+      "Dưới cơn mưa của số phận, server kia đã đổ sập hoàn toàn..." +
+      " Tựa như định mệnh đã an bài, mọi cố gắng giờ chỉ còn là kỷ niệm." +
+      " Xin gửi lời cảm ơn sâu sắc đến những người anh em đã đồng hành cùng mình suốt chặng đường qua." +
+      " Khoảnh khắc này, chúng ta phải nói lời tạm biệt." +
+      " Hẹn gặp lại ở một chân trời mới, nếu còn duyên, chúng ta sẽ hồi sinh – mạnh mẽ hơn bao giờ hết!",
     type: "warning"
   };
 
@@ -86,7 +86,7 @@ const Home = () => {
         handleHeroMove={handleHeroMove}
       />
 
-      <div className="container mx-auto px-4 py-8 sm:py-12">
+      {/* <div className="container mx-auto px-4 py-8 sm:py-12">
         {MOVIE_SECTIONS.map((section) => (
           <GenericMoviesSection
             key={section.sectionKey}
@@ -107,7 +107,7 @@ const Home = () => {
             viewMoreLink={section.viewMoreLink}
           />
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };
