@@ -26,8 +26,10 @@ const Home = () => {
   const notificationContent = {
     title: "Thông báo",
     message:
-      "Vì Cloudflare sập diện rộng nên server website này cũng bị ảnh hưởng nên không thể truy cập phim " +
-      "chờ bên đó fix thôi chứ biết sao giờ",
+      "Bên server kia sập r mấy ní ơi nên bên đây cũng ảnh hưởng theo" +
+      "bái bai mấy ní mình dừng lại ở đây được rồi." +
+      "thanks mấy ní đã ủng hộ mình suốt thời gian qua ❤" +
+      "Mình sẽ kím server mới rồi hồi sinh lại!!!",
     type: "warning"
   };
 
