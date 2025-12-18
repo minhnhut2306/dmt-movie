@@ -12,24 +12,37 @@ export const movieApi = {
     }
   },
 
-  getLatestMovies: async (page = 2) => {
-    return apiRequest(`/danh-sach/phim-moi-cap-nhat-v3?page=${page}`);
+  // API Home cho featured movies
+  getHomeData: async () => {
+    try {
+      const { data } = await api.get("/v1/api/home");
+      console.log("Home data:", data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching home data:", error);
+      throw error;
+    }
   },
 
   getFeaturedMovies: async () => {
     try {
-      const { data } = await api.get("/danh-sach/phim-moi-cap-nhat-v3?page=1");
+      const { data } = await api.get("/v1/api/home");
+      // Lấy items từ home API
+      const items = data?.data?.items || [];
       return {
-        ...data,
+        status: "success",
         data: {
-          ...data.data,
-          items: data.data?.items?.slice(0, 5) || [],
-        },
+          items: items.slice(0, 5) || []
+        }
       };
     } catch (error) {
       console.error("Error fetching featured movies:", error);
       throw error;
     }
+  },
+
+  getLatestMovies: async (page = 1) => {
+    return apiRequest(`/v1/api/danh-sach/phim-moi?page=${page}`);
   },
 
   getCategoryMovies: async (categoryType, categorySlug, page = 1) => {
@@ -47,36 +60,7 @@ export const movieApi = {
           endpoint = `/v1/api/nam/${categorySlug}?page=${page}`;
           break;
         case 'danh-sach':
-          // Xử lý đặc biệt cho từng slug trong danh-sach
-          switch (categorySlug) {
-            case 'phim-moi-cap-nhat':
-              endpoint = `/danh-sach/phim-moi-cap-nhat-v3?page=${page}`;
-              break;
-            case 'phim-bo':
-              endpoint = `/v1/api/danh-sach/phim-bo?page=${page}`;
-              break;
-            case 'phim-le':
-              endpoint = `/v1/api/danh-sach/phim-le?page=${page}`;
-              break;
-            case 'tv-shows':
-              endpoint = `/v1/api/danh-sach/tv-shows?page=${page}`;
-              break;
-            case 'hoat-hinh':
-              endpoint = `/v1/api/danh-sach/hoat-hinh?page=${page}`;
-              break;
-            case 'phim-chieu-rap':
-              endpoint = `/v1/api/danh-sach/phim-chieu-rap?page=${page}`;
-              break;
-            case 'phim-thuyet-minh':
-              endpoint = `/v1/api/danh-sach/phim-thuyet-minh?page=${page}`;
-              break;
-            case 'phim-vietsub':
-              endpoint = `/v1/api/danh-sach/phim-vietsub?page=${page}`;
-              break;
-            default:
-              // Fallback cho các slug khác
-              endpoint = `/v1/api/danh-sach/${categorySlug}?page=${page}`;
-          }
+          endpoint = `/v1/api/danh-sach/${categorySlug}?page=${page}`;
           break;
         default:
           throw new Error(`Unsupported category type: ${categoryType}`);
@@ -93,6 +77,7 @@ export const movieApi = {
     }
   },
 
+  // Danh sách phim
   getVietnamMovies: (page = 1) => apiRequest(`/v1/api/quoc-gia/viet-nam?page=${page}`),
   getChinaMovies: (page = 1) => apiRequest(`/v1/api/quoc-gia/trung-quoc?page=${page}`),
   getJapanMovies: (page = 1) => apiRequest(`/v1/api/quoc-gia/nhat-ban?page=${page}`),

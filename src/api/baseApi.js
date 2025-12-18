@@ -1,7 +1,7 @@
 // api/baseApi.js
 import axios from "axios";
 
-const API_URL = "https://phimapi.com";
+const API_URL = "https://ophim1.com";
 
 export const api = axios.create({
   baseURL: API_URL,
