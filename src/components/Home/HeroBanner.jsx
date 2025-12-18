@@ -20,7 +20,6 @@ const HeroBanner = ({
   const [dragStartX, setDragStartX] = useState(0);
   const [dragCurrentX, setDragCurrentX] = useState(0);
   const [dragStartY, setDragStartY] = useState(0);
-  // eslint-disable-next-line no-unused-vars
   const [dragCurrentY, setDragCurrentY] = useState(0);
   const [isDraggingLocal, setIsDraggingLocal] = useState(false);
   const [dragDirection, setDragDirection] = useState(null);
@@ -31,9 +30,13 @@ const HeroBanner = ({
         setLoading(true);
         setError(null);
 
-        const data = await movieApi.getFeaturedMovies();
+        // Sử dụng API home mới
+        const data = await movieApi.getHomeData();
+        
+        // Lấy items từ response
+        const items = data?.data?.items || [];
 
-        const transformedMovies = data.items?.slice(0, 5).map(movie => ({
+        const transformedMovies = items.slice(0, 5).map(movie => ({
           id: movie._id,
           title: movie.name,
           description: movie.origin_name,
@@ -45,12 +48,13 @@ const HeroBanner = ({
           country: movie.country?.[0]?.name,
           type: movie.type === 'series' ? 'Phim Bộ' :
             movie.type === 'single' ? 'Phim Lẻ' :
-              movie.type === 'tvshows' ? 'TV Shows' : movie.type,
+              movie.type === 'tvshows' ? 'TV Shows' : 
+                movie.type === 'hoathinh' ? 'Hoạt Hình' : movie.type,
           quality: movie.quality,
           language: movie.lang,
           episode: movie.episode_current,
           slug: movie.slug
-        })) || [];
+        }));
 
         setFeaturedMovies(transformedMovies);
         setCurrentIndex(0);
@@ -69,13 +73,11 @@ const HeroBanner = ({
 
   // Auto-slide functionality
   useEffect(() => {
-    // Clear existing interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
 
-    // Only create interval when conditions are met
     if (!isDragging && !isDraggingLocal && !loading && featuredMovies.length > 1) {
       startTimeRef.current = Date.now();
 
@@ -97,12 +99,10 @@ const HeroBanner = ({
     };
   }, [isDragging, isDraggingLocal, loading, featuredMovies.length]);
 
-  // Handle manual navigation
   const handleManualChange = (index) => {
     if (index >= 0 && index < featuredMovies.length) {
       setCurrentIndex(index);
 
-      // Reset timer
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -123,7 +123,6 @@ const HeroBanner = ({
     }
   };
 
-  // Local drag handlers
   const handleLocalDragStart = (e) => {
     const clientX = e.type === 'mousedown' ? e.clientX : e.touches[0].clientX;
     const clientY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
@@ -135,7 +134,6 @@ const HeroBanner = ({
     setIsDraggingLocal(true);
     setDragDirection(null);
 
-    // Call parent handler if exists
     if (handleHeroStart) {
       handleHeroStart(e);
     }
@@ -163,6 +161,7 @@ const HeroBanner = ({
         }
       }
     }
+    
     if (dragDirection === 'horizontal') {
       e.preventDefault();
       if (handleHeroMove) {
@@ -173,9 +172,11 @@ const HeroBanner = ({
 
   const handleLocalDragEnd = (e) => {
     if (!isDraggingLocal) return;
+    
     if (dragDirection === 'horizontal') {
       const dragDistance = dragCurrentX - dragStartX;
       const threshold = 100;
+      
       if (Math.abs(dragDistance) > threshold) {
         if (dragDistance > 0) {
           const prevIndex = currentIndex === 0 ? featuredMovies.length - 1 : currentIndex - 1;
@@ -215,6 +216,7 @@ const HeroBanner = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentIndex, featuredMovies.length]);
+
   useEffect(() => {
     return () => {
       if (intervalRef.current) {
@@ -250,6 +252,7 @@ const HeroBanner = ({
       </div>
     );
   }
+
   if (!featuredMovies || featuredMovies.length === 0) {
     return (
       <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-gray-800 flex items-center justify-center">
@@ -280,8 +283,9 @@ const HeroBanner = ({
         {featuredMovies.map((movie, index) => (
           <div
             key={movie.id || index}
-            className={`absolute inset-0 bg-cover bg-center transition-all duration-500 ease-out ${index === currentIndex ? 'opacity-100' : 'opacity-0'
-              }`}
+            className={`absolute inset-0 bg-cover bg-center transition-all duration-500 ease-out ${
+              index === currentIndex ? 'opacity-100' : 'opacity-0'
+            }`}
             style={{
               backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${movie.backgroundImage}')`,
               transform: isDraggingLocal && dragDirection === 'horizontal' ? `translateX(${localDragOffset}px)` :
@@ -297,8 +301,9 @@ const HeroBanner = ({
           <button
             key={index}
             onClick={() => handleManualChange(index)}
-            className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 hover:scale-110 ${index === currentIndex ? 'bg-red-600' : 'bg-white/50 hover:bg-white/70'
-              }`}
+            className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 hover:scale-110 ${
+              index === currentIndex ? 'bg-red-600' : 'bg-white/50 hover:bg-white/70'
+            }`}
           />
         ))}
       </div>
