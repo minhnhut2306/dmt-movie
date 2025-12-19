@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
 import { isEpisodeWatched } from '../utils/watchHistory';
 import { useParams } from 'react-router-dom';
 
@@ -9,10 +9,33 @@ const EpisodeList = ({
   currentEpisode,
   setCurrentServer,
   setCurrentEpisode,
-  isMobile
+  isMobile,
+  movieData
 }) => {
   const { slug } = useParams();
   const [expandedGroups, setExpandedGroups] = useState({});
+
+  // ✅ Kiểm tra xem có episode hợp lệ không
+  const hasValidEpisodes = useMemo(() => {
+    if (!episodes || episodes.length === 0) return false;
+    
+    return episodes.some(server => 
+      server.server_data && 
+      server.server_data.length > 0 && 
+      server.server_data.some(ep => ep.link_m3u8 && ep.link_m3u8.trim() !== '')
+    );
+  }, [episodes]);
+
+  // ✅ Lọc ra các server có episode hợp lệ
+  const validServers = useMemo(() => {
+    if (!episodes) return [];
+    
+    return episodes.filter(server => 
+      server.server_data && 
+      server.server_data.length > 0 && 
+      server.server_data.some(ep => ep.link_m3u8 && ep.link_m3u8.trim() !== '')
+    );
+  }, [episodes]);
 
   const handleEpisodeClick = (episodeIndex) => {
     setCurrentEpisode(episodeIndex);
@@ -31,9 +54,50 @@ const EpisodeList = ({
     }));
   };
 
+  // ✅ Hiển thị thông báo khi không có episode
+  if (!hasValidEpisodes) {
+    return (
+      <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-4 md:p-6 rounded-2xl shadow-xl mb-6 md:mb-8">
+        <h3 className="text-lg md:text-xl font-bold text-white mb-4">Danh Sách Tập</h3>
+        
+        <div className="bg-gray-800/50 rounded-xl p-6 md:p-8 text-center">
+          <div className="flex flex-col items-center">
+            <div className="text-5xl md:text-6xl mb-4">🎬</div>
+            
+            
+            <h4 className="text-white text-lg md:text-xl font-semibold mb-2">
+              Phim chưa có tập nào
+            </h4>
+            
+            <div className="space-y-2 text-gray-400">
+              <p className="text-base md:text-lg">
+                Danh sách tập: <span className="text-white font-bold">0/0</span>
+              </p>
+              
+              {movieData?.status === 'trailer' && (
+                <div className="mt-4 bg-yellow-900/30 border border-yellow-600/50 rounded-lg p-3">
+                  <p className="text-yellow-400 text-sm md:text-base flex items-center justify-center gap-2">
+                    <span>⏳</span>
+                    <span>Phim đang ở trạng thái Trailer - Chờ cập nhật</span>
+                  </p>
+                </div>
+              )}
+              
+              {movieData?.episode_current === 'Trailer' && (
+                <p className="text-gray-500 text-xs md:text-sm mt-2">
+                  Tập hiện tại: <span className="text-yellow-400">{movieData.episode_current}</span>
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Tạo nhóm tập cho phim > 100 tập
   const episodeGroups = useMemo(() => {
-    const serverData = episodes?.[currentServer]?.server_data;
+    const serverData = validServers?.[currentServer]?.server_data;
     if (!serverData || serverData.length <= 100) {
       return null;
     }
@@ -62,19 +126,8 @@ const EpisodeList = ({
     }
     
     return groups;
-  }, [episodes, currentServer, slug, currentEpisode]);
+  }, [validServers, currentServer, slug, currentEpisode]);
 
-  if (!episodes || episodes.length === 0) {
-    return (
-      <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl mb-8">
-        <p className="text-gray-400 text-center">Không có tập phim nào</p>
-      </div>
-    );
-  }
-
-  // Render cho phim > 100 tập (có nhóm)
- // Render cho phim > 100 tập (có nhóm)
-  // Render cho phim > 100 tập (có nhóm)
   const renderGroupedEpisodes = () => {
     return (
       <div className="space-y-4">
@@ -86,7 +139,6 @@ const EpisodeList = ({
               key={groupIndex} 
               className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/50 overflow-hidden hover:border-gray-600/50 transition-all duration-300"
             >
-              {/* Header của nhóm */}
               <button
                 onClick={() => toggleGroup(groupIndex)}
                 className={`w-full px-6 py-4 flex items-center justify-between transition-colors duration-200 ${
@@ -124,7 +176,6 @@ const EpisodeList = ({
                 </div>
               </button>
               
-              {/* Danh sách tập */}
               {isExpanded && (
                 <div className="border-t border-gray-700/50">
                   <div className={`p-5 grid gap-2 ${
@@ -167,7 +218,7 @@ const EpisodeList = ({
   };
 
   const renderNormalEpisodes = () => {
-    const serverData = episodes[currentServer]?.server_data;
+    const serverData = validServers[currentServer]?.server_data;
     if (!serverData) return null;
 
     return (
@@ -207,11 +258,10 @@ const EpisodeList = ({
     <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-4 md:p-6 rounded-2xl shadow-xl mb-6 md:mb-8">
       <h3 className="text-lg md:text-xl font-bold text-white mb-4">Danh Sách Tập</h3>
       
-      {/* Server Selection */}
-      {episodes.length > 1 && (
+      {validServers.length > 1 && (
         <div className="mb-4">
           <div className="flex flex-wrap gap-2">
-            {episodes.map((server, serverIndex) => (
+            {validServers.map((server, serverIndex) => (
               <button
                 key={serverIndex}
                 onClick={() => handleServerChange(serverIndex)}
@@ -228,9 +278,9 @@ const EpisodeList = ({
         </div>
       )}
 
-      {/* Episode List - Grouped or Normal */}
       {episodeGroups ? renderGroupedEpisodes() : renderNormalEpisodes()}
-      {episodes[currentServer]?.server_data?.length > 0 && (
+      
+      {validServers[currentServer]?.server_data?.length > 0 && (
         <div className="mt-4 text-xs text-gray-400 flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 bg-gradient-to-r from-green-600 to-green-700 rounded"></div>

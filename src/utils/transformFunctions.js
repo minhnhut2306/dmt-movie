@@ -1,7 +1,5 @@
-const normalizeUrl = (url) => {
-  if (!url) return "";
-  return url.startsWith("http") ? url : `https://phimimg.com/${url}`;
-};
+// utils/transformFunctions.js
+import { getSafeImageUrl } from './imageHelper';
 
 const createMovieTransform = (defaultGenre, defaultType) => (data) => {
   const items = data?.data?.items || data?.items || [];
@@ -10,8 +8,8 @@ const createMovieTransform = (defaultGenre, defaultType) => (data) => {
     id: movie._id,
     title: movie.name,
     originalTitle: movie.origin_name,
-    poster: normalizeUrl(movie.poster_url),
-    thumbnail: normalizeUrl(movie.thumb_url),
+    poster: getSafeImageUrl(movie.poster_url, movie.name),
+    thumbnail: getSafeImageUrl(movie.thumb_url, movie.name),
     rating:
       movie.tmdb?.vote_average > 0 ? movie.tmdb.vote_average.toFixed(1) : null,
     year: movie.year,
@@ -39,9 +37,9 @@ const createMovieTransform = (defaultGenre, defaultType) => (data) => {
 };
 
 export const transformMovieDetail = (data) => {
-  if (!data || !data.movie) return null;
+  if (!data?.data?.item) return null;
 
-  const movie = data.movie;
+  const movie = data.data.item;
 
   return {
     id: movie._id,
@@ -63,7 +61,7 @@ export const transformMovieDetail = (data) => {
     director: movie.director || [],
     category: movie.category || [],
     country: movie.country || [],
-    episodes: data.episodes || [],
+    episodes: data.data.item.episodes || [],
     type: movie.type,
     slug: movie.slug,
     created: movie.created,
@@ -71,15 +69,16 @@ export const transformMovieDetail = (data) => {
   };
 };
 
+// ✅ NEW: Transform cho Phim Mới Nhất - dùng chung logic
 export const transformLatestMovies = (data) => {
-  const items = data?.items || [];
+  const items = data?.data?.items || data?.items || [];
 
   return items.map((movie) => ({
     id: movie._id,
     title: movie.name,
     originalTitle: movie.origin_name,
-    poster: movie.poster_url,
-    thumbnail: movie.thumb_url,
+    poster: getSafeImageUrl(movie.poster_url, movie.name),
+    thumbnail: getSafeImageUrl(movie.thumb_url, movie.name),
     rating: movie.tmdb?.vote_average?.toFixed(1),
     year: movie.year,
     duration: movie.time,
@@ -102,6 +101,7 @@ export const transformLatestMovies = (data) => {
   }));
 };
 
+// Country transforms
 export const transformVietnamMovies = createMovieTransform(
   "Chưa phân loại",
   null
@@ -115,6 +115,7 @@ export const transformJapanMovies = createMovieTransform(
   null
 );
 
+// Type transforms
 export const transformSeriesMovies = createMovieTransform(
   "Chưa phân loại",
   "Phim Bộ"
@@ -128,6 +129,7 @@ export const transformTVShows = createMovieTransform(
   "TV Shows"
 );
 
+// Genre transforms
 export const transformAnimationMovies = createMovieTransform(
   "Hoạt hình",
   "Phim Hoạt Hình"
@@ -145,6 +147,7 @@ export const transformHistoryMovies = createMovieTransform(
   "Phim Cổ Trang"
 );
 
+// Language transforms
 export const transformDubbedMovies = createMovieTransform(
   "Thuyết minh",
   "Phim Thuyết Minh"

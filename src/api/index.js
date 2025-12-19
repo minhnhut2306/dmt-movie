@@ -2,3 +2,4 @@
 export { api, apiRequest } from './baseApi';
 export { movieApi } from './movieApi';
 export { searchApi } from './searchApi';
+export { categoryApi } from './categoryApi';

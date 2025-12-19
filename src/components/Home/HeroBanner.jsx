@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Star, Calendar, Clock, Loader2 } from 'lucide-react';
 import { movieApi } from '../../api/movieApi.js';
-import { getSafeImageUrl } from '../../utils/imageHelper.js';
+import { getImageUrlCandidates } from '../../utils/imageHelper.js'; // ✅ NEW
 
 const HeroBanner = ({
   isDragging,
@@ -15,6 +15,8 @@ const HeroBanner = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [imageErrors, setImageErrors] = useState({}); // ✅ Track image errors
+  const [currentImageIndex, setCurrentImageIndex] = useState({}); // ✅ Track current image attempt
   const intervalRef = useRef(null);
   const startTimeRef = useRef(Date.now());
   const [dragStartX, setDragStartX] = useState(0);
@@ -30,34 +32,48 @@ const HeroBanner = ({
         setLoading(true);
         setError(null);
 
-        // Sử dụng API home mới
         const data = await movieApi.getHomeData();
-        
-        // Lấy items từ response
         const items = data?.data?.items || [];
 
-        const transformedMovies = items.slice(0, 5).map(movie => ({
-          id: movie._id,
-          title: movie.name,
-          description: movie.origin_name,
-          backgroundImage: getSafeImageUrl(movie.poster_url, movie.name),
-          rating: movie.tmdb?.vote_average?.toFixed(1),
-          year: movie.year,
-          duration: movie.time,
-          genre: movie.category?.[0]?.name,
-          country: movie.country?.[0]?.name,
-          type: movie.type === 'series' ? 'Phim Bộ' :
-            movie.type === 'single' ? 'Phim Lẻ' :
-              movie.type === 'tvshows' ? 'TV Shows' : 
-                movie.type === 'hoathinh' ? 'Hoạt Hình' : movie.type,
-          quality: movie.quality,
-          language: movie.lang,
-          episode: movie.episode_current,
-          slug: movie.slug
-        }));
+        const transformedMovies = items.slice(0, 5).map(movie => {
+          // ✅ Get multiple image URL candidates
+          const imageCandidates = getImageUrlCandidates(
+            movie.thumb_url || movie.poster_url,
+            movie.name
+          );
+          
+          return {
+            id: movie._id,
+            title: movie.name,
+            description: movie.origin_name,
+            // ✅ Use first candidate as default
+            backgroundImage: imageCandidates[0],
+            imageCandidates: imageCandidates, // ✅ Store all candidates
+            rating: movie.tmdb?.vote_average?.toFixed(1),
+            year: movie.year,
+            duration: movie.time,
+            genre: movie.category?.[0]?.name,
+            country: movie.country?.[0]?.name,
+            type: movie.type === 'series' ? 'Phim Bộ' :
+              movie.type === 'single' ? 'Phim Lẻ' :
+                movie.type === 'tvshows' ? 'TV Shows' : 
+                  movie.type === 'hoathinh' ? 'Hoạt Hình' : movie.type,
+            quality: movie.quality,
+            language: movie.lang,
+            episode: movie.episode_current,
+            slug: movie.slug
+          };
+        });
 
         setFeaturedMovies(transformedMovies);
         setCurrentIndex(0);
+        
+        // ✅ Initialize image tracking
+        const initialImageIndex = {};
+        transformedMovies.forEach(movie => {
+          initialImageIndex[movie.id] = 0;
+        });
+        setCurrentImageIndex(initialImageIndex);
 
       } catch (err) {
         console.error('Error fetching featured movies:', err);
@@ -70,6 +86,31 @@ const HeroBanner = ({
 
     fetchFeaturedMovies();
   }, []);
+
+  // ✅ Handle image error - try next candidate
+  const handleImageError = (movieId) => {
+    const movie = featuredMovies.find(m => m.id === movieId);
+    if (!movie) return;
+
+    const currentIdx = currentImageIndex[movieId] || 0;
+    const nextIdx = currentIdx + 1;
+
+    if (nextIdx < movie.imageCandidates.length) {
+      setCurrentImageIndex(prev => ({
+        ...prev,
+        [movieId]: nextIdx
+      }));
+      
+      // Update background image
+      setFeaturedMovies(prev => prev.map(m => 
+        m.id === movieId 
+          ? { ...m, backgroundImage: movie.imageCandidates[nextIdx] }
+          : m
+      ));
+    } else {
+      setImageErrors(prev => ({ ...prev, [movieId]: true }));
+    }
+  };
 
   // Auto-slide functionality
   useEffect(() => {
@@ -287,12 +328,22 @@ const HeroBanner = ({
               index === currentIndex ? 'opacity-100' : 'opacity-0'
             }`}
             style={{
-              backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${movie.backgroundImage}')`,
+              backgroundImage: imageErrors[movie.id] 
+                ? 'linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.9))'
+                : `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${movie.backgroundImage}')`,
               transform: isDraggingLocal && dragDirection === 'horizontal' ? `translateX(${localDragOffset}px)` :
                 (isDragging && activeSection === 'hero') ? `translateX(${dragOffset}px)` :
                   'translateX(0)'
             }}
-          />
+          >
+            {/* ✅ Hidden image for error handling */}
+            <img 
+              src={movie.backgroundImage}
+              alt=""
+              onError={() => handleImageError(movie.id)}
+              style={{ display: 'none' }}
+            />
+          </div>
         ))}
       </div>
 

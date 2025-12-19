@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
 import Home from './pages/home/Home';
-import MovieLayouts from './pages/Movie/MovieLayouts';
+import MovieLayouts from './pages/Movie/MoviePlay';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import SearchPage from './pages/Search/SearchPage';
