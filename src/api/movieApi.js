@@ -27,7 +27,6 @@ export const movieApi = {
   getFeaturedMovies: async () => {
     try {
       const { data } = await api.get("/v1/api/home");
-      // Lấy items từ home API
       const items = data?.data?.items || [];
       return {
         status: "success",
@@ -45,6 +44,26 @@ export const movieApi = {
     return apiRequest(`/v1/api/danh-sach/phim-moi?page=${page}`);
   },
 
+  // API mới: Lấy danh sách quốc gia
+  getCountries: async () => {
+    return apiRequest('/v1/api/quoc-gia');
+  },
+
+  // API mới: Lọc phim theo quốc gia
+  getMoviesByCountry: async (countrySlug, page = 1) => {
+    return apiRequest(`/v1/api/quoc-gia/${countrySlug}?page=${page}`);
+  },
+
+  // API mới: Lấy danh sách năm phát hành
+  getYears: async () => {
+    return apiRequest('/v1/api/nam-phat-hanh');
+  },
+
+  // API mới: Lọc phim theo năm phát hành
+  getMoviesByYear: async (year, page = 1) => {
+    return apiRequest(`/v1/api/nam-phat-hanh/${year}?page=${page}`);
+  },
+
   getCategoryMovies: async (categoryType, categorySlug, page = 1) => {
     try {
       let endpoint;
@@ -57,7 +76,7 @@ export const movieApi = {
           endpoint = `/v1/api/quoc-gia/${categorySlug}?page=${page}`;
           break;
         case 'nam':
-          endpoint = `/v1/api/nam/${categorySlug}?page=${page}`;
+          endpoint = `/v1/api/nam-phat-hanh/${categorySlug}?page=${page}`;
           break;
         case 'danh-sach':
           endpoint = `/v1/api/danh-sach/${categorySlug}?page=${page}`;
