@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Info } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
 import HeroBanner from '../../components/Home/HeroBanner';
 import GenericMoviesSection from '../../components/Home/GenericMoviesSection';
 import { useSwipeHandler } from '../../hooks/useSwipeHandler';
@@ -32,54 +32,67 @@ const Home = () => {
     type: "info"
   };
 
-  const getNotificationStyle = (type) => {
-    switch (type) {
-      case 'success':
-        return 'bg-green-600 border-green-500';
-      case 'warning':
-        return 'bg-yellow-600 border-yellow-500';
-      case 'error':
-        return 'bg-red-600 border-red-500';
-      default:
-        return 'bg-blue-600 border-blue-500';
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gray-900">
-      {/* Notification Banner */}
+      {/* Improved Notification Banner */}
       {showNotification && (
-        <div className={`${getNotificationStyle(notificationContent.type)} border-b-2 text-white relative`}>
-          <div className="container mx-auto px-2 xs:px-3 sm:px-4 lg:px-6 xl:px-8 2xl:px-12 py-2 xs:py-3 sm:py-4 lg:py-5">
-            <div className="flex items-start justify-between space-x-2 xs:space-x-3 sm:space-x-4 lg:space-x-6">
-              <div className="flex items-start space-x-2 xs:space-x-3 sm:space-x-4 flex-1">
-                <Info className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 xl:w-8 xl:h-8 flex-shrink-0 mt-0.5" />
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-xs xs:text-sm sm:text-base lg:text-lg xl:text-xl 2xl:text-2xl mb-1 xs:mb-2 break-words">
-                    {notificationContent.title}
-                  </h4>
-                  <p className="text-xs xs:text-xs sm:text-sm lg:text-base xl:text-lg 2xl:text-xl opacity-90 leading-relaxed break-words">
-                    {notificationContent.message}
-                    <a 
-                      href={notificationContent.linkUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline hover:text-yellow-300 transition-colors duration-200 font-semibold"
-                    >
-                      {notificationContent.linkText}
-                    </a>
-                  </p>
+        <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600">
+          {/* Animated background effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-10 animate-pulse"></div>
+          
+          <div className="relative container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-4">
+            <div className="flex items-start gap-2 sm:gap-3 lg:gap-4">
+              {/* Icon with animation */}
+              <div className="flex-shrink-0 pt-0.5">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-white rounded-full opacity-20 animate-ping"></div>
+                  <div className="relative bg-white bg-opacity-20 backdrop-blur-sm rounded-full p-1.5 sm:p-2">
+                    <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-white" />
+                  </div>
                 </div>
               </div>
+
+              {/* Content */}
+              <div className="flex-1 min-w-0">
+                <h4 className="font-bold text-white text-sm sm:text-base lg:text-lg mb-1 sm:mb-1.5 flex items-center gap-2 flex-wrap">
+                  {notificationContent.title}
+                  <span className="inline-block bg-yellow-400 text-yellow-900 text-xs font-semibold px-2 py-0.5 rounded-full">
+                    MỚI
+                  </span>
+                </h4>
+                
+                <p className="text-white text-opacity-95 text-xs sm:text-sm lg:text-base leading-relaxed mb-2 sm:mb-3">
+                  {notificationContent.message}
+                </p>
+
+                {/* CTA Button */}
+                <a 
+                  href={notificationContent.linkUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 sm:gap-2 bg-white text-blue-600 font-semibold px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-yellow-300 hover:text-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-lg text-xs sm:text-sm group"
+                >
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4" />
+                  {notificationContent.linkText}
+                  <svg className="w-3 h-3 sm:w-4 sm:h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </a>
+              </div>
+
+              {/* Close button */}
               <button
                 onClick={() => setShowNotification(false)}
-                className="p-1 xs:p-1.5 sm:p-2 lg:p-3 xl:p-4 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors duration-200 flex-shrink-0"
+                className="flex-shrink-0 p-1 sm:p-1.5 lg:p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-all duration-200 group"
                 aria-label="Đóng thông báo"
               >
-                <X className="w-3 h-3 xs:w-4 xs:h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:rotate-90 transition-transform duration-200" />
               </button>
             </div>
           </div>
+
+          {/* Bottom accent line */}
+          <div className="h-0.5 sm:h-1 bg-gradient-to-r from-yellow-400 via-pink-400 to-purple-400"></div>
         </div>
       )}
 
