@@ -1,5 +1,5 @@
 // components/SearchResults.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Loader2, Search } from 'lucide-react';
 import { useSearchMovies, transformSearchResults } from '../../hooks/userSearchMovie';
 import { searchUtils } from '../../utils/searchUtils';
@@ -11,14 +11,43 @@ const SearchResults = ({
   currentPage = 1, 
   onPageChange
 }) => {
-  // Kiểm tra từ khóa bị chặn TRƯỚC KHI gọi API
+  // Kiểm tra từ khóa bị chặn
   if (isBlockedKeyword(keyword)) {
     return <BlockedSearchAlert />;
   }
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const { data: apiData, isLoading, error } = useSearchMovies(keyword, currentPage);
+  
+  // Debug: Log raw API data
+  useEffect(() => {
+    if (apiData) {
+      console.log("🔍 Raw API Search Data:", apiData);
+      console.log("📊 API Data Structure:", {
+        hasData: !!apiData.data,
+        hasItems: !!apiData.data?.items,
+        itemsCount: apiData.data?.items?.length,
+        firstItem: apiData.data?.items?.[0]
+      });
+    }
+  }, [apiData]);
+
   const movies = transformSearchResults(apiData);
+  
+  // Debug: Log transformed movies
+  useEffect(() => {
+    if (movies && movies.length > 0) {
+      console.log("✨ Transformed Movies:", {
+        count: movies.length,
+        firstMovie: movies[0],
+        posterUrls: movies.slice(0, 3).map(m => ({
+          title: m.title,
+          poster: m.poster,
+          poster_url: m.poster_url
+        }))
+      });
+    }
+  }, [movies]);
+
   const pagination = apiData?.data?.params?.pagination;
   const totalPages = pagination?.totalPages || 1;
   const totalItems = pagination?.totalItems || 0;
@@ -114,6 +143,7 @@ const SearchResults = ({
   }
 
   if (error) {
+    console.error("❌ Search Error:", error);
     return (
       <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
         <div className="text-white text-center">
@@ -131,6 +161,7 @@ const SearchResults = ({
   }
 
   if (!movies || movies.length === 0) {
+    console.log("⚠️ No movies found for keyword:", keyword);
     return (
       <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
         <div className="text-white text-center">
@@ -145,6 +176,8 @@ const SearchResults = ({
     );
   }
 
+  console.log(`✅ Rendering ${movies.length} movies`);
+
   return (
     <div>
       <div className="mb-6">
@@ -157,10 +190,16 @@ const SearchResults = ({
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-8 gap-4 mb-8">
-        {movies.map((movie) => (
-          <SearchMovieCard key={movie.id} movie={movie} />
-        ))}
+        {movies.map((movie, index) => {
+          console.log(`🎬 Rendering movie ${index + 1}:`, {
+            id: movie.id,
+            title: movie.title,
+            poster: movie.poster
+          });
+          return <SearchMovieCard key={movie.id || index} movie={movie} />;
+        })}
       </div>
+      
       {renderPagination()}
     </div>
   );

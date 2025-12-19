@@ -1,11 +1,10 @@
 // src/utils/imageHelper.js
 
 /**
- * ✅ FIX: Cải thiện logic lấy ảnh từ nhiều nguồn
- * Priority: img.ophim -> phimimg.com -> backup CDN -> placeholder
+ * Lấy URL ảnh an toàn với fallback
+ * Priority: img.ophim.live -> ophim1.com -> phimimg.com -> backup CDN -> placeholder
  */
 export function getSafeImageUrl(url, fallbackText = "No Image") {
-  // Placeholder mặc định
   const placeholder = `https://via.placeholder.com/300x450/374151/ffffff?text=${encodeURIComponent(fallbackText)}`;
   
   if (!url || url === 'null' || url === null || url === undefined) {
@@ -14,17 +13,17 @@ export function getSafeImageUrl(url, fallbackText = "No Image") {
 
   // Nếu là URL đầy đủ
   if (url.startsWith("http://") || url.startsWith("https://")) {
-    // ✅ Ưu tiên các CDN chính thức của Ophim
+    // Ưu tiên các CDN chính thức của Ophim
     if (url.includes('img.ophim') || url.includes('ophim.cc')) {
       return url;
     }
     
-    // ✅ Phimimg.com CDN backup
+    // Phimimg.com CDN backup
     if (url.includes('phimimg.com')) {
       return url;
     }
     
-    // ✅ Thử proxy cho các URL khác
+    // Thử proxy cho các URL khác
     try {
       const u = new URL(url);
       const hostAndPath = `${u.hostname}${u.pathname}${u.search}`;
@@ -34,17 +33,11 @@ export function getSafeImageUrl(url, fallbackText = "No Image") {
     }
   }
 
-  // ✅ Nếu là đường dẫn tương đối từ Ophim
+  // Nếu là đường dẫn tương đối từ Ophim
   let fullUrl;
   
   if (url.startsWith('/uploads/')) {
-    // Thử nhiều CDN domain
-    const domains = [
-      'https://img.ophim.live',
-      'https://img.ophim1.com', 
-      'https://phimimg.com'
-    ];
-    fullUrl = `${domains[0]}${url}`; // Dùng domain đầu tiên
+    fullUrl = `https://img.ophim.live${url}`;
   } else if (url.startsWith('uploads/')) {
     fullUrl = `https://img.ophim.live/${url}`;
   } else {
@@ -55,8 +48,8 @@ export function getSafeImageUrl(url, fallbackText = "No Image") {
 }
 
 /**
- * ✅ NEW: Lấy ảnh với fallback tự động
- * Trả về array các URL để thử lần lượt
+ * Lấy danh sách URL ảnh để thử lần lượt (dùng cho fallback tự động)
+ * Trả về array các URL để thử theo thứ tự
  */
 export function getImageUrlCandidates(url, fallbackText = "No Image") {
   const placeholder = `https://via.placeholder.com/300x450/374151/ffffff?text=${encodeURIComponent(fallbackText)}`;

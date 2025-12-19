@@ -1,163 +1,157 @@
-import React from 'react';
-import { Star, Calendar, Clock, Globe, Users, Film, Eye } from 'lucide-react';
-import VideoPlayer from './VideoPlayer';
-import EpisodeList from '../EpisodeList';
+import React, { useState } from 'react';
+import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
+import { getSafeImageUrl } from '../../utils/imageHelper';
+import TrailerModal from './TrailerModal';
 
-const DesktopWatchLayout = ({
+const DesktopDetailLayout = ({
   movieData,
-  setActiveLayout,
-  currentEpisode,
-  currentServer,
-  setCurrentEpisode,
-  setCurrentServer,
-  isFullscreen,
-  setIsFullscreen
+  navigate,
+  setActiveLayout
 }) => {
-  const currentVideoUrl = movieData.episodes?.[currentServer]?.server_data?.[currentEpisode]?.link_m3u8;
-  const currentEpisodeName = movieData.episodes?.[currentServer]?.server_data?.[currentEpisode]?.name;
+  const [showTrailer, setShowTrailer] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
-      <div className="container mx-auto px-4 py-6">
-        <div className="mb-6">
-          <button
-            onClick={() => setActiveLayout('detail')}
-            className="text-blue-400 hover:text-blue-300 mb-2 transition-colors duration-300"
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
+      <div className="container mx-auto px-4 py-8">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-6 transition-colors duration-300"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span>Quay lại</span>
+        </button>
+
+        <div className="relative mb-12">
+          <div
+            className="h-96 bg-cover bg-center rounded-2xl relative overflow-hidden"
+            style={{ backgroundImage: `url(${getSafeImageUrl(movieData.thumb_url, movieData.name)})` }}
           >
-            ← Quay lại chi tiết
-          </button>
-          <h1 className="text-3xl font-bold text-white">{movieData.name}</h1>
-          <p className="text-gray-300">{movieData.origin_name}</p>
-          <p className="text-sm text-gray-400 mt-1">
-            Đang xem: {currentEpisodeName} - {movieData.episodes?.[currentServer]?.server_name}
-          </p>
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+            <div className="absolute bottom-6 left-6 z-10">
+              <h1 className="text-4xl font-bold mb-2 text-white">{movieData.name}</h1>
+              <p className="text-xl text-gray-200 mb-4">{movieData.origin_name}</p>
+              <div className="flex items-center gap-4 text-sm text-gray-300">
+                <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 text-yellow-400" fill="currentColor" />
+                  <span>{movieData.vote_average}/10</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Users className="w-4 h-4" />
+                  <span>{movieData.vote_count} đánh giá</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  <span>{movieData.year}</span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="mb-6">
-          <div className="bg-black rounded-2xl overflow-hidden shadow-2xl">
-            <VideoPlayer 
-              currentVideoUrl={currentVideoUrl}
-              isFullscreen={isFullscreen}
-              setIsFullscreen={setIsFullscreen}
+        <div className="grid lg:grid-cols-4 gap-8 mb-12">
+          <div className="lg:col-span-1">
+            <img
+              src={getSafeImageUrl(movieData.poster_url, movieData.name)}
+              alt={movieData.name}
+              className="w-full rounded-2xl shadow-2xl transition-transform duration-300 hover:scale-105"
+              referrerPolicy="no-referrer"
             />
+            <button
+              onClick={() => setActiveLayout('watch')}
+              className="w-full mt-6 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+            >
+              <Play className="w-5 h-5" fill="currentColor" />
+              Xem Phim
+            </button>
+            
+            {movieData.trailer_url && (
+              <button
+                onClick={() => setShowTrailer(true)}
+                className="w-full mt-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+              >
+                <Youtube className="w-5 h-5" />
+                Xem Trailer
+              </button>
+            )}
           </div>
 
-          {currentVideoUrl && (
-            <div className="mt-4 p-4 bg-gradient-to-r from-gray-800/50 to-gray-700/50 backdrop-blur-sm rounded-xl border border-gray-600/30">
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span>Đang phát: {currentEpisodeName}</span>
+          <div className="lg:col-span-3 space-y-6">
+            <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
+              <h2 className="text-2xl font-bold mb-4 text-white">Thông Tin Phim</h2>
+              <p className="text-gray-300 mb-6 leading-relaxed">{movieData.content}</p>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-blue-400" />
+                    <span className="text-gray-400">Thời lượng:</span>
+                    <span className="text-white font-medium">{movieData.time}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Film className="w-5 h-5 text-green-400" />
+                    <span className="text-gray-400">Tập phim:</span>
+                    <span className="text-white font-medium">{movieData.episode_current}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Eye className="w-5 h-5 text-purple-400" />
+                    <span className="text-gray-400">Chất lượng:</span>
+                    <span className="text-white font-medium">{movieData.quality}</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-blue-400" />
-                  <span>{movieData.episodes?.[currentServer]?.server_name}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-purple-400" />
-                  <span>{movieData.quality}</span>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-5 h-5 text-yellow-400" />
+                    <span className="text-gray-400">Ngôn ngữ:</span>
+                    <span className="text-white font-medium">{movieData.lang}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-5 h-5 text-red-400" />
+                    <span className="text-gray-400">Quốc gia:</span>
+                    <span className="text-white font-medium">{movieData.country?.[0]?.name}</span>
+                  </div>
                 </div>
               </div>
             </div>
-          )}
-        </div>
 
-        <EpisodeList
-          episodes={movieData.episodes}
-          currentServer={currentServer}
-          currentEpisode={currentEpisode}
-          setCurrentServer={setCurrentServer}
-          setCurrentEpisode={setCurrentEpisode}
-          isMobile={false}
-        />
+            <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
+              <h3 className="text-xl font-bold mb-4 text-white">Thể Loại</h3>
+              <div className="flex flex-wrap gap-2">
+                {movieData.category?.map((cat, index) => (
+                  <span
+                    key={index}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105"
+                  >
+                    {cat.name}
+                  </span>
+                ))}
+              </div>
+            </div>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
-            <h3 className="text-lg font-bold text-white mb-4">Thông Tin Phim</h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 text-yellow-400" fill="currentColor" />
-                <span className="text-gray-400">Đánh giá:</span>
-                <span className="text-white font-medium">{movieData.vote_average}/10</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-blue-400" />
-                <span className="text-gray-400">Năm:</span>
-                <span className="text-white font-medium">{movieData.year}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-green-400" />
-                <span className="text-gray-400">Thời lượng:</span>
-                <span className="text-white font-medium">{movieData.time}</span>
+            <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
+              <h3 className="text-xl font-bold mb-4 text-white">Diễn Viên</h3>
+              <div className="flex flex-wrap gap-2">
+                {movieData.actor?.map((actor, index) => (
+                  <span
+                    key={index}
+                    className="bg-gradient-to-r from-gray-700 to-gray-600 text-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gradient-to-r hover:from-gray-600 hover:to-gray-500 transition-all duration-300 cursor-pointer"
+                  >
+                    {actor}
+                  </span>
+                ))}
               </div>
             </div>
           </div>
-
-          <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
-            <h3 className="text-lg font-bold text-white mb-4">Chi Tiết</h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4 text-purple-400" />
-                <span className="text-gray-400">Chất lượng:</span>
-                <span className="text-white font-medium">{movieData.quality}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-yellow-400" />
-                <span className="text-gray-400">Ngôn ngữ:</span>
-                <span className="text-white font-medium">{movieData.lang}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Film className="w-4 h-4 text-green-400" />
-                <span className="text-gray-400">Số tập:</span>
-                <span className="text-white font-medium">{movieData.episode_current}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
-            <h3 className="text-lg font-bold text-white mb-4">Thể Loại</h3>
-            <div className="flex flex-wrap gap-2">
-              {movieData.category?.slice(0, 4).map((cat, index) => (
-                <span
-                  key={index}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium"
-                >
-                  {cat.name}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl mb-8">
-          <h3 className="text-lg font-bold text-white mb-4">Nội Dung Phim</h3>
-          <p className="text-gray-300 leading-relaxed">{movieData.content}</p>
-        </div>
-
-        {/* ✅ FIX: Hiển thị "Không có diễn viên" khi không có actor */}
-        <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl mb-8">
-          <h3 className="text-lg font-bold text-white mb-4">Diễn Viên</h3>
-          {movieData.actor && movieData.actor.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-              {movieData.actor.map((actor, index) => (
-                <div
-                  key={index}
-                  className="bg-gradient-to-r from-gray-700 to-gray-600 text-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gradient-to-r hover:from-gray-600 hover:to-gray-500 transition-all duration-300 cursor-pointer text-center"
-                >
-                  {actor}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="flex items-center justify-center py-8 text-gray-400">
-              <Users className="w-6 h-6 mr-2" />
-              <span>Không có thông tin diễn viên</span>
-            </div>
-          )}
         </div>
       </div>
+
+      <TrailerModal
+        isOpen={showTrailer}
+        onClose={() => setShowTrailer(false)}
+        trailerUrl={movieData.trailer_url}
+        movieName={movieData.name}
+      />
     </div>
   );
 };
 
-export default DesktopWatchLayout;
+export default DesktopDetailLayout;
