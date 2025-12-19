@@ -1,9 +1,10 @@
 import { api, apiRequest } from "./baseApi";
 
 export const movieApi = {
+  // API chi tiết phim
   getMovieDetail: async (slug) => {
     try {
-      const { data } = await api.get(`/phim/${slug}`);
+      const { data } = await api.get(`/v1/api/phim/${slug}`);
       console.log("Movie detail data:", data);
       return data;
     } catch (error) {
@@ -12,7 +13,43 @@ export const movieApi = {
     }
   },
 
-  // API Home cho featured movies
+  // API hình ảnh phim (MỚI)
+  getMovieImages: async (slug) => {
+    try {
+      const { data } = await api.get(`/v1/api/phim/${slug}/images`);
+      console.log("Movie images data:", data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching movie images:", error);
+      throw error;
+    }
+  },
+
+  // API diễn viên (MỚI)
+  getMoviePeoples: async (slug) => {
+    try {
+      const { data } = await api.get(`/v1/api/phim/${slug}/peoples`);
+      console.log("Movie peoples data:", data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching movie peoples:", error);
+      throw error;
+    }
+  },
+
+  // API từ khóa (MỚI)
+  getMovieKeywords: async (slug) => {
+    try {
+      const { data } = await api.get(`/v1/api/phim/${slug}/keywords`);
+      console.log("Movie keywords data:", data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching movie keywords:", error);
+      throw error;
+    }
+  },
+
+  // API Home
   getHomeData: async () => {
     try {
       const { data } = await api.get("/v1/api/home");
@@ -44,22 +81,18 @@ export const movieApi = {
     return apiRequest(`/v1/api/danh-sach/phim-moi?page=${page}`);
   },
 
-  // API mới: Lấy danh sách quốc gia
   getCountries: async () => {
     return apiRequest('/v1/api/quoc-gia');
   },
 
-  // API mới: Lọc phim theo quốc gia
   getMoviesByCountry: async (countrySlug, page = 1) => {
     return apiRequest(`/v1/api/quoc-gia/${countrySlug}?page=${page}`);
   },
 
-  // API mới: Lấy danh sách năm phát hành
   getYears: async () => {
     return apiRequest('/v1/api/nam-phat-hanh');
   },
 
-  // API mới: Lọc phim theo năm phát hành
   getMoviesByYear: async (year, page = 1) => {
     return apiRequest(`/v1/api/nam-phat-hanh/${year}?page=${page}`);
   },
@@ -85,10 +118,7 @@ export const movieApi = {
           throw new Error(`Unsupported category type: ${categoryType}`);
       }
       
-      console.log(`Fetching category: ${categoryType}/${categorySlug} from endpoint: ${endpoint}`);
-      
       const { data } = await api.get(endpoint);
-      console.log(`Category API Response:`, data);
       return data;
     } catch (error) {
       console.error(`Error fetching category ${categoryType}/${categorySlug}:`, error);
@@ -96,7 +126,6 @@ export const movieApi = {
     }
   },
 
-  // Danh sách phim
   getVietnamMovies: (page = 1) => apiRequest(`/v1/api/quoc-gia/viet-nam?page=${page}`),
   getChinaMovies: (page = 1) => apiRequest(`/v1/api/quoc-gia/trung-quoc?page=${page}`),
   getJapanMovies: (page = 1) => apiRequest(`/v1/api/quoc-gia/nhat-ban?page=${page}`),

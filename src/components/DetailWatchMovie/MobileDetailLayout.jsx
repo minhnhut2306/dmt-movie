@@ -2,11 +2,20 @@ import React, { useState } from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
 import { getSafeImageUrl } from '../../utils/imageHelper';
 import TrailerModal from './TrailerModal';
+import MovieImagesGallery from './MovieImagesGallery';
+import MovieCast from './MovieCast';
+import MovieKeywords from './MovieKeywords';
 
 const MobileDetailLayout = ({
   movieData,
   navigate,
-  setActiveLayout
+  setActiveLayout,
+  movieImages = [],
+  moviePeoples = [],
+  movieKeywords = [],
+  imagesLoading = false,
+  peoplesLoading = false,
+  keywordsLoading = false
 }) => {
   const [showTrailer, setShowTrailer] = useState(false);
 
@@ -21,6 +30,7 @@ const MobileDetailLayout = ({
           <span>Quay lại</span>
         </button>
 
+        {/* Hero Banner */}
         <div className="relative mb-6">
           <div
             className="h-64 sm:h-80 bg-cover bg-center rounded-xl relative overflow-hidden"
@@ -48,6 +58,7 @@ const MobileDetailLayout = ({
           </div>
         </div>
 
+        {/* Poster & Actions */}
         <div className="flex gap-4 mb-6">
           <div className="w-28 sm:w-32 flex-shrink-0">
             <img
@@ -101,11 +112,13 @@ const MobileDetailLayout = ({
           </div>
         </div>
 
+        {/* Movie Content */}
         <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
           <h2 className="text-lg font-bold mb-3 text-white">Nội Dung Phim</h2>
           <p className="text-gray-300 leading-relaxed text-sm">{movieData.content}</p>
         </div>
 
+        {/* Genres */}
         <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
           <h3 className="text-lg font-bold mb-3 text-white">Thể Loại</h3>
           <div className="flex flex-wrap gap-2">
@@ -120,19 +133,37 @@ const MobileDetailLayout = ({
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
-          <h3 className="text-lg font-bold mb-3 text-white">Diễn Viên</h3>
-          <div className="grid grid-cols-2 gap-2">
-            {movieData.actor?.slice(0, 6).map((actor, index) => (
-              <span
-                key={index}
-                className="bg-gradient-to-r from-gray-700 to-gray-600 text-gray-200 px-3 py-2 rounded-lg text-xs text-center"
-              >
-                {actor}
-              </span>
-            ))}
+        {/* Keywords */}
+        {!keywordsLoading && movieKeywords.length > 0 && (
+          <MovieKeywords keywords={movieKeywords} />
+        )}
+
+        {/* Images Gallery */}
+        {!imagesLoading && movieImages.length > 0 && (
+          <MovieImagesGallery images={movieImages} movieName={movieData.name} />
+        )}
+
+        {/* Cast */}
+        {!peoplesLoading && moviePeoples.length > 0 && (
+          <MovieCast peoples={moviePeoples} isMobile={true} />
+        )}
+
+        {/* Directors */}
+        {movieData.director && movieData.director.length > 0 && (
+          <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
+            <h3 className="text-lg font-bold mb-3 text-white">Đạo Diễn</h3>
+            <div className="grid grid-cols-2 gap-2">
+              {movieData.director.slice(0, 4).map((dir, index) => (
+                <span
+                  key={index}
+                  className="bg-gradient-to-r from-gray-700 to-gray-600 text-gray-200 px-3 py-2 rounded-lg text-xs text-center"
+                >
+                  {dir}
+                </span>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <TrailerModal

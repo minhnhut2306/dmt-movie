@@ -2,7 +2,7 @@
 
 /**
  * Tạo URL ảnh an toàn với fallback và proxy
- * Ophim1 API thường trả về đường dẫn tương đối hoặc full URL
+ * Ophim1 API trả về đường dẫn tương đối hoặc full URL
  */
 export function getSafeImageUrl(url, fallbackText = "No Image") {
   // Fallback nếu thiếu URL
@@ -10,30 +10,39 @@ export function getSafeImageUrl(url, fallbackText = "No Image") {
     return `https://via.placeholder.com/300x450/374151/ffffff?text=${encodeURIComponent(fallbackText)}`;
   }
 
-  // Nếu là URL đầy đủ, giữ nguyên
+  // Nếu là URL đầy đủ
   if (url.startsWith("http://") || url.startsWith("https://")) {
-    // Sử dụng proxy để tránh CORS và SSL issues
+    // Nếu đã là từ img.ophim hoặc CDN khác, giữ nguyên
+    if (url.includes('img.ophim') || url.includes('phimimg.com')) {
+      return url;
+    }
+    
+    // Các URL khác thử dùng proxy
     try {
       const u = new URL(url);
       const hostAndPath = `${u.hostname}${u.pathname}${u.search}`;
       return `https://images.weserv.nl/?url=${encodeURIComponent(hostAndPath)}`;
     } catch {
-      return url; // Nếu parse lỗi, trả về URL gốc
+      return url;
     }
   }
 
-  // Nếu là đường dẫn tương đối, nối với CDN của Ophim
-  // Ophim1 thường dùng img.ophim1.com hoặc tương tự
-  const normalized = `https://img.ophim1.com${url.startsWith('/') ? '' : '/'}${url}`;
+  // Nếu là đường dẫn tương đối từ Ophim
+  // Ophim1 API thường trả về: "uploads/movies/xxx.jpg"
+  let fullUrl;
   
-  // Sử dụng proxy cho ảnh từ Ophim CDN
-  try {
-    const u = new URL(normalized);
-    const hostAndPath = `${u.hostname}${u.pathname}${u.search}`;
-    return `https://images.weserv.nl/?url=${encodeURIComponent(hostAndPath)}`;
-  } catch {
-    return `https://via.placeholder.com/300x450/374151/ffffff?text=${encodeURIComponent(fallbackText)}`;
+  if (url.startsWith('/uploads/')) {
+    // Đường dẫn bắt đầu bằng /uploads/
+    fullUrl = `https://img.ophim.live${url}`;
+  } else if (url.startsWith('uploads/')) {
+    // Đường dẫn không có / ở đầu
+    fullUrl = `https://img.ophim.live/${url}`;
+  } else {
+    // Các trường hợp khác
+    fullUrl = `https://img.ophim.live/uploads/movies/${url}`;
   }
+  
+  return fullUrl;
 }
 
 /**

@@ -1,6 +1,5 @@
 // config/movieSections.js
 import {
-  useMovies,
   useVietnamMovies,
   useChinaMovies,
   useJapanMovies,
@@ -13,7 +12,6 @@ import {
   useDubbedMovies,
   useVoiceoverMovies,
   useVietsubMovies,
-  transformLatestMovies,
   transformVietnamMovies,
   transformChinaMovies,
   transformJapanMovies,
@@ -27,16 +25,18 @@ import {
   transformVietsubMovies,
   transformVoiceoverMovies,
 } from "../hooks/useMovies";
+import { useHomeMovies, transformHomeMovies } from "../hooks/useLatestMovies";
 
 export const MOVIE_SECTIONS = [
+  // Phim Mới Nhất từ Home API
   {
     title: "Phim Mới Nhất",
     emoji: "🔥",
     sectionKey: "latest",
     badgeColor: "bg-red-600",
-    useDataHook: () => useMovies(1),
-    transformFunction: transformLatestMovies,
-    viewMoreLink: "/category/danh-sach/phim-moi-cap-nhat",
+    useDataHook: useHomeMovies,
+    transformFunction: transformHomeMovies,
+    viewMoreLink: "/v1/api/danh-sach/phim-moi",
   },
   {
     title: "Phim Việt Nam",
@@ -45,7 +45,7 @@ export const MOVIE_SECTIONS = [
     badgeColor: "bg-red-600",
     useDataHook: () => useVietnamMovies(1),
     transformFunction: transformVietnamMovies,
-    viewMoreLink: "/category/quoc-gia/viet-nam",
+    viewMoreLink: "/v1/api/category/quoc-gia/viet-nam",
   },
   {
     title: "Phim Trung Quốc",
@@ -54,7 +54,7 @@ export const MOVIE_SECTIONS = [
     badgeColor: "bg-red-600",
     useDataHook: useChinaMovies,
     transformFunction: transformChinaMovies,
-    viewMoreLink: "/category/quoc-gia/trung-quoc",
+    viewMoreLink: "/v1/api/category/quoc-gia/trung-quoc",
   },
   {
     title: "Phim Nhật Bản",
@@ -63,7 +63,7 @@ export const MOVIE_SECTIONS = [
     badgeColor: "bg-red-600",
     useDataHook: useJapanMovies,
     transformFunction: transformJapanMovies,
-    viewMoreLink: "/category/quoc-gia/nhat-ban",
+    viewMoreLink: "/v1/api/category/quoc-gia/nhat-ban",
   },
   {
     title: "Phim Bộ",
@@ -72,7 +72,7 @@ export const MOVIE_SECTIONS = [
     badgeColor: "bg-blue-600",
     useDataHook: useSeriesMovies,
     transformFunction: transformSeriesMovies,
-    viewMoreLink: "/category/danh-sach/phim-bo",
+    viewMoreLink: "/v1/api/category/danh-sach/phim-bo",
   },
   {
     title: "Phim Lẻ",
@@ -81,7 +81,7 @@ export const MOVIE_SECTIONS = [
     badgeColor: "bg-green-600",
     useDataHook: useSingleMovies,
     transformFunction: transformSingleMovies,
-    viewMoreLink: "/category/danh-sach/phim-le",
+    viewMoreLink: "/v1/api/category/danh-sach/phim-le",
   },
   {
     title: "Phim Hoạt Hình",
@@ -90,7 +90,7 @@ export const MOVIE_SECTIONS = [
     badgeColor: "bg-pink-600",
     useDataHook: useAnimationMovies,
     transformFunction: transformAnimationMovies,
-    viewMoreLink: "/category/danh-sach/hoat-hinh",
+    viewMoreLink: "/v1/api/category/danh-sach/hoat-hinh",
   },
   {
     title: "Phim Thuyết Minh",
@@ -99,7 +99,7 @@ export const MOVIE_SECTIONS = [
     badgeColor: "bg-purple-600",
     useDataHook: useDubbedMovies,
     transformFunction: transformDubbedMovies,
-    viewMoreLink: "/category/danh-sach/phim-thuyet-minh",
+    viewMoreLink: "/v1/api/category/danh-sach/phim-thuyet-minh",
   },
   {
     title: "Phim Lồng Tiếng",
@@ -108,7 +108,7 @@ export const MOVIE_SECTIONS = [
     badgeColor: "bg-indigo-600",
     useDataHook: useVoiceoverMovies,
     transformFunction: transformVoiceoverMovies,
-    viewMoreLink: "/category/danh-sach/phim-long-tieng",
+    viewMoreLink: "/v1/api/category/danh-sach/phim-long-tieng",
   },
   {
     title: "Phim Vietsub",
@@ -117,7 +117,7 @@ export const MOVIE_SECTIONS = [
     badgeColor: "bg-cyan-600",
     useDataHook: useVietsubMovies,
     transformFunction: transformVietsubMovies,
-    viewMoreLink: "/category/danh-sach/phim-vietsub",
+    viewMoreLink: "/v1/api/category/danh-sach/phim-vietsub",
   },
   {
     title: "Phim Hành Động",
@@ -126,7 +126,7 @@ export const MOVIE_SECTIONS = [
     badgeColor: "bg-orange-600",
     useDataHook: useActionMovies,
     transformFunction: transformActionMovies,
-    viewMoreLink: "/category/the-loai/hanh-dong",
+    viewMoreLink: "/v1/api/category/the-loai/hanh-dong",
   },
   {
     title: "Phim Kinh Dị",
@@ -135,7 +135,7 @@ export const MOVIE_SECTIONS = [
     badgeColor: "bg-gray-800",
     useDataHook: useHorrorMovies,
     transformFunction: transformHorrorMovies,
-    viewMoreLink: "/category/the-loai/kinh-di",
+    viewMoreLink: "/v1/api/category/the-loai/kinh-di",
   },
   {
     title: "Phim Cổ Trang",
@@ -144,6 +144,6 @@ export const MOVIE_SECTIONS = [
     badgeColor: "bg-amber-600",
     useDataHook: useHistoryMovies,
     transformFunction: transformHistoryMovies,
-    viewMoreLink: "/category/the-loai/co-trang",
+    viewMoreLink: "/v1/api/category/the-loai/co-trang",
   },
 ];

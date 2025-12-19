@@ -2,11 +2,20 @@ import React, { useState } from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
 import { getSafeImageUrl } from '../../utils/imageHelper';
 import TrailerModal from './TrailerModal';
+import MovieImagesGallery from './MovieImagesGallery';
+import MovieCast from './MovieCast';
+import MovieKeywords from './MovieKeywords';
 
 const DesktopDetailLayout = ({
   movieData,
   navigate,
-  setActiveLayout
+  setActiveLayout,
+  movieImages = [],
+  moviePeoples = [],
+  movieKeywords = [],
+  imagesLoading = false,
+  peoplesLoading = false,
+  keywordsLoading = false
 }) => {
   const [showTrailer, setShowTrailer] = useState(false);
 
@@ -21,6 +30,7 @@ const DesktopDetailLayout = ({
           <span>Quay lại</span>
         </button>
 
+        {/* Hero Banner */}
         <div className="relative mb-12">
           <div
             className="h-96 bg-cover bg-center rounded-2xl relative overflow-hidden"
@@ -49,6 +59,7 @@ const DesktopDetailLayout = ({
         </div>
 
         <div className="grid lg:grid-cols-4 gap-8 mb-12">
+          {/* Poster & Actions */}
           <div className="lg:col-span-1">
             <img
               src={getSafeImageUrl(movieData.poster_url, movieData.name)}
@@ -75,6 +86,7 @@ const DesktopDetailLayout = ({
             )}
           </div>
 
+          {/* Movie Info */}
           <div className="lg:col-span-3 space-y-6">
             <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold mb-4 text-white">Thông Tin Phim</h2>
@@ -113,6 +125,7 @@ const DesktopDetailLayout = ({
               </div>
             </div>
 
+            {/* Genres */}
             <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
               <h3 className="text-xl font-bold mb-4 text-white">Thể Loại</h3>
               <div className="flex flex-wrap gap-2">
@@ -126,22 +139,40 @@ const DesktopDetailLayout = ({
                 ))}
               </div>
             </div>
-
-            <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
-              <h3 className="text-xl font-bold mb-4 text-white">Diễn Viên</h3>
-              <div className="flex flex-wrap gap-2">
-                {movieData.actor?.map((actor, index) => (
-                  <span
-                    key={index}
-                    className="bg-gradient-to-r from-gray-700 to-gray-600 text-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gradient-to-r hover:from-gray-600 hover:to-gray-500 transition-all duration-300 cursor-pointer"
-                  >
-                    {actor}
-                  </span>
-                ))}
-              </div>
-            </div>
           </div>
         </div>
+
+        {/* Keywords Section */}
+        {!keywordsLoading && movieKeywords.length > 0 && (
+          <MovieKeywords keywords={movieKeywords} />
+        )}
+
+        {/* Images Gallery */}
+        {!imagesLoading && movieImages.length > 0 && (
+          <MovieImagesGallery images={movieImages} movieName={movieData.name} />
+        )}
+
+        {/* Cast Section */}
+        {!peoplesLoading && moviePeoples.length > 0 && (
+          <MovieCast peoples={moviePeoples} isMobile={false} />
+        )}
+
+        {/* Directors (if available from old API) */}
+        {movieData.director && movieData.director.length > 0 && (
+          <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
+            <h3 className="text-xl font-bold mb-4 text-white">Đạo Diễn</h3>
+            <div className="flex flex-wrap gap-2">
+              {movieData.director.map((dir, index) => (
+                <span
+                  key={index}
+                  className="bg-gradient-to-r from-gray-700 to-gray-600 text-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gradient-to-r hover:from-gray-600 hover:to-gray-500 transition-all duration-300 cursor-pointer"
+                >
+                  {dir}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <TrailerModal
