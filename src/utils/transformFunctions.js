@@ -69,8 +69,9 @@ export const transformMovieDetail = (data) => {
   };
 };
 
+// ✅ NEW: Transform cho Phim Mới Nhất - dùng chung logic
 export const transformLatestMovies = (data) => {
-  const items = data?.items || [];
+  const items = data?.data?.items || data?.items || [];
 
   return items.map((movie) => ({
     id: movie._id,
@@ -100,6 +101,7 @@ export const transformLatestMovies = (data) => {
   }));
 };
 
+// Country transforms
 export const transformVietnamMovies = createMovieTransform(
   "Chưa phân loại",
   null
@@ -113,6 +115,7 @@ export const transformJapanMovies = createMovieTransform(
   null
 );
 
+// Type transforms
 export const transformSeriesMovies = createMovieTransform(
   "Chưa phân loại",
   "Phim Bộ"
@@ -126,6 +129,7 @@ export const transformTVShows = createMovieTransform(
   "TV Shows"
 );
 
+// Genre transforms
 export const transformAnimationMovies = createMovieTransform(
   "Hoạt hình",
   "Phim Hoạt Hình"
@@ -143,6 +147,7 @@ export const transformHistoryMovies = createMovieTransform(
   "Phim Cổ Trang"
 );
 
+// Language transforms
 export const transformDubbedMovies = createMovieTransform(
   "Thuyết minh",
   "Phim Thuyết Minh"

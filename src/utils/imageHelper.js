@@ -1,48 +1,107 @@
 // src/utils/imageHelper.js
 
 /**
- * Tạo URL ảnh an toàn với fallback và proxy
- * Ophim1 API trả về đường dẫn tương đối hoặc full URL
+ * ✅ FIX: Cải thiện logic lấy ảnh từ nhiều nguồn
+ * Priority: img.ophim -> phimimg.com -> backup CDN -> placeholder
  */
 export function getSafeImageUrl(url, fallbackText = "No Image") {
-  // Fallback nếu thiếu URL
-  if (!url) {
-    return `https://via.placeholder.com/300x450/374151/ffffff?text=${encodeURIComponent(fallbackText)}`;
+  // Placeholder mặc định
+  const placeholder = `https://via.placeholder.com/300x450/374151/ffffff?text=${encodeURIComponent(fallbackText)}`;
+  
+  if (!url || url === 'null' || url === null || url === undefined) {
+    return placeholder;
   }
 
   // Nếu là URL đầy đủ
   if (url.startsWith("http://") || url.startsWith("https://")) {
-    // Nếu đã là từ img.ophim hoặc CDN khác, giữ nguyên
-    if (url.includes('img.ophim') || url.includes('phimimg.com')) {
+    // ✅ Ưu tiên các CDN chính thức của Ophim
+    if (url.includes('img.ophim') || url.includes('ophim.cc')) {
       return url;
     }
     
-    // Các URL khác thử dùng proxy
+    // ✅ Phimimg.com CDN backup
+    if (url.includes('phimimg.com')) {
+      return url;
+    }
+    
+    // ✅ Thử proxy cho các URL khác
     try {
       const u = new URL(url);
       const hostAndPath = `${u.hostname}${u.pathname}${u.search}`;
-      return `https://images.weserv.nl/?url=${encodeURIComponent(hostAndPath)}`;
+      return `https://images.weserv.nl/?url=${encodeURIComponent(hostAndPath)}&default=${encodeURIComponent(placeholder)}`;
     } catch {
-      return url;
+      return placeholder;
     }
   }
 
-  // Nếu là đường dẫn tương đối từ Ophim
-  // Ophim1 API thường trả về: "uploads/movies/xxx.jpg"
+  // ✅ Nếu là đường dẫn tương đối từ Ophim
   let fullUrl;
   
   if (url.startsWith('/uploads/')) {
-    // Đường dẫn bắt đầu bằng /uploads/
-    fullUrl = `https://img.ophim.live${url}`;
+    // Thử nhiều CDN domain
+    const domains = [
+      'https://img.ophim.live',
+      'https://img.ophim1.com', 
+      'https://phimimg.com'
+    ];
+    fullUrl = `${domains[0]}${url}`; // Dùng domain đầu tiên
   } else if (url.startsWith('uploads/')) {
-    // Đường dẫn không có / ở đầu
     fullUrl = `https://img.ophim.live/${url}`;
   } else {
-    // Các trường hợp khác
     fullUrl = `https://img.ophim.live/uploads/movies/${url}`;
   }
   
   return fullUrl;
+}
+
+/**
+ * ✅ NEW: Lấy ảnh với fallback tự động
+ * Trả về array các URL để thử lần lượt
+ */
+export function getImageUrlCandidates(url, fallbackText = "No Image") {
+  const placeholder = `https://via.placeholder.com/300x450/374151/ffffff?text=${encodeURIComponent(fallbackText)}`;
+  
+  if (!url || url === 'null' || url === null) {
+    return [placeholder];
+  }
+
+  const candidates = [];
+  
+  // Nếu là URL đầy đủ
+  if (url.startsWith("http")) {
+    candidates.push(url);
+    
+    // Thêm proxy backup
+    try {
+      const u = new URL(url);
+      const hostPath = `${u.hostname}${u.pathname}${u.search}`;
+      candidates.push(`https://images.weserv.nl/?url=${encodeURIComponent(hostPath)}`);
+      candidates.push(`https://wsrv.nl/?url=${encodeURIComponent(hostPath)}`);
+    } catch {
+      // Bỏ qua lỗi URL
+    }
+  } else {
+    // Đường dẫn tương đối - thử nhiều domain
+    const cdnDomains = [
+      'https://img.ophim.live',
+      'https://img.ophim1.com',
+      'https://phimimg.com'
+    ];
+    
+    const path = url.startsWith('/uploads/') ? url : 
+                 url.startsWith('uploads/') ? `/${url}` :
+                 `/uploads/movies/${url}`;
+    
+    cdnDomains.forEach(domain => {
+      candidates.push(`${domain}${path}`);
+    });
+  }
+  
+  // Thêm placeholder cuối cùng
+  candidates.push(placeholder);
+  
+  // Loại bỏ trùng lặp
+  return Array.from(new Set(candidates));
 }
 
 /**
@@ -51,7 +110,6 @@ export function getSafeImageUrl(url, fallbackText = "No Image") {
 export function getOptimizedPosterUrl(url, width = 300, height = 450) {
   const baseUrl = getSafeImageUrl(url);
   
-  // Nếu đang dùng weserv proxy, thêm tham số resize
   if (baseUrl.includes('weserv.nl')) {
     return `${baseUrl}&w=${width}&h=${height}&fit=cover`;
   }
@@ -65,7 +123,6 @@ export function getOptimizedPosterUrl(url, width = 300, height = 450) {
 export function getOptimizedThumbnailUrl(url, width = 780, height = 438) {
   const baseUrl = getSafeImageUrl(url);
   
-  // Nếu đang dùng weserv proxy, thêm tham số resize
   if (baseUrl.includes('weserv.nl')) {
     return `${baseUrl}&w=${width}&h=${height}&fit=cover`;
   }

@@ -2,7 +2,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { movieApi } from "../api";
 
-
 const queryOptions = {
   staleTime: 5 * 60 * 1000,
   cacheTime: 10 * 60 * 1000,
@@ -23,6 +22,7 @@ const createMovieHook = (key, apiMethod) => (page) => {
   });
 };
 
+// Movie Detail Hook
 export const useMovieDetail = (slug) => {
   return useQuery({
     queryKey: ["movie-detail", slug],
@@ -35,7 +35,7 @@ export const useMovieDetail = (slug) => {
   });
 };
 
-
+// General Movies Hook
 export const useMovies = (page = 1) => {
   return useQuery({
     queryKey: ["movies", page],
@@ -45,7 +45,9 @@ export const useMovies = (page = 1) => {
 };
 
 
-export const useVietnamMovies = createMovieHook("vietnam-movies", (page) => movieApi.getVietnamMovies(page !== undefined ? page : 4));
+export const useLatestMovies = createMovieHook("latest-movies", movieApi.getLatestMovies);
+
+export const useVietnamMovies = createMovieHook("vietnam-movies", movieApi.getVietnamMovies);
 export const useChinaMovies = createMovieHook("china-movies", movieApi.getChinaMovies);
 export const useJapanMovies = createMovieHook("japan-movies", movieApi.getJapanMovies);
 
