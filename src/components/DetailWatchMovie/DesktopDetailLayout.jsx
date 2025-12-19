@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
 import { getSafeImageUrl } from '../../utils/imageHelper';
 import TrailerModal from './TrailerModal';
+import { sanitizeHtmlContent } from '../../utils/htmlUtils';
 
 const DesktopDetailLayout = ({
   movieData,
@@ -78,7 +79,7 @@ const DesktopDetailLayout = ({
           <div className="lg:col-span-3 space-y-6">
             <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold mb-4 text-white">Thông Tin Phim</h2>
-              <p className="text-gray-300 mb-6 leading-relaxed">{movieData.content}</p>
+              <p className="text-gray-300 mb-6 leading-relaxed" dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(movieData.content) }}></p>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-3">

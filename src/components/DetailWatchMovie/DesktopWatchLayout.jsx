@@ -2,6 +2,7 @@ import React from 'react';
 import { Star, Calendar, Clock, Globe, Users, Film, Eye } from 'lucide-react';
 import VideoPlayer from './VideoPlayer';
 import EpisodeList from '../EpisodeList';
+import { sanitizeHtmlContent } from '../../utils/htmlUtils';
 
 const DesktopWatchLayout = ({
   movieData,
@@ -136,7 +137,7 @@ const DesktopWatchLayout = ({
  
         <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl mb-8">
           <h3 className="text-lg font-bold text-white mb-4">Nội Dung Phim</h3>
-          <p className="text-gray-300 leading-relaxed">{movieData.content}</p>
+          <p className="text-gray-300 leading-relaxed" dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(movieData.content) }}></p>
         </div>
 
 

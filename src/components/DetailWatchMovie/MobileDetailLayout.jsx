@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
 import { getSafeImageUrl } from '../../utils/imageHelper';
 import TrailerModal from './TrailerModal';
+import { sanitizeHtmlContent } from '../../utils/htmlUtils';
 
 const MobileDetailLayout = ({
   movieData,
@@ -103,7 +104,7 @@ const MobileDetailLayout = ({
 
         <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
           <h2 className="text-lg font-bold mb-3 text-white">Nội Dung Phim</h2>
-          <p className="text-gray-300 leading-relaxed text-sm">{movieData.content}</p>
+          <p className="text-gray-300 leading-relaxed text-sm" dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(movieData.content) }}></p>
         </div>
 
         <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">

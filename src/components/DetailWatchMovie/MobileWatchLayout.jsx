@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft, Star, Calendar, Eye, Globe, Film } from 'lucide-react';
 import VideoPlayer from './VideoPlayer';
 import EpisodeList from '../EpisodeList';
+import { sanitizeHtmlContent } from '../../utils/htmlUtils';
 
 const MobileWatchLayout = ({
   movieData,
@@ -107,7 +108,7 @@ const MobileWatchLayout = ({
 
           <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
             <h3 className="text-sm font-bold text-white mb-2">Nội Dung Phim</h3>
-            <p className="text-gray-300 leading-relaxed text-xs">{movieData.content}</p>
+            <p className="text-gray-300 leading-relaxed text-xs" dangerouslySetInnerHTML={{ __html: sanitizeHtmlContent(movieData.content) }}></p>
           </div>
 
           <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
