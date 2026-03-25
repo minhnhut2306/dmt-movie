@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Bell, Download, Share2, X, Smartphone, Sparkles, ExternalLink } from "lucide-react";
-import { LATEST_VERSION, VERSION_STORAGE_KEY } from "../config/appVersion";
+import { LATEST_VERSION } from "../config/appVersion";
 
 const READ_KEY = "dmt-notif-read";
 
@@ -10,6 +10,7 @@ const NotificationBell = () => {
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [readSet, setReadSet] = useState(new Set());
+  const [showIOSGuide, setShowIOSGuide] = useState(false);
   const ref = useRef(null);
 
   useEffect(() => {
@@ -21,7 +22,6 @@ const NotificationBell = () => {
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
     setIsIOS(ios);
 
-    // Đọc danh sách đã đọc từ localStorage
     try {
       const saved = JSON.parse(localStorage.getItem(READ_KEY) || "[]");
       setReadSet(new Set(saved));
@@ -33,7 +33,6 @@ const NotificationBell = () => {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
-  // Đóng khi click ra ngoài
   useEffect(() => {
     const handle = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false);
@@ -42,38 +41,22 @@ const NotificationBell = () => {
     return () => document.removeEventListener("mousedown", handle);
   }, [open]);
 
-  // Danh sách thông báo động
+  // PWA install trước (MỚI), V2 announcement sau
   const notifications = [
-    {
-      id: "v2-release",
-      icon: <Sparkles size={16} className="text-yellow-400" />,
-      title: `DMT Movie ${LATEST_VERSION.label} đã ra mắt!`,
-      body: LATEST_VERSION.message,
-      action: null,
-    },
-    ...(!isStandalone ? [{
-      id: "pwa-install",
-      icon: <Smartphone size={16} className="text-sky-400" />,
-      title: "Đã có phiên bản dành cho điện thoại!",
-      body: isIOS
-        ? null  // render riêng bên dưới
-        : "Đã có phiên bản DMT Movie V1 dành cho điện thoại, chọn vào đây để tải về!",
-      action: "install",
-    }] : []),
+    ...(!isStandalone ? [{ id: "pwa-install" }] : []),
+    { id: "v2-release" },
   ];
 
   const unreadCount = notifications.filter((n) => !readSet.has(n.id)).length;
 
-  const markAllRead = () => {
-    const ids = notifications.map((n) => n.id);
-    const next = new Set(ids);
-    setReadSet(next);
-    localStorage.setItem(READ_KEY, JSON.stringify([...next]));
-  };
-
   const handleOpen = () => {
     setOpen((p) => !p);
-    if (!open) markAllRead();
+    if (!open) {
+      const ids = notifications.map((n) => n.id);
+      const next = new Set(ids);
+      setReadSet(next);
+      localStorage.setItem(READ_KEY, JSON.stringify([...next]));
+    }
   };
 
   const handleInstall = async () => {
@@ -100,89 +83,99 @@ const NotificationBell = () => {
         )}
       </button>
 
-      {/* Dropdown — fixed góc phải màn hình */}
+      {/* Dropdown — fixed góc phải, co theo màn hình mobile */}
       {open && (
-        <div className="fixed right-3 top-14 sm:top-16 lg:top-20 w-[calc(100vw-24px)] max-w-sm z-50 animate-slide-up">
+        <div
+          className="fixed right-2 top-12 sm:top-14 lg:top-[72px] z-[999] animate-slide-up"
+          style={{ width: "min(340px, calc(100vw - 16px))" }}
+        >
           <div className="bg-[#12171f] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
 
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
-              <div className="flex items-center gap-2">
-                <Bell size={14} className="text-orange-400" />
+            <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/5">
+              <div className="flex items-center gap-1.5">
+                <Bell size={13} className="text-orange-400" />
                 <span className="text-white text-sm font-semibold">Thông báo</span>
-                {unreadCount === 0 && (
-                  <span className="text-gray-500 text-xs">· Đã đọc tất cả</span>
-                )}
               </div>
               <button
                 onClick={() => setOpen(false)}
                 className="p-1 hover:bg-white/10 rounded-lg transition-colors text-gray-500 hover:text-white"
               >
-                <X size={15} />
+                <X size={14} />
               </button>
             </div>
 
-            {/* Notification items */}
+            {/* Danh sách thông báo */}
             <div className="divide-y divide-white/5">
-              {notifications.map((notif, idx) => (
-                <div key={notif.id} className="p-4">
-                  <div className="flex gap-3">
-                    {/* Icon */}
-                    <div className="w-9 h-9 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      {notif.icon}
+
+              {/* 1. PWA Install — hiện nếu chưa cài */}
+              {!isStandalone && (
+                <div className="p-3">
+                  <div className="flex gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-sky-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Smartphone size={15} className="text-sky-400" />
                     </div>
-
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <p className="text-white font-semibold text-sm leading-snug">
-                          {notif.title}
-                        </p>
-                        {idx === 0 && (
-                          <span className="bg-orange-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0">
-                            MỚI
-                          </span>
-                        )}
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-white font-semibold text-xs">Đã có ứng dụng cho điện thoại!</p>
+                        <span className="bg-orange-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0">MỚI</span>
                       </div>
+                      <p className="text-gray-400 text-[11px] leading-relaxed mb-2">
+                        Cài DMT Movie lên điện thoại để xem phim nhanh hơn, không cần mở trình duyệt.
+                      </p>
 
-                      {/* Body text */}
-                      {notif.id === "pwa-install" && isIOS ? (
-                        <p className="text-gray-400 text-xs leading-relaxed">
-                          Nhấn <Share2 size={10} className="inline mb-0.5 text-blue-400" />{" "}
-                          <span className="text-blue-400 font-medium">Chia sẻ</span> → chọn{" "}
-                          <span className="text-orange-400 font-medium">"Thêm vào màn hình chính"</span>
-                        </p>
-                      ) : (
-                        <p className="text-gray-400 text-xs leading-relaxed">{notif.body}</p>
-                      )}
+                      {/* Nút cài — Android cài thẳng, iOS hiện popup */}
+                      <button
+                        onClick={isIOS ? () => setShowIOSGuide(true) : handleInstall}
+                        className="w-full flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-500 active:scale-95 text-white text-[11px] font-semibold px-3 py-2 rounded-lg transition-all"
+                      >
+                        <Download size={12} />
+                        Ấn vào đây để cài đặt
+                      </button>
 
-                      {/* Action button */}
-                      {notif.id === "v2-release" && (
-                        <a
-                          href={LATEST_VERSION.v2Url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 mt-2 bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-400 hover:to-orange-300 active:scale-95 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-all shadow-md shadow-orange-500/20"
-                        >
-                          <Sparkles size={12} />
-                          Chuyển sang {LATEST_VERSION.label}
-                          <ExternalLink size={11} />
-                        </a>
-                      )}
-
-                      {notif.id === "pwa-install" && !isIOS && deferredPrompt && (
-                        <button
-                          onClick={handleInstall}
-                          className="inline-flex items-center gap-1.5 mt-2 bg-sky-600 hover:bg-sky-500 active:scale-95 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
-                        >
-                          <Download size={13} />
-                          Tải về
-                        </button>
+                      {/* iOS popup hướng dẫn */}
+                      {isIOS && showIOSGuide && (
+                        <div className="mt-2 bg-white/5 border border-white/10 rounded-lg p-2.5 flex items-start gap-2">
+                          <Share2 size={13} className="text-blue-400 flex-shrink-0 mt-0.5" />
+                          <p className="text-[11px] text-gray-300 leading-relaxed">
+                            Nhấn <span className="text-blue-400 font-medium">Chia sẻ</span>{" "}
+                            ở thanh dưới → chọn{" "}
+                            <span className="text-orange-400 font-medium">"Thêm vào màn hình chính"</span>
+                          </p>
+                        </div>
                       )}
                     </div>
                   </div>
                 </div>
-              ))}
+              )}
+
+              {/* 2. V2 Release */}
+              <div className="p-3">
+                <div className="flex gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-yellow-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Sparkles size={15} className="text-yellow-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white font-semibold text-xs mb-1">
+                      DMT Movie {LATEST_VERSION.label} đã ra mắt!
+                    </p>
+                    <p className="text-gray-400 text-[11px] leading-relaxed mb-2">
+                      {LATEST_VERSION.message}
+                    </p>
+                    <a
+                      href={LATEST_VERSION.v2Url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-400 hover:to-orange-300 active:scale-95 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all"
+                    >
+                      <Sparkles size={11} />
+                      Chuyển sang {LATEST_VERSION.label}
+                      <ExternalLink size={10} />
+                    </a>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
