@@ -143,14 +143,14 @@ const DesktopWatchLayout = ({
         <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl mb-8">
           <h3 className="text-lg font-bold text-white mb-4">Diễn Viên</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-            {movieData.actor?.map((actor, index) => (
+            {movieData.actor?.length > 0 ? movieData.actor.map((actor, index) => (
               <div
                 key={index}
                 className="bg-gradient-to-r from-gray-700 to-gray-600 text-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gradient-to-r hover:from-gray-600 hover:to-gray-500 transition-all duration-300 cursor-pointer text-center"
               >
                 {actor}
               </div>
-            ))}
+            )) : <span className="text-gray-400 text-sm">Không có diễn viên nào.</span>}
           </div>
         </div>
       </div>
