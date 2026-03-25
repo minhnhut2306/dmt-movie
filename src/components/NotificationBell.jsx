@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bell, Download, Share2, X, Smartphone, Sparkles, ExternalLink } from "lucide-react";
-import { LATEST_VERSION } from "../config/appVersion";
+import { Bell, Download, Share2, X, Smartphone } from "lucide-react";
 
 const READ_KEY = "dmt-notif-read";
 
@@ -41,10 +40,8 @@ const NotificationBell = () => {
     return () => document.removeEventListener("mousedown", handle);
   }, [open]);
 
-  // PWA install trước (MỚI), V2 announcement sau
   const notifications = [
     ...(!isStandalone ? [{ id: "pwa-install" }] : []),
-    { id: "v2-release" },
   ];
 
   const unreadCount = notifications.filter((n) => !readSet.has(n.id)).length;
@@ -149,32 +146,6 @@ const NotificationBell = () => {
                 </div>
               )}
 
-              {/* 2. V2 Release */}
-              <div className="p-3">
-                <div className="flex gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-yellow-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Sparkles size={15} className="text-yellow-400" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-semibold text-xs mb-1">
-                      DMT Movie {LATEST_VERSION.label} đã ra mắt!
-                    </p>
-                    <p className="text-gray-400 text-[11px] leading-relaxed mb-2">
-                      {LATEST_VERSION.message}
-                    </p>
-                    <a
-                      href={LATEST_VERSION.v2Url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-400 hover:to-orange-300 active:scale-95 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all"
-                    >
-                      <Sparkles size={11} />
-                      Chuyển sang {LATEST_VERSION.label}
-                      <ExternalLink size={10} />
-                    </a>
-                  </div>
-                </div>
-              </div>
 
             </div>
           </div>
