@@ -128,14 +128,14 @@ const MobileWatchLayout = ({
           <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
             <h3 className="text-sm font-bold text-white mb-3">Diễn Viên</h3>
             <div className="grid grid-cols-2 gap-2">
-              {movieData.actor?.slice(0, 6).map((actor, index) => (
+              {movieData.actor?.length > 0 ? movieData.actor.slice(0, 6).map((actor, index) => (
                 <div
                   key={index}
                   className="bg-gradient-to-r from-gray-700 to-gray-600 text-gray-200 px-2 py-2 rounded-lg text-xs text-center"
                 >
                   {actor}
                 </div>
-              ))}
+              )) : <span className="text-gray-400 text-xs">Không có diễn viên nào.</span>}
             </div>
           </div>
         </div>
