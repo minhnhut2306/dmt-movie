@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Moon, Menu, X, Search, ChevronDown } from "lucide-react";
 import SearchInput from "./Search/SearchInput";
 import { ALL_GENRES, ALL_COUNTRIES, ALL_YEARS, CATEGORY_TYPES } from "../utils/CategoryConfig";
+import NotificationBell from "./NotificationBell";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -128,9 +129,11 @@ const Navbar = () => {
                 </div>
               </div>
             </div>
+            <NotificationBell />
           </div>
 
           <div className="flex items-center lg:hidden space-x-2">
+            <NotificationBell />
             <button onClick={toggleMobileSearch} className="p-1.5 hover:bg-gray-700 rounded-md transition-colors">
               <Search size={18} className="text-gray-300" />
             </button>
