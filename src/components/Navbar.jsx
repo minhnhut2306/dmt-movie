@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Menu, X, Search, ChevronDown, Loader2 } from "lucide-react";
+import NotificationBell from "./NotificationBell";
 import SearchInput from "./Search/SearchInput";
 import { useGenres, useCountries, useYears, transformGenres, transformCountries, transformYears } from "../hooks/useCategoryHooks";
 
@@ -119,10 +120,12 @@ const Navbar = () => {
                 )}
               </div>
             </div>
+            <NotificationBell />
           </div>
 
           {/* Mobile Buttons */}
           <div className="flex items-center lg:hidden space-x-2">
+            <NotificationBell />
             <button onClick={toggleMobileSearch} className="p-1.5 hover:bg-gray-700 rounded-md transition-colors">
               <Search size={18} className="text-gray-300" />
             </button>

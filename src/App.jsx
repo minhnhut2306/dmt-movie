@@ -9,6 +9,7 @@ import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import SearchPage from './pages/Search/SearchPage';
 import CategoryPage from './pages/CategoryPage/CategoryPage';
+import PWAUpdatePrompt from './components/PWAUpdatePrompt';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +33,7 @@ const App = () => {
           <Route path="/search" element={<SearchPage />} />
         </Routes>
         <Footer/>
+        <PWAUpdatePrompt />
       </BrowserRouter>
       <Toaster
         position="top-right"
