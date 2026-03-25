@@ -8,6 +8,12 @@ const PWAUpdatePrompt = () => {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
 
+    // Chỉ hiện khi đang dùng app đã cài (standalone)
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+    if (!isStandalone) return;
+
     navigator.serviceWorker.ready.then((reg) => {
       setRegistration(reg);
 
