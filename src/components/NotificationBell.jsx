@@ -95,6 +95,13 @@ const NotificationBell = () => {
               </button>
             </div>
 
+              {notifications.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+                  <Bell size={28} className="text-gray-600 mb-2" />
+                  <p className="text-gray-500 text-xs">Hiện tại chưa có thông báo nào.</p>
+                </div>
+              )}
+
             {!isStandalone && (
               <div className="p-3">
                 <div className="flex gap-2.5">

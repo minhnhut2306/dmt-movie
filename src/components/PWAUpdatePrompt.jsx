@@ -8,6 +8,11 @@ const PWAUpdatePrompt = () => {
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
 
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+    if (!isStandalone) return;
+
     navigator.serviceWorker.ready.then((reg) => {
       setRegistration(reg);
 
@@ -26,6 +31,7 @@ const PWAUpdatePrompt = () => {
       });
     });
 
+    // Khi user bấm "Cập nhật" → SW mới lên thay → reload
     let refreshing = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
       if (!refreshing) {
@@ -36,9 +42,15 @@ const PWAUpdatePrompt = () => {
   }, []);
 
   const handleUpdate = () => {
+    // User đồng ý → kích hoạt SW mới ngay
     if (registration?.waiting) {
       registration.waiting.postMessage({ type: "SKIP_WAITING" });
     }
+    setNeedRefresh(false);
+  };
+
+  const handleDismiss = () => {
+    // User không muốn cập nhật → ẩn banner, SW mới chờ đến lần mở app sau
     setNeedRefresh(false);
   };
 
@@ -46,26 +58,34 @@ const PWAUpdatePrompt = () => {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-[9999] max-w-sm mx-auto animate-slide-up">
-      <div className="bg-[#1a1f2e] border border-sky-500/40 rounded-2xl shadow-2xl p-4 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-sky-500/10 flex items-center justify-center flex-shrink-0">
-          <RefreshCw size={17} className="text-sky-400 animate-spin" style={{ animationDuration: "3s" }} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold text-sm">Có bản cập nhật mới!</p>
-          <p className="text-gray-400 text-xs mt-0.5">Nhấn cập nhật để dùng phiên bản mới nhất.</p>
-        </div>
-        <div className="flex gap-2 flex-shrink-0">
+      <div className="bg-[#1a1f2e] border border-sky-500/40 rounded-2xl shadow-2xl p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-sky-500/10 flex items-center justify-center flex-shrink-0">
+            <RefreshCw size={17} className="text-sky-400 animate-spin" style={{ animationDuration: "3s" }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white font-semibold text-sm">Có bản cập nhật mới!</p>
+            <p className="text-gray-400 text-xs mt-0.5">Cập nhật ngay hoặc để lần sau.</p>
+          </div>
           <button
-            onClick={handleUpdate}
-            className="bg-sky-600 hover:bg-sky-500 active:scale-95 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
-          >
-            Cập nhật
-          </button>
-          <button
-            onClick={() => setNeedRefresh(false)}
-            className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-gray-500 hover:text-white"
+            onClick={handleDismiss}
+            className="p-1.5 hover:bg-white/10 rounded-lg transition-colors text-gray-500 hover:text-white flex-shrink-0"
           >
             <X size={14} />
+          </button>
+        </div>
+        <div className="flex gap-2 mt-3">
+          <button
+            onClick={handleUpdate}
+            className="flex-1 bg-sky-600 hover:bg-sky-500 active:scale-95 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all"
+          >
+            Cập nhật ngay
+          </button>
+          <button
+            onClick={handleDismiss}
+            className="flex-1 bg-white/5 hover:bg-white/10 active:scale-95 text-gray-300 text-xs font-semibold px-3 py-2 rounded-lg transition-all"
+          >
+            Để lần sau
           </button>
         </div>
       </div>
