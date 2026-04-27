@@ -42,6 +42,7 @@ const NotificationBell = () => {
   }, [open]);
 
   const notifications = [
+    { id: "auto-skip-ads" },
     ...(!isStandalone ? [{ id: "pwa-install" }] : []),
     ...(!isStandalone ? [{ id: "v2-release" }] : []),
   ];
@@ -113,7 +114,25 @@ const NotificationBell = () => {
                 </div>
               )}
 
-              {/* 1. PWA Install — hiện nếu chưa cài */}
+              {/* 1. Auto skip ads */}
+              <div className="p-3">
+                <div className="flex gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-green-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Sparkles size={15} className="text-green-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-white font-semibold text-xs">Tự động bỏ qua quảng cáo!</p>
+                      <span className="bg-green-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0">MỚI</span>
+                    </div>
+                    <p className="text-gray-400 text-[11px] leading-relaxed">
+                      DMT Movie giờ tự động phát hiện và bỏ qua quảng cáo trong video, không cần bấm gì thêm.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. PWA Install — hiện nếu chưa cài */}
               {!isStandalone && (
                 <div className="p-3">
                   <div className="flex gap-2.5">
@@ -123,7 +142,6 @@ const NotificationBell = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <p className="text-white font-semibold text-xs">Đã có ứng dụng cho điện thoại!</p>
-                        <span className="bg-orange-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0">MỚI</span>
                       </div>
                       <p className="text-gray-400 text-[11px] leading-relaxed mb-2">
                         Cài DMT Movie lên điện thoại để xem phim nhanh hơn, không cần mở trình duyệt.

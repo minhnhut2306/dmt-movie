@@ -2,61 +2,130 @@ import React, { useEffect, useRef } from 'react';
 import { Play, Minimize } from 'lucide-react';
 import Hls from 'hls.js';
 
-const VideoPlayer = ({ 
-  currentVideoUrl, 
-  isFullscreen, 
+const isRoundDuration = (d) => Number.isInteger(d) || Math.abs(d - Math.round(d)) < 0.05;
+
+const findAdRanges = (fragments) => {
+  const adRanges = [];
+  let accumulated = 0;
+  let adStart = null;
+
+  for (const frag of fragments) {
+    const isAd = frag.relurl && (
+      /\/v\d+\//.test(frag.relurl) ||
+      frag.relurl.includes('convertv7/')
+    );
+    if (isAd && adStart === null) adStart = accumulated;
+    else if (!isAd && adStart !== null) {
+      adRanges.push({ start: adStart, end: accumulated });
+      adStart = null;
+    }
+    accumulated += frag.duration;
+  }
+  if (adStart !== null) adRanges.push({ start: adStart, end: accumulated });
+
+  if (adRanges.length === 0) {
+    accumulated = 0;
+    let roundStart = null;
+    let roundCount = 0;
+
+    for (const frag of fragments) {
+      if (isRoundDuration(frag.duration)) {
+        if (roundStart === null) roundStart = accumulated;
+        roundCount++;
+      } else {
+        if (roundCount >= 6) {
+          const duration = accumulated - roundStart;
+          if (duration >= 15 && duration <= 120) {
+            adRanges.push({ start: roundStart, end: accumulated });
+          }
+        }
+        roundStart = null;
+        roundCount = 0;
+      }
+      accumulated += frag.duration;
+    }
+    if (roundCount >= 6) {
+      const duration = accumulated - roundStart;
+      if (duration >= 15 && duration <= 120) {
+        adRanges.push({ start: roundStart, end: accumulated });
+      }
+    }
+  }
+
+  return adRanges;
+};
+
+const VideoPlayer = ({
+  currentVideoUrl,
+  isFullscreen,
   setIsFullscreen,
-  autoPlay = true 
+  autoPlay = true
 }) => {
   const videoRef = useRef(null);
+  const adRangesRef = useRef([]);
+  const skippedRef = useRef(new Set());
 
   useEffect(() => {
     if (!currentVideoUrl) return;
 
     const video = videoRef.current;
-    if (Hls.isSupported()) {
-      const hls = new Hls({
-        debug: false,
-        enableWorker: true,
-        lowLatencyMode: true,
-        backBufferLength: 90,
-      });
-      
-      hls.loadSource(currentVideoUrl);
-      hls.attachMedia(video);
-      
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        console.log('HLS manifest loaded');
-      });
-      
-      hls.on(Hls.Events.ERROR, (event, data) => {
-        console.error('HLS Error:', data);
-        if (data.fatal) {
-          switch (data.type) {
-            case Hls.ErrorTypes.NETWORK_ERROR:
-              console.log('Fatal network error encountered, try to recover');
-              hls.startLoad();
-              break;
-            case Hls.ErrorTypes.MEDIA_ERROR:
-              console.log('Fatal media error encountered, try to recover');
-              hls.recoverMediaError();
-              break;
-            default:
-              console.log('Fatal error, cannot recover');
-              hls.destroy();
-              break;
-          }
-        }
-      });
+    adRangesRef.current = [];
+    skippedRef.current = new Set();
 
-      return () => {
-        if (hls) {
-          hls.destroy();
-        }
-      };
-    } else if (video && video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = currentVideoUrl;
+    if (!Hls.isSupported()) {
+      if (video?.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = currentVideoUrl;
+      }
+      return;
     }
+
+    // Dùng proxy để lọc QC từ m3u8
+    const proxyBase = import.meta.env.DEV ? 'http://localhost:3000' : '';
+    const proxyUrl = `${proxyBase}/api/m3u8-proxy?url=${encodeURIComponent(currentVideoUrl)}`;
+
+    const hls = new Hls({
+      debug: false,
+      enableWorker: true,
+      lowLatencyMode: true,
+      backBufferLength: 90,
+    });
+
+    hls.loadSource(proxyUrl);
+    hls.attachMedia(video);
+
+    hls.on(Hls.Events.LEVEL_LOADED, (event, data) => {
+      adRangesRef.current = findAdRanges(data.details.fragments);
+      console.log('Ad ranges:', adRangesRef.current);
+    });
+
+    hls.on(Hls.Events.ERROR, (event, data) => {
+      if (data.fatal) {
+        switch (data.type) {
+          case Hls.ErrorTypes.NETWORK_ERROR: hls.startLoad(); break;
+          case Hls.ErrorTypes.MEDIA_ERROR: hls.recoverMediaError(); break;
+          default: hls.destroy(); break;
+        }
+      }
+    });
+
+    const handleTimeUpdate = () => {
+      const currentTime = video.currentTime;
+      for (const ad of adRangesRef.current) {
+        if (currentTime >= ad.start - 0.5 && currentTime < ad.end && !skippedRef.current.has(ad.start)) {
+          skippedRef.current.add(ad.start);
+          video.currentTime = ad.end + 0.1;
+          console.log(`Skipped ad: ${ad.start.toFixed(1)}s → ${ad.end.toFixed(1)}s`);
+          break;
+        }
+      }
+    };
+
+    video.addEventListener('timeupdate', handleTimeUpdate);
+
+    return () => {
+      video.removeEventListener('timeupdate', handleTimeUpdate);
+      hls.destroy();
+    };
   }, [currentVideoUrl]);
 
   if (!currentVideoUrl) {
