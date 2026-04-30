@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Menu, X, Search, ChevronDown, Filter } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import FilterModal from "./FilterModal";
 import { 
   useDynamicGenres, 
@@ -33,7 +33,7 @@ const Navbar = () => {
     params.append('sort_field', filters.sortField);
     params.append('sort_type', filters.sortType);
     
-    window.location.href = `/filter?${params.toString()}`;
+    navigate(`/filter?${params.toString()}`);
   };
 
   const handleSearch = (e) => {
@@ -71,36 +71,36 @@ const Navbar = () => {
             <div className="flex items-center justify-between h-14">
               
               {/* Logo */}
-              <a href="/" className="flex items-center">
+              <Link to="/" className="flex items-center">
                 <h1 className="text-2xl font-bold">
                   <span className="text-orange-500">DMT</span>
                   <span className="text-blue-400">Movie</span>
                 </h1>
-              </a>
+              </Link>
 
               {/* Desktop Menu chính */}
               <div className="hidden lg:flex items-center space-x-8">
-                <a href="/category/danh-sach/phim-bo" className="text-sm font-medium hover:text-orange-500 transition-colors">
+                <Link to="/category/danh-sach/phim-bo" className="text-sm font-medium hover:text-orange-500 transition-colors">
                   Phim Bộ
-                </a>
-                <a href="/category/danh-sach/phim-le" className="text-sm font-medium hover:text-orange-500 transition-colors">
+                </Link>
+                <Link to="/category/danh-sach/phim-le" className="text-sm font-medium hover:text-orange-500 transition-colors">
                   Phim Lẻ
-                </a>
-                <a href="/category/danh-sach/phim-chieu-rap" className="text-sm font-medium hover:text-orange-500 transition-colors">
+                </Link>
+                <Link to="/category/danh-sach/phim-chieu-rap" className="text-sm font-medium hover:text-orange-500 transition-colors">
                   Phim Chiếu Rạp
-                </a>
-                <a href="/category/danh-sach/hoat-hinh" className="text-sm font-medium hover:text-orange-500 transition-colors">
+                </Link>
+                <Link to="/category/danh-sach/hoat-hinh" className="text-sm font-medium hover:text-orange-500 transition-colors">
                   Hoạt Hình
-                </a>
-                <a href="/category/danh-sach/phim-vietsub" className="text-sm font-medium hover:text-orange-500 transition-colors">
+                </Link>
+                <Link to="/category/danh-sach/phim-vietsub" className="text-sm font-medium hover:text-orange-500 transition-colors">
                   Vietsub
-                </a>
-                <a href="/category/danh-sach/phim-thuyet-minh" className="text-sm font-medium hover:text-orange-500 transition-colors">
+                </Link>
+                <Link to="/category/danh-sach/phim-thuyet-minh" className="text-sm font-medium hover:text-orange-500 transition-colors">
                   Thuyết Minh
-                </a>
-                <a href="/category/danh-sach/phim-long-tieng" className="text-sm font-medium hover:text-orange-500 transition-colors">
+                </Link>
+                <Link to="/category/danh-sach/phim-long-tieng" className="text-sm font-medium hover:text-orange-500 transition-colors">
                   Lồng Tiếng
-                </a>
+                </Link>
 
                 {/* Thể loại Dropdown */}
                 <div className="relative">
@@ -123,13 +123,14 @@ const Navbar = () => {
                       >
                         <div className="p-4 grid grid-cols-3 gap-2 max-h-96 overflow-y-auto scrollbar-hide">
                           {displayGenres.map(genre => (
-                            <a
+                            <Link
                               key={genre.slug}
-                              href={genre.fullPath}
+                              to={genre.fullPath}
+                              onClick={() => setActiveDropdown(null)}
                               className="px-3 py-2 bg-black hover:bg-orange-500 rounded-lg text-sm transition-all text-center border border-gray-800"
                             >
                               {genre.name}
-                            </a>
+                            </Link>
                           ))}
                         </div>
                       </div>
@@ -158,13 +159,14 @@ const Navbar = () => {
                       >
                         <div className="p-4 grid grid-cols-3 gap-2 max-h-96 overflow-y-auto scrollbar-hide">
                           {displayCountries.map(country => (
-                            <a
+                            <Link
                               key={country.slug}
-                              href={country.fullPath}
+                              to={country.fullPath}
+                              onClick={() => setActiveDropdown(null)}
                               className="px-3 py-2 bg-black hover:bg-orange-500 rounded-lg text-sm transition-all text-center border border-gray-800"
                             >
                               {country.name}
-                            </a>
+                            </Link>
                           ))}
                         </div>
                       </div>
@@ -193,13 +195,14 @@ const Navbar = () => {
                       >
                         <div className="p-4 grid grid-cols-4 gap-2">
                           {displayYears.map(year => (
-                            <a
+                            <Link
                               key={year.slug}
-                              href={year.fullPath}
+                              to={year.fullPath}
+                              onClick={() => setActiveDropdown(null)}
                               className="px-2 py-2 bg-black hover:bg-orange-500 rounded-lg text-sm transition-all text-center border border-gray-800"
                             >
                               {year.name}
-                            </a>
+                            </Link>
                           ))}
                         </div>
                       </div>
@@ -315,27 +318,27 @@ const Navbar = () => {
               <div className="space-y-2">
                 {/* Grid 2 cột cho mobile */}
                 <div className="grid grid-cols-2 gap-2">
-                  <a href="/category/danh-sach/phim-bo" className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
+                  <Link to="/category/danh-sach/phim-bo" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
                     Phim Bộ
-                  </a>
-                  <a href="/category/danh-sach/phim-le" className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
+                  </Link>
+                  <Link to="/category/danh-sach/phim-le" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
                     Phim Lẻ
-                  </a>
-                  <a href="/category/danh-sach/phim-chieu-rap" className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
+                  </Link>
+                  <Link to="/category/danh-sach/phim-chieu-rap" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
                     Phim Chiếu Rạp
-                  </a>
-                  <a href="/category/danh-sach/hoat-hinh" className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
+                  </Link>
+                  <Link to="/category/danh-sach/hoat-hinh" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
                     Hoạt Hình
-                  </a>
-                  <a href="/category/danh-sach/phim-vietsub" className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
+                  </Link>
+                  <Link to="/category/danh-sach/phim-vietsub" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
                     Vietsub
-                  </a>
-                  <a href="/category/danh-sach/phim-thuyet-minh" className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
+                  </Link>
+                  <Link to="/category/danh-sach/phim-thuyet-minh" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
                     Thuyết Minh
-                  </a>
-                  <a href="/category/danh-sach/phim-long-tieng" className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
+                  </Link>
+                  <Link to="/category/danh-sach/phim-long-tieng" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
                     Lồng Tiếng
-                  </a>
+                  </Link>
                 </div>
 
                 <button
@@ -360,13 +363,14 @@ const Navbar = () => {
                         <div className="max-h-48 overflow-y-auto scrollbar-hide">
                           <div className="grid grid-cols-2 gap-2">
                             {displayGenres.map(genre => (
-                              <a
+                              <Link
                                 key={genre.slug}
-                                href={genre.fullPath}
+                                to={genre.fullPath}
+                                onClick={toggleMenu}
                                 className="block px-2 py-2 text-sm text-gray-300 hover:bg-orange-500 hover:text-white rounded-lg transition-all text-center"
                               >
                                 {genre.name}
-                              </a>
+                              </Link>
                             ))}
                           </div>
                         </div>
@@ -387,13 +391,14 @@ const Navbar = () => {
                         <div className="max-h-48 overflow-y-auto scrollbar-hide">
                           <div className="grid grid-cols-2 gap-2">
                             {displayCountries.map(country => (
-                              <a
+                              <Link
                                 key={country.slug}
-                                href={country.fullPath}
+                                to={country.fullPath}
+                                onClick={toggleMenu}
                                 className="block px-2 py-2 text-sm text-gray-300 hover:bg-orange-500 hover:text-white rounded-lg transition-all text-center"
                               >
                                 {country.name}
-                              </a>
+                              </Link>
                             ))}
                           </div>
                         </div>
@@ -413,13 +418,14 @@ const Navbar = () => {
                       <div className="mt-2 max-h-48 overflow-y-auto scrollbar-hide">
                         <div className="grid grid-cols-3 gap-2">
                           {displayYears.map(year => (
-                            <a
+                            <Link
                               key={year.slug}
-                              href={year.fullPath}
+                              to={year.fullPath}
+                              onClick={toggleMenu}
                               className="block px-2 py-2 text-sm text-gray-300 hover:bg-orange-500 hover:text-white rounded-lg transition-all text-center"
                             >
                               {year.name}
-                            </a>
+                            </Link>
                           ))}
                         </div>
                       </div>

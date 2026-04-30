@@ -1,8 +1,12 @@
-// src/components/UnifiedMovieCard.jsx - UNIFIED MOVIE CARD COMPONENT
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Play, Star, Loader2 } from 'lucide-react';
 import { useMovieImage } from '../hooks/useMovieImage';
+
+// Computed once at module load — không chạy lại mỗi render
+const isFacebookInApp = /FBAN|FBAV|FB_IAB|FB4A|FBAN\/Messenger|Instagram/i.test(
+  navigator.userAgent || ''
+);
 
 /**
  * Unified Movie Card Component - Thay thế MovieCard, MovieCardDetail, SearchMovieCard
@@ -35,10 +39,6 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
     displayTitle
   );
 
-  // Detect Facebook/Instagram in-app browser
-  const isFacebookInApp = /FBAN|FBAV|FB_IAB|FB4A|FBAN\/Messenger|Instagram/i.test(
-    navigator.userAgent || ''
-  );
   const loadingAttr = isFacebookInApp ? 'eager' : 'lazy';
 
   const handleClick = () => {
@@ -52,7 +52,7 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
   if (variant === 'carousel') {
     return (
       <div
-        className={`group cursor-pointer transform transition-all duration-300 hover:scale-105 flex-shrink-0 
+        className={`group cursor-pointer transform transition-transform duration-300 hover:scale-105 flex-shrink-0
                    w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 px-2 mb-4 ${className}`}
         onClick={handleClick}
       >
@@ -135,7 +135,7 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
   if (variant === 'grid') {
     return (
       <div
-        className={`group cursor-pointer transform transition-all duration-300 hover:scale-105 w-full ${className}`}
+        className={`group cursor-pointer transform transition-transform duration-300 hover:scale-105 w-full ${className}`}
         onClick={handleClick}
       >
         <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300">

@@ -17,11 +17,10 @@
     -moz-osx-font-smoothing: grayscale;
   }
   
-  /* Optimize video rendering */
-  video {
+  /* Optimize video rendering — only when playing, not on load */
+  video:not([paused]) {
     transform: translateZ(0);
     -webkit-transform: translateZ(0);
-    will-change: transform;
   }
   
   /* Hide scrollbar but keep functionality */

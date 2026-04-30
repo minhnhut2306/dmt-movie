@@ -1,5 +1,4 @@
-// components/GenericMoviesSection.jsx
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import UnifiedMovieCard from '../UnifiedMovieCard';
@@ -174,4 +173,4 @@ const GenericMoviesSection = ({
   );
 };
 
-export default GenericMoviesSection;
+export default memo(GenericMoviesSection);

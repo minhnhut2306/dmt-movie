@@ -1,16 +1,18 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
-import Home from './pages/home/Home';
-import MovieLayouts from './pages/Movie/MovieLayouts';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
-import SearchPage from './pages/Search/SearchPage';
-import CategoryPage from './pages/CategoryPage/CategoryPage';
-import FilterPage from './pages/FilterPage/FilterPage';
 import PWAUpdatePrompt from './components/PWAUpdatePrompt';
+
+// Lazy load routes — giảm initial bundle
+const Home = lazy(() => import('./pages/home/Home'));
+const MovieLayouts = lazy(() => import('./pages/Movie/MovieLayouts'));
+const SearchPage = lazy(() => import('./pages/Search/SearchPage'));
+const CategoryPage = lazy(() => import('./pages/CategoryPage/CategoryPage'));
+const FilterPage = lazy(() => import('./pages/FilterPage/FilterPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,13 +35,15 @@ const App = () => {
       <BrowserRouter>
         <ScrollToTop />
         <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/movie/:slug" element={<MovieLayouts />} />
-          <Route path="/category/:categoryType/:categorySlug" element={<CategoryPage/>} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/filter" element={<FilterPage />} />
-        </Routes>
+        <Suspense fallback={<div className="min-h-screen bg-gray-900" />}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/movie/:slug" element={<MovieLayouts />} />
+            <Route path="/category/:categoryType/:categorySlug" element={<CategoryPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/filter" element={<FilterPage />} />
+          </Routes>
+        </Suspense>
         <Footer/>
         <PWAUpdatePrompt />
       </BrowserRouter>

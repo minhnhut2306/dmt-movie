@@ -72,20 +72,26 @@ const VideoPlayer = ({
     const handleOrientationChange = () => {
       const isLandscapeMode = window.matchMedia('(orientation: landscape)').matches;
       setIsLandscape(isLandscapeMode);
-      
-      // Auto fullscreen on landscape mobile
       if (isLandscapeMode && window.innerWidth < 1024) {
         setIsFullscreen(true);
       }
     };
 
+    // Debounce resize để tránh setState liên tục khi kéo cửa sổ
+    let resizeTimer;
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(handleOrientationChange, 150);
+    };
+
     handleOrientationChange();
     window.addEventListener('orientationchange', handleOrientationChange);
-    window.addEventListener('resize', handleOrientationChange);
+    window.addEventListener('resize', handleResize);
 
     return () => {
+      clearTimeout(resizeTimer);
       window.removeEventListener('orientationchange', handleOrientationChange);
-      window.removeEventListener('resize', handleOrientationChange);
+      window.removeEventListener('resize', handleResize);
     };
   }, [setIsFullscreen]);
 
@@ -134,10 +140,10 @@ const VideoPlayer = ({
       debug: false,
       enableWorker: true,
       lowLatencyMode: false,
-      backBufferLength: 90,
+      backBufferLength: 30,        // 90 → 30s, tiết kiệm RAM/mobile
       maxBufferLength: 30,
       maxMaxBufferLength: 60,
-      maxBufferSize: 60 * 1000 * 1000,
+      maxBufferSize: 20 * 1000 * 1000, // 60MB → 20MB
       maxBufferHole: 0.5,
       highBufferWatchdogPeriod: 2,
       nudgeMaxRetry: 5,
@@ -147,17 +153,13 @@ const VideoPlayer = ({
       levelLoadingMaxRetry: 4,
       fragLoadingTimeOut: 20000,
       fragLoadingMaxRetry: 6,
-      // Performance optimization
       abrEwmaDefaultEstimate: 500000,
       abrBandWidthFactor: 0.95,
       abrBandWidthUpFactor: 0.7,
-      startLevel: -1, // Auto quality
-      // Mobile optimization
+      startLevel: -1,
       maxLoadingDelay: 4,
-      maxBufferHole: 0.5,
       liveSyncDurationCount: 3,
       liveMaxLatencyDurationCount: 10,
-      // Faster startup
       startFragPrefetch: true,
       testBandwidth: true,
     });

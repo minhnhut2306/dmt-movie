@@ -1,19 +1,23 @@
-// src/hooks/useMovieImage.js - SHARED IMAGE LOADING HOOK
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { buildImageCandidates } from '../utils/imageHelper';
 
-/**
- * Hook quản lý state loading ảnh với fallback chain
- * @param {string} rawUrl - URL ảnh gốc
- * @param {string} fallbackText - Text hiển thị khi không có ảnh
- * @returns {object} - { currentSrc, isLoaded, hasError, handleLoad, handleError }
- */
 export const useMovieImage = (rawUrl, fallbackText = 'No Image') => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [srcIndex, setSrcIndex] = useState(0);
 
-  const candidates = buildImageCandidates(rawUrl, fallbackText);
+  const candidates = useMemo(
+    () => buildImageCandidates(rawUrl, fallbackText),
+    [rawUrl, fallbackText]
+  );
+
+  // Reset khi URL thay đổi (e.g. navigate sang phim khác)
+  useEffect(() => {
+    setSrcIndex(0);
+    setIsLoaded(false);
+    setHasError(false);
+  }, [rawUrl]);
+
   const currentSrc = candidates[srcIndex];
 
   const handleLoad = () => {
@@ -22,22 +26,14 @@ export const useMovieImage = (rawUrl, fallbackText = 'No Image') => {
   };
 
   const handleError = () => {
-    // Thử URL tiếp theo trong chain
     if (srcIndex < candidates.length - 1) {
-      setSrcIndex(prev => prev + 1);
+      setSrcIndex((prev) => prev + 1);
       setIsLoaded(false);
     } else {
-      // Hết URLs để thử
       setHasError(true);
       setIsLoaded(true);
     }
   };
 
-  return {
-    currentSrc,
-    isLoaded,
-    hasError,
-    handleLoad,
-    handleError,
-  };
+  return { currentSrc, isLoaded, hasError, handleLoad, handleError };
 };
