@@ -9,13 +9,20 @@ import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import SearchPage from './pages/Search/SearchPage';
 import CategoryPage from './pages/CategoryPage/CategoryPage';
+import FilterPage from './pages/FilterPage/FilterPage';
 import PWAUpdatePrompt from './components/PWAUpdatePrompt';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5,
-      retry: 1,
+      staleTime: 10 * 60 * 1000, // 10 phút
+      gcTime: 30 * 60 * 1000, // 30 phút
+      retry: 2,
+      retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 3000),
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+      refetchOnMount: false, // Không refetch khi mount nếu có cache
+      networkMode: 'online', // Chỉ fetch khi online
     },
   },
 });
@@ -31,6 +38,7 @@ const App = () => {
           <Route path="/movie/:slug" element={<MovieLayouts />} />
           <Route path="/category/:categoryType/:categorySlug" element={<CategoryPage/>} />
           <Route path="/search" element={<SearchPage />} />
+          <Route path="/filter" element={<FilterPage />} />
         </Routes>
         <Footer/>
         <PWAUpdatePrompt />

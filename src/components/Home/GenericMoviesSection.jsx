@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import MovieCard from '../MovieCard';
+import UnifiedMovieCard from '../UnifiedMovieCard';
 
 const GenericMoviesSection = ({ 
   // Section config
@@ -166,7 +166,7 @@ const GenericMoviesSection = ({
           }}
         >
           {movies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
+            <UnifiedMovieCard key={movie.id} movie={movie} variant="carousel" />
           ))}
         </div>
       </div>

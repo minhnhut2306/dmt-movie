@@ -4,12 +4,14 @@ import { movieApi } from "../api";
 
 // Shared query options với cache tối ưu
 const DEFAULT_QUERY_OPTIONS = {
-  staleTime: 10 * 60 * 1000, // 10 phút - tăng từ 5 phút
-  gcTime: 30 * 60 * 1000, // 30 phút (cacheTime đổi tên thành gcTime trong React Query v5)
-  retry: 2, // Giảm từ 3 xuống 2
-  retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 5000), // Nhanh hơn
-  refetchOnWindowFocus: false, // Tắt refetch khi focus window
-  refetchOnReconnect: true, // Chỉ refetch khi reconnect
+  staleTime: 15 * 60 * 1000, // 15 phút
+  gcTime: 60 * 60 * 1000, // 60 phút
+  retry: 2,
+  retryDelay: (attemptIndex) => Math.min(500 * 2 ** attemptIndex, 3000),
+  refetchOnWindowFocus: false,
+  refetchOnReconnect: true,
+  refetchOnMount: false,
+  networkMode: 'online',
 };
 
 // ============================================
@@ -39,7 +41,7 @@ export const useMovieDetail = (slug) => {
     queryFn: () => movieApi.getMovieDetail(slug),
     enabled: !!slug,
     ...DEFAULT_QUERY_OPTIONS,
-    staleTime: 15 * 60 * 1000, // 15 phút cho detail (ít thay đổi)
+    staleTime: 30 * 60 * 1000, // 30 phút cho detail
   });
 };
 
@@ -54,7 +56,7 @@ export const useFeaturedMovies = () =>
     queryKey: ["movies", "featured"],
     queryFn: () => movieApi.getFeaturedMovies(),
     ...DEFAULT_QUERY_OPTIONS,
-    staleTime: 15 * 60 * 1000, // Featured movies cache lâu hơn
+    staleTime: 30 * 60 * 1000, // Featured movies cache lâu hơn
   });
 
 export const useVietnamMovies = (page = 1) => 
@@ -112,9 +114,8 @@ export const useCategoryMovies = (categoryType, categorySlug, page = 1) => {
     enabled: !!categoryType && !!categorySlug,
     ...DEFAULT_QUERY_OPTIONS,
     retry: (failureCount, error) => {
-      if (error?.status === 404 || error?.status === 400) {
-        return false;
-      }
+      const status = error?.response?.status;
+      if (status === 404 || status === 400) return false;
       return failureCount < 2;
     },
   });
@@ -128,8 +129,8 @@ export const useAllGenres = () => {
     queryKey: ["categories", "genres"],
     queryFn: () => movieApi.getAllGenres(),
     ...DEFAULT_QUERY_OPTIONS,
-    staleTime: 60 * 60 * 1000, // 1 giờ - categories ít thay đổi
-    gcTime: 24 * 60 * 60 * 1000, // 24 giờ
+    staleTime: 24 * 60 * 60 * 1000, // 24 giờ - categories ít thay đổi
+    gcTime: 7 * 24 * 60 * 60 * 1000, // 7 ngày
   });
 };
 
@@ -138,7 +139,7 @@ export const useAllCountries = () => {
     queryKey: ["categories", "countries"],
     queryFn: () => movieApi.getAllCountries(),
     ...DEFAULT_QUERY_OPTIONS,
-    staleTime: 60 * 60 * 1000, // 1 giờ
-    gcTime: 24 * 60 * 60 * 1000, // 24 giờ
+    staleTime: 24 * 60 * 60 * 1000, // 24 giờ
+    gcTime: 7 * 24 * 60 * 60 * 1000, // 7 ngày
   });
 };

@@ -6,10 +6,38 @@
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
   }
   body {
     color: #1a202c; 
-    background-color: #f9fafb; 
+    background-color: #f9fafb;
+    /* Hardware acceleration */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Optimize video rendering */
+  video {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform;
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Landscape orientation optimization */
+  @media (orientation: landscape) and (max-width: 1024px) {
+    body {
+      overflow: hidden;
+    }
   }
 }
 
@@ -27,5 +55,24 @@
     line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+  }
+  
+  /* Performance optimization */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

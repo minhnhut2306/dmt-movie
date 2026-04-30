@@ -3,7 +3,7 @@ import React from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import MovieCardDetail from '../../components/MovieCardDetail';
+import UnifiedMovieCard from '../../components/UnifiedMovieCard';
 import { CATEGORY_TYPES } from '../../utils/CategoryConfigDynamic';
 import { movieApi } from '../../api'; // Import từ api/index.js
 import { getSafeImageUrl } from '../../utils/imageHelper';
@@ -302,9 +302,10 @@ const CategoryPage = () => {
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
               {movies.map((movie, index) => (
-                <MovieCardDetail
+                <UnifiedMovieCard
                   key={movie.id || `${movie.slug}-${index}`}
                   movie={movie}
+                  variant="grid"
                 />
               ))}
             </div>

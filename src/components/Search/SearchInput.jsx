@@ -138,10 +138,9 @@ const SearchInput = ({
 
   return (
     <div className={`relative ${className}`}>
-      <Search 
-        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 z-10" 
-        size={18} 
-      />
+      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
+        <Search className="text-blue-400" size={20} />
+      </div>
       
       <input
         ref={inputRef}
@@ -150,11 +149,11 @@ const SearchInput = ({
         onChange={handleInputChange}
         onKeyDown={handleKeyPress}
         placeholder={placeholder}
-        className={`bg-[#1f2a3a] text-white rounded-full pl-10 pr-12 py-2.5 w-full outline-none transition-all text-sm lg:text-base ${
+        className={`bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl pl-11 pr-12 py-3 w-full outline-none transition-all text-sm lg:text-base border ${
           isBlocked 
-            ? 'ring-2 ring-red-500 focus:ring-red-600 focus:bg-[#2d1a1a]' 
-            : 'focus:ring-2 focus:ring-blue-500 focus:bg-[#2d3a4a]'
-        }`}
+            ? 'border-red-500 ring-2 ring-red-500/50 focus:ring-red-600 focus:border-red-600' 
+            : 'border-gray-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500'
+        } shadow-lg`}
       />
       
       {isLoading && (
@@ -173,12 +172,12 @@ const SearchInput = ({
         <button
           type="button"
           onClick={handleClear}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-600 rounded-full transition-colors group"
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 hover:bg-red-600 bg-gray-700 rounded-lg transition-all group"
           title={isOnSearchPage ? "Quay lại trang trước" : "Xóa tìm kiếm"}
         >
           <X 
-            size={16} 
-            className="text-gray-400 group-hover:text-white transition-colors" 
+            size={18} 
+            className="text-gray-300 group-hover:text-white transition-colors" 
           />
         </button>
       )}

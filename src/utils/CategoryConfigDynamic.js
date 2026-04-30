@@ -31,13 +31,13 @@ export const CATEGORY_TYPES = {
 // ============================================
 // STATIC LISTS - Không cần API
 // ============================================
-// Tự động generate năm từ 1980 đến năm hiện tại + 1
+// Tự động generate năm từ 1980 đến năm hiện tại
 const currentYear = new Date().getFullYear();
 const startYear = 1980;
-const yearCount = currentYear - startYear + 2; // +2 để có năm hiện tại và năm sau
+const yearCount = currentYear - startYear + 1;
 
 export const STATIC_YEARS = Array.from({ length: yearCount }, (_, i) => {
-  const year = currentYear + 1 - i; // Bắt đầu từ năm sau, giảm dần
+  const year = currentYear - i; // Bắt đầu từ năm hiện tại, giảm dần
   return {
     slug: year.toString(),
     name: year.toString(),

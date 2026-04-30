@@ -3,7 +3,7 @@ import React from 'react';
 import { ChevronLeft, ChevronRight, Loader2, Search } from 'lucide-react';
 import { useSearchMovies, transformSearchResults } from '../../hooks/userSearchMovie';
 import { searchUtils } from '../../utils/searchUtils';
-import SearchMovieCard from './SearchMovieCard';
+import UnifiedMovieCard from '../UnifiedMovieCard';
 import BlockedSearchAlert, { isBlockedKeyword } from './BlockedSearchAlert';
 
 const SearchResults = ({ 
@@ -158,7 +158,7 @@ const SearchResults = ({
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-8 gap-4 mb-8">
         {movies.map((movie) => (
-          <SearchMovieCard key={movie.id} movie={movie} />
+          <UnifiedMovieCard key={movie.id} movie={movie} variant="search" />
         ))}
       </div>
       {renderPagination()}
