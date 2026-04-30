@@ -1,8 +1,21 @@
+// Cache m3u8 trong 30s để tránh fetch lại liên tục
+const cache = new Map();
+const CACHE_TTL = 30000; // 30 giây
+
 export default async function handler(req, res) {
   const { url } = req.query;
   if (!url) return res.status(400).send('Missing url');
 
   const decodedUrl = decodeURIComponent(url);
+
+  // Check cache
+  const cached = cache.get(decodedUrl);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=30');
+    return res.status(200).send(cached.data);
+  }
 
   try {
     const response = await fetch(decodedUrl, {
@@ -27,8 +40,12 @@ export default async function handler(req, res) {
         return line;
       }).join('\n');
 
+      // Cache master playlist
+      cache.set(decodedUrl, { data: rewritten, timestamp: Date.now() });
+
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
       res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Cache-Control', 'public, max-age=30');
       return res.status(200).send(rewritten);
     }
 
@@ -78,13 +95,17 @@ export default async function handler(req, res) {
         skipNextSegment = false;
         continue;
       }
-
       filtered.push(line);
     }
+    const result = filtered.join('\n');
+
+    // Cache media playlist
+    cache.set(decodedUrl, { data: result, timestamp: Date.now() });
 
     res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.status(200).send(filtered.join('\n'));
+    res.setHeader('Cache-Control', 'public, max-age=30');
+    res.status(200).send(result);
   } catch (err) {
     res.status(500).send('Proxy error: ' + err.message);
   }

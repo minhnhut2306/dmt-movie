@@ -1,4 +1,4 @@
-// hooks/useSearchMovie.js
+// hooks/useSearchMovie.js - OPTIMIZED
 import { useQuery } from "@tanstack/react-query";
 import { searchApi } from "../api/index";
 
@@ -7,10 +7,11 @@ export const useSearchMovies = (keyword, page = 1, sortField = "created.time") =
     queryKey: ["search-movies", keyword, page, sortField],
     queryFn: () => searchApi.searchMovies(keyword, page, sortField),
     enabled: !!keyword && keyword.trim().length > 0,
-    staleTime: 2 * 60 * 1000, // 2 phút
-    cacheTime: 5 * 60 * 1000, // 5 phút
-    retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
+    staleTime: 5 * 60 * 1000, // Tăng từ 2 phút lên 5 phút
+    gcTime: 15 * 60 * 1000, // Tăng từ 5 phút lên 15 phút
+    retry: 1,
+    retryDelay: 1000,
+    refetchOnWindowFocus: false, // Tắt refetch khi focus
   });
 };
 
@@ -19,9 +20,10 @@ export const useSearchSuggestions = (keyword) => {
     queryKey: ["search-suggestions", keyword],
     queryFn: () => searchApi.getSuggestions(keyword),
     enabled: !!keyword && keyword.trim().length >= 2, 
-    staleTime: 1 * 60 * 1000, // 1 phút
-    cacheTime: 3 * 60 * 1000, // 3 phút
+    staleTime: 3 * 60 * 1000, // Tăng từ 1 phút lên 3 phút
+    gcTime: 10 * 60 * 1000, // Tăng từ 3 phút lên 10 phút
     retry: 1,
+    refetchOnWindowFocus: false,
   });
 };
 

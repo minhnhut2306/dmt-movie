@@ -110,4 +110,32 @@ export const movieApi = {
   getDubbedMovies: (page = 1) => apiRequest(`/v1/api/danh-sach/phim-thuyet-minh?page=${page}`),
   getVoiceoverMovies: (page = 1) => apiRequest(`/v1/api/danh-sach/phim-long-tieng?page=${page}`),
   getVietsubMovies: (page = 1) => apiRequest(`/v1/api/danh-sach/phim-vietsub?page=${page}`),
+  getCinemaMovies: (page = 1) => apiRequest(`/v1/api/danh-sach/phim-chieu-rap?page=${page}`),
+
+  // ============================================
+  // CATEGORY LIST APIs - Lấy danh sách categories
+  // ============================================
+  getAllGenres: async () => {
+    try {
+      const { data } = await api.get("/the-loai");
+      console.log("All genres:", data);
+      // API trả về array trực tiếp
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error("Error fetching genres:", error);
+      throw error;
+    }
+  },
+
+  getAllCountries: async () => {
+    try {
+      const { data } = await api.get("/quoc-gia");
+      console.log("All countries:", data);
+      // API trả về array trực tiếp
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error("Error fetching countries:", error);
+      throw error;
+    }
+  },
 };

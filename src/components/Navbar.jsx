@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import { Moon, Menu, X, Search, ChevronDown } from "lucide-react";
 import SearchInput from "./Search/SearchInput";
-import { ALL_GENRES, ALL_COUNTRIES, ALL_YEARS, CATEGORY_TYPES } from "../utils/CategoryConfig";
+import { 
+  CATEGORY_TYPES, 
+  useDynamicGenres, 
+  useDynamicCountries, 
+  ALL_YEARS 
+} from "../utils/CategoryConfigDynamic";
 import NotificationBell from "./NotificationBell";
 
 const Navbar = () => {
@@ -17,8 +22,9 @@ const Navbar = () => {
 
   const toggleMobileSearch = () => setShowMobileSearch(!showMobileSearch);
 
-  const displayGenres = ALL_GENRES;
-  const displayCountries = ALL_COUNTRIES;
+  // ✅ Fetch từ API thay vì hardcode
+  const { genres: displayGenres, isLoading: genresLoading } = useDynamicGenres();
+  const { countries: displayCountries, isLoading: countriesLoading } = useDynamicCountries();
   const displayYears = ALL_YEARS;
 
   return (
@@ -62,8 +68,8 @@ const Navbar = () => {
               <a href="/category/danh-sach/phim-le" className="px-2 py-2 text-sm xl:text-base font-medium hover:text-blue-400 transition-colors whitespace-nowrap">
                 Phim Lẻ
               </a>
-              <a href="/category/danh-sach/tv-shows" className="px-2 py-2 text-sm xl:text-base font-medium hover:text-blue-400 transition-colors whitespace-nowrap">
-                TV Shows
+              <a href="/category/danh-sach/phim-chieu-rap" className="px-2 py-2 text-sm xl:text-base font-medium hover:text-blue-400 transition-colors whitespace-nowrap">
+                Phim Chiếu Rạp
               </a>
               <a href="/category/danh-sach/hoat-hinh" className="px-2 py-2 text-sm xl:text-base font-medium hover:text-blue-400 transition-colors whitespace-nowrap">
                 Hoạt Hình
@@ -188,8 +194,8 @@ const Navbar = () => {
                 <a href="/category/danh-sach/phim-le" className="block px-3 py-3 text-base font-medium hover:bg-[#1c2228] rounded-md transition-colors text-white">
                   Phim Lẻ
                 </a>
-                <a href="/category/danh-sach/tv-shows" className="block px-3 py-3 text-base font-medium hover:bg-[#1c2228] rounded-md transition-colors text-white">
-                  TV Shows
+                <a href="/category/danh-sach/phim-chieu-rap" className="block px-3 py-3 text-base font-medium hover:bg-[#1c2228] rounded-md transition-colors text-white">
+                  Phim Chiếu Rạp
                 </a>
                 <a href="/category/danh-sach/hoat-hinh" className="block px-3 py-3 text-base font-medium hover:bg-[#1c2228] rounded-md transition-colors text-white">
                   Hoạt Hình

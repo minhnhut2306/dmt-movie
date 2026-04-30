@@ -1,9 +1,26 @@
+// ============================================
+// OPTIMIZED TRANSFORM - Single function
+// ============================================
 const normalizeUrl = (url) => {
   if (!url) return "";
   return url.startsWith("http") ? url : `https://phimimg.com/${url}`;
 };
 
-const createMovieTransform = (defaultGenre, defaultType) => (data) => {
+const TYPE_MAP = {
+  series: "Phim Bộ",
+  single: "Phim Lẻ",
+  tvshows: "TV Shows",
+  hoathinh: "Hoạt Hình",
+};
+
+const getMovieType = (type, defaultType) => {
+  if (defaultType) return defaultType;
+  return TYPE_MAP[type] || type;
+};
+
+// UNIFIED transform function - thay thế tất cả
+export const transformMovies = (data, options = {}) => {
+  const { defaultGenre = "Chưa phân loại", defaultType = null } = options;
   const items = data?.data?.items || data?.items || [];
 
   return items.map((movie) => ({
@@ -12,21 +29,12 @@ const createMovieTransform = (defaultGenre, defaultType) => (data) => {
     originalTitle: movie.origin_name,
     poster: normalizeUrl(movie.poster_url),
     thumbnail: normalizeUrl(movie.thumb_url),
-    rating:
-      movie.tmdb?.vote_average > 0 ? movie.tmdb.vote_average.toFixed(1) : null,
+    rating: movie.tmdb?.vote_average > 0 ? movie.tmdb.vote_average.toFixed(1) : null,
     year: movie.year,
     duration: movie.time,
     genre: movie.category?.[0]?.name || defaultGenre,
     country: movie.country?.[0]?.name || "Chưa xác định",
-    type:
-      defaultType ||
-      (movie.type === "series"
-        ? "Phim Bộ"
-        : movie.type === "single"
-        ? "Phim Lẻ"
-        : movie.type === "tvshows"
-        ? "TV Shows"
-        : movie.type),
+    type: getMovieType(movie.type, defaultType),
     quality: movie.quality,
     language: movie.lang,
     episode: movie.episode_current,
@@ -37,6 +45,10 @@ const createMovieTransform = (defaultGenre, defaultType) => (data) => {
     createdTime: movie.created?.time,
   }));
 };
+
+// Legacy wrapper - giữ backward compatibility
+const createMovieTransform = (defaultGenre, defaultType) => (data) => 
+  transformMovies(data, { defaultGenre, defaultType });
 
 export const transformMovieDetail = (data) => {
   if (!data || !data.movie) return null;
@@ -156,4 +168,8 @@ export const transformVoiceoverMovies = createMovieTransform(
 export const transformVietsubMovies = createMovieTransform(
   "Vietsub",
   "Phim Vietsub"
+);
+export const transformCinemaMovies = createMovieTransform(
+  "Phim chiếu rạp",
+  "Phim Chiếu Rạp"
 );

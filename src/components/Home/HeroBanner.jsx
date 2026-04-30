@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Star, Calendar, Clock, Loader2 } from 'lucide-react';
-import { movieApi } from '../../api/movieApi.js';
+import { useFeaturedMovies } from '../../hooks/useMovies';
 import { getSafeImageUrl } from '../../utils/imageHelper.js';
 
 const HeroBanner = ({
@@ -11,9 +11,6 @@ const HeroBanner = ({
   handleHeroMove,
   handleHeroEnd
 }) => {
-  const [featuredMovies, setFeaturedMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const intervalRef = useRef(null);
   const startTimeRef = useRef(Date.now());
@@ -25,47 +22,32 @@ const HeroBanner = ({
   const [isDraggingLocal, setIsDraggingLocal] = useState(false);
   const [dragDirection, setDragDirection] = useState(null);
 
-  useEffect(() => {
-    const fetchFeaturedMovies = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+  // ✅ USE REACT QUERY - Tự động cache, không duplicate
+  const { data, isLoading, error: queryError } = useFeaturedMovies();
 
-        const data = await movieApi.getFeaturedMovies();
-
-        const transformedMovies = data.items?.slice(0, 5).map(movie => ({
-          id: movie._id,
-          title: movie.name,
-          description: movie.origin_name,
-          backgroundImage: getSafeImageUrl(movie.poster_url, movie.name),
-          rating: movie.tmdb?.vote_average?.toFixed(1),
-          year: movie.year,
-          duration: movie.time,
-          genre: movie.category?.[0]?.name,
-          country: movie.country?.[0]?.name,
-          type: movie.type === 'series' ? 'Phim Bộ' :
-            movie.type === 'single' ? 'Phim Lẻ' :
-              movie.type === 'tvshows' ? 'TV Shows' : movie.type,
-          quality: movie.quality,
-          language: movie.lang,
-          episode: movie.episode_current,
-          slug: movie.slug
-        })) || [];
-
-        setFeaturedMovies(transformedMovies);
-        setCurrentIndex(0);
-
-      } catch (err) {
-        console.error('Error fetching featured movies:', err);
-        setError(err.message);
-        setFeaturedMovies([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFeaturedMovies();
-  }, []);
+  // Transform data
+  const featuredMovies = React.useMemo(() => {
+    if (!data?.items) return [];
+    
+    return data.items.slice(0, 5).map(movie => ({
+      id: movie._id,
+      title: movie.name,
+      description: movie.origin_name,
+      backgroundImage: getSafeImageUrl(movie.poster_url, movie.name),
+      rating: movie.tmdb?.vote_average?.toFixed(1),
+      year: movie.year,
+      duration: movie.time,
+      genre: movie.category?.[0]?.name,
+      country: movie.country?.[0]?.name,
+      type: movie.type === 'series' ? 'Phim Bộ' :
+        movie.type === 'single' ? 'Phim Lẻ' :
+          movie.type === 'tvshows' ? 'TV Shows' : movie.type,
+      quality: movie.quality,
+      language: movie.lang,
+      episode: movie.episode_current,
+      slug: movie.slug
+    }));
+  }, [data]);
 
   // Auto-slide functionality
   useEffect(() => {
@@ -76,7 +58,7 @@ const HeroBanner = ({
     }
 
     // Only create interval when conditions are met
-    if (!isDragging && !isDraggingLocal && !loading && featuredMovies.length > 1) {
+    if (!isDragging && !isDraggingLocal && !isLoading && featuredMovies.length > 1) {
       startTimeRef.current = Date.now();
 
       intervalRef.current = setInterval(() => {
@@ -95,7 +77,7 @@ const HeroBanner = ({
         intervalRef.current = null;
       }
     };
-  }, [isDragging, isDraggingLocal, loading, featuredMovies.length]);
+  }, [isDragging, isDraggingLocal, isLoading, featuredMovies.length]);
 
   // Handle manual navigation
   const handleManualChange = (index) => {
@@ -107,7 +89,7 @@ const HeroBanner = ({
         clearInterval(intervalRef.current);
         intervalRef.current = null;
 
-        if (!isDragging && !isDraggingLocal && !loading && featuredMovies.length > 1) {
+        if (!isDragging && !isDraggingLocal && !isLoading && featuredMovies.length > 1) {
           startTimeRef.current = Date.now();
 
           intervalRef.current = setInterval(() => {
@@ -223,7 +205,7 @@ const HeroBanner = ({
     };
   }, []);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-gray-800 flex items-center justify-center">
         <div className="text-white text-center">
@@ -234,12 +216,12 @@ const HeroBanner = ({
     );
   }
 
-  if (error) {
+  if (queryError) {
     return (
       <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-gray-800 flex items-center justify-center">
         <div className="text-white text-center">
           <p className="text-red-400 mb-2">Lỗi tải dữ liệu</p>
-          <p className="text-gray-400 text-sm">{error}</p>
+          <p className="text-gray-400 text-sm">{queryError.message}</p>
           <button
             onClick={() => window.location.reload()}
             className="mt-4 bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm"

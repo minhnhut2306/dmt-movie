@@ -10,17 +10,24 @@ import {
   Clock,
   MessageCircle
 } from 'lucide-react';
-import { CATEGORY_TYPES } from '../utils/CategoryConfig';
+import { 
+  CATEGORY_TYPES, 
+  STATIC_SPECIAL_LISTS,
+  useDynamicGenres 
+} from '../utils/CategoryConfigDynamic';
 
 const Footer = () => {
+  // ✅ Fetch từ API
+  const { genres } = useDynamicGenres();
+
   const socialLinks = [
     { icon: Facebook, href: 'https://www.facebook.com/nhut2306', label: 'Facebook' },
     { icon: Youtube, href: '#', label: 'YouTube' },
     { icon: MessageCircle, href: 'https://zalo.me/0345093534', label: 'Zalo' }
   ];
 
-  const popularMovieCategories = Object.entries(CATEGORY_TYPES["danh-sach"].categories).slice(0, 6);
-  const popularGenres = Object.entries(CATEGORY_TYPES["the-loai"].categories).slice(0, 6);
+  const popularMovieCategories = STATIC_SPECIAL_LISTS.slice(0, 6);
+  const popularGenres = genres.slice(0, 6);
 
   return (
     <footer className="bg-gray-900 text-gray-300">
@@ -51,10 +58,10 @@ const Footer = () => {
                   <span className="text-sm">Danh Mục Phim</span>
                 </h3>
                 <ul className="space-y-3">
-                  {popularMovieCategories.map(([slug, category]) => (
-                    <li key={slug}>
+                  {popularMovieCategories.map((category) => (
+                    <li key={category.slug}>
                       <a
-                        href={`/category/danh-sach/${slug}`}
+                        href={`/category/danh-sach/${category.slug}`}
                         className="text-xs leading-relaxed hover:text-orange-400 transition-colors duration-200 hover:translate-x-1 inline-block"
                       >
                         {category.name}
@@ -70,10 +77,10 @@ const Footer = () => {
                   <span className="text-sm">Thể Loại</span>
                 </h3>
                 <ul className="space-y-3">
-                  {popularGenres.map(([slug, genre]) => (
-                    <li key={slug}>
+                  {popularGenres.map((genre) => (
+                    <li key={genre.slug}>
                       <a
-                        href={`/category/the-loai/${slug}`}
+                        href={`/category/the-loai/${genre.slug}`}
                         className="text-xs leading-relaxed hover:text-orange-400 transition-colors duration-200 hover:translate-x-1 inline-block"
                       >
                         {genre.name}
@@ -93,10 +100,10 @@ const Footer = () => {
               <span>Danh Mục Phim</span>
             </h3>
             <ul className="space-y-2">
-              {popularMovieCategories.map(([slug, category]) => (
-                <li key={slug}>
+              {popularMovieCategories.map((category) => (
+                <li key={category.slug}>
                   <a
-                    href={`/category/danh-sach/${slug}`}
+                    href={`/category/danh-sach/${category.slug}`}
                     className="text-sm hover:text-orange-400 transition-colors duration-200 hover:translate-x-1 inline-block"
                   >
                     {category.name}
@@ -113,10 +120,10 @@ const Footer = () => {
               <span>Thể Loại</span>
             </h3>
             <ul className="space-y-2">
-              {popularGenres.map(([slug, genre]) => (
-                <li key={slug}>
+              {popularGenres.map((genre) => (
+                <li key={genre.slug}>
                   <a
-                    href={`/category/the-loai/${slug}`}
+                    href={`/category/the-loai/${genre.slug}`}
                     className="text-sm hover:text-orange-400 transition-colors duration-200 hover:translate-x-1 inline-block"
                   >
                     {genre.name}

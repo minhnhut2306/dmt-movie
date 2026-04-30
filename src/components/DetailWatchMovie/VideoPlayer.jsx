@@ -86,8 +86,20 @@ const VideoPlayer = ({
     const hls = new Hls({
       debug: false,
       enableWorker: true,
-      lowLatencyMode: true,
+      lowLatencyMode: false, // Tắt low latency để giảm lag
       backBufferLength: 90,
+      maxBufferLength: 30, // Buffer 30s trước
+      maxMaxBufferLength: 60, // Tối đa 60s
+      maxBufferSize: 60 * 1000 * 1000, // 60MB
+      maxBufferHole: 0.5, // Cho phép gap nhỏ
+      highBufferWatchdogPeriod: 2, // Giảm watchdog
+      nudgeMaxRetry: 5, // Tăng retry
+      manifestLoadingTimeOut: 10000, // 10s timeout
+      manifestLoadingMaxRetry: 4,
+      levelLoadingTimeOut: 10000,
+      levelLoadingMaxRetry: 4,
+      fragLoadingTimeOut: 20000, // 20s cho segment
+      fragLoadingMaxRetry: 6,
     });
 
     hls.loadSource(proxyUrl);

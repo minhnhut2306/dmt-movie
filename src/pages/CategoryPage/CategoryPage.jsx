@@ -4,7 +4,7 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import MovieCardDetail from '../../components/MovieCardDetail';
-import { getCategoryInfo } from '../../utils/CategoryConfig';
+import { CATEGORY_TYPES } from '../../utils/CategoryConfigDynamic';
 import { movieApi } from '../../api'; // Import từ api/index.js
 import { getSafeImageUrl } from '../../utils/imageHelper';
 
@@ -13,7 +13,12 @@ const CategoryPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentPage = parseInt(searchParams.get('page') || '1');
 
-  const categoryInfo = getCategoryInfo(categoryType, categorySlug);
+  // ✅ Đơn giản hóa - chỉ cần check categoryType có tồn tại
+  const categoryConfig = CATEGORY_TYPES[categoryType];
+  const categoryInfo = categoryConfig ? {
+    type: categoryConfig.title,
+    slug: categorySlug,
+  } : null;
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['category', categoryType, categorySlug, currentPage],
@@ -232,7 +237,7 @@ const CategoryPage = () => {
           <div className="flex items-center justify-center h-64">
             <div className="text-white text-center">
               <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-              <p className="text-lg">Đang tải {categoryInfo.name.toLowerCase()}...</p>
+              <p className="text-lg">Đang tải...</p>
             </div>
           </div>
         </div>

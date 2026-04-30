@@ -1,11 +1,12 @@
 // config/movieSections.js
 import {
-  useMovies,
+  useLatestMovies,
   useVietnamMovies,
   useChinaMovies,
   useJapanMovies,
   useSeriesMovies,
   useSingleMovies,
+  useTVShows,
   useAnimationMovies,
   useActionMovies,
   useHorrorMovies,
@@ -13,12 +14,17 @@ import {
   useDubbedMovies,
   useVoiceoverMovies,
   useVietsubMovies,
+  useCinemaMovies,
+} from "../hooks/useMovies";
+
+import {
   transformLatestMovies,
   transformVietnamMovies,
   transformChinaMovies,
   transformJapanMovies,
   transformSeriesMovies,
   transformSingleMovies,
+  transformTVShows,
   transformAnimationMovies,
   transformActionMovies,
   transformHorrorMovies,
@@ -26,7 +32,8 @@ import {
   transformDubbedMovies,
   transformVietsubMovies,
   transformVoiceoverMovies,
-} from "../hooks/useMovies";
+  transformCinemaMovies,
+} from "../utils/transformFunctions";
 
 export const MOVIE_SECTIONS = [
   {
@@ -34,7 +41,7 @@ export const MOVIE_SECTIONS = [
     emoji: "🔥",
     sectionKey: "latest",
     badgeColor: "bg-red-600",
-    useDataHook: () => useMovies(1),
+    useDataHook: () => useLatestMovies(1),
     transformFunction: transformLatestMovies,
     viewMoreLink: "/category/danh-sach/phim-moi-cap-nhat",
   },
@@ -93,6 +100,15 @@ export const MOVIE_SECTIONS = [
     viewMoreLink: "/category/danh-sach/hoat-hinh",
   },
   {
+    title: "Phim Chiếu Rạp",
+    emoji: "🎥",
+    sectionKey: "cinema",
+    badgeColor: "bg-yellow-600",
+    useDataHook: useCinemaMovies,
+    transformFunction: transformCinemaMovies,
+    viewMoreLink: "/category/danh-sach/phim-chieu-rap",
+  },
+  {
     title: "Phim Thuyết Minh",
     emoji: "🎤",
     sectionKey: "dubbed",
@@ -120,13 +136,13 @@ export const MOVIE_SECTIONS = [
     viewMoreLink: "/category/danh-sach/phim-vietsub",
   },
   {
-    title: "Phim Hành Động",
-    emoji: "💥",
-    sectionKey: "action",
+    title: "TV Shows",
+    emoji: "📺",
+    sectionKey: "tvshows",
     badgeColor: "bg-orange-600",
-    useDataHook: useActionMovies,
-    transformFunction: transformActionMovies,
-    viewMoreLink: "/category/the-loai/hanh-dong",
+    useDataHook: useTVShows,
+    transformFunction: transformTVShows,
+    viewMoreLink: "/category/danh-sach/tv-shows",
   },
   {
     title: "Phim Kinh Dị",
