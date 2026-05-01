@@ -145,21 +145,31 @@ const VideoPlayer = ({
     }
 
     const proxyBase = import.meta.env.DEV
-      ? 'http://localhost:3000'
-      : (import.meta.env.VITE_PROXY_URL || ''); // Cloudflare Worker URL hoặc Vercel
-    const proxyUrl = proxyBase.startsWith('http') && !proxyBase.includes(window.location.hostname)
-      ? `${proxyBase}?url=${encodeURIComponent(currentVideoUrl)}`           // Cloudflare Worker
-      : `${proxyBase}/api/m3u8-proxy?url=${encodeURIComponent(currentVideoUrl)}`; // Vercel fallback
+      ? 'http://localhost:8787'
+      : (import.meta.env.VITE_PROXY_URL || '');
+    const proxyUrl = proxyBase && !proxyBase.includes(window.location.hostname)
+      ? `${proxyBase}?url=${encodeURIComponent(currentVideoUrl)}`
+      : `/api/m3u8-proxy?url=${encodeURIComponent(currentVideoUrl)}`;
 
-    // Dùng proxy trước để lọc QC.
-    // Nếu proxy 502 (server block Vercel IP) → fallback load trực tiếp từ browser
+    // Hàm kiểm tra URL có phải QC không (dùng cho cả proxy lẫn direct)
+    const isAdUrl = (url) => {
+      if (!url) return false;
+      return (
+        /\/v\d+\//.test(url) ||
+        url.includes('convertv7/') ||
+        url.includes('convertv8/') ||
+        /segment_\d+\.ts/.test(url) ||
+        url.includes('/ads/') ||
+        url.includes('/ad/') ||
+        /\/commercial\//.test(url)
+      );
+    };
+
     let hlsInstance = null;
     let directFallbackTriggered = false;
 
     const createHls = (sourceUrl) => {
-      if (hlsInstance) {
-        hlsInstance.destroy();
-      }
+      if (hlsInstance) hlsInstance.destroy();
 
       const hls = new Hls({
         debug: false,
@@ -207,13 +217,38 @@ const VideoPlayer = ({
         adRangesRef.current = findAdRanges(data.details.fragments);
       });
 
+      // Chặn QC ở tầng fragment — trước khi decode và phát
+      // Hoạt động cả khi dùng proxy lẫn direct load
+      hls.on(Hls.Events.FRAG_LOADING, (event, data) => {
+        const fragUrl = data.frag?.url || '';
+        if (isAdUrl(fragUrl)) {
+          // Hủy load fragment QC, skip sang fragment tiếp theo
+          console.log('Ad fragment blocked:', fragUrl);
+          try {
+            hls.stopLoad();
+            // Tìm fragment tiếp theo không phải QC
+            const level = hls.levels[hls.currentLevel];
+            if (level?.details?.fragments) {
+              const frags = level.details.fragments;
+              const currentSn = data.frag.sn;
+              const nextFrag = frags.find(f => f.sn > currentSn && !isAdUrl(f.url));
+              if (nextFrag) {
+                video.currentTime = nextFrag.start + 0.1;
+              }
+            }
+            hls.startLoad();
+          } catch (e) {
+            // silent
+          }
+        }
+      });
+
       hls.on(Hls.Events.ERROR, (event, data) => {
         if (data.fatal) {
-          // Proxy bị 502 (server block Vercel IP) → fallback load trực tiếp từ browser
-          // Browser dùng IP user (residential) nên không bị block
+          // Proxy bị 502 → fallback direct, vẫn có lọc QC qua FRAG_LOADING
           if (sourceUrl === proxyUrl && !directFallbackTriggered) {
             directFallbackTriggered = true;
-            console.log('Proxy blocked by upstream, falling back to direct load (ads may appear)...');
+            console.log('Proxy blocked, falling back to direct (ad filter still active via FRAG_LOADING)');
             createHls(currentVideoUrl);
             return;
           }
@@ -225,17 +260,14 @@ const VideoPlayer = ({
                 console.log(`Network error, retrying... (${retryCountRef.current}/2)`);
                 setTimeout(() => hls.startLoad(), 1000 * retryCountRef.current);
               } else {
-                console.error('Network error after retries:', data);
                 setVideoError('network');
                 hls.destroy();
               }
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
-              console.log('Media error, recovering...');
               hls.recoverMediaError();
               break;
             default:
-              console.error('Fatal error:', data);
               setVideoError('fatal');
               hls.destroy();
               break;
@@ -246,7 +278,6 @@ const VideoPlayer = ({
       return hls;
     };
 
-    // Bắt đầu bằng proxy (có lọc QC)
     const hls = createHls(proxyUrl);
 
     const handleTimeUpdate = () => {

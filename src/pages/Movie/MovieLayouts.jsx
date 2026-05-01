@@ -56,7 +56,9 @@ const MoviePlay = () => {
         if (!movieData?.episodes?.length) return;
         const firstEpisodeUrl = movieData.episodes[0]?.server_data?.[0]?.link_m3u8;
         if (!firstEpisodeUrl) return;
-        const proxyBase = import.meta.env.VITE_PROXY_URL || '';
+        const proxyBase = import.meta.env.DEV
+            ? 'http://localhost:8787'
+            : (import.meta.env.VITE_PROXY_URL || '');
         const warmupUrl = proxyBase && !proxyBase.includes(window.location.hostname)
             ? `${proxyBase}?url=${encodeURIComponent(firstEpisodeUrl)}`
             : `/api/m3u8-proxy?url=${encodeURIComponent(firstEpisodeUrl)}`;

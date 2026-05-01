@@ -16,7 +16,7 @@ const FilterPage = lazy(() => import('./pages/FilterPage/FilterPage'));
 
 // =============================================
 // BẬT/TẮT CHẾ ĐỘ BẢO TRÌ TẠI ĐÂY
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 const MAINTENANCE_END_TIME = '10:40'; // giờ kết thúc bảo trì
 // =============================================
 
