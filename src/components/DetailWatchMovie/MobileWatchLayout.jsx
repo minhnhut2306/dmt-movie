@@ -16,6 +16,7 @@ const MobileWatchLayout = ({
   setIsFullscreen
 }) => {
   const currentVideoUrl = movieData.episodes?.[currentServer]?.server_data?.[currentEpisode]?.link_m3u8;
+  const currentEmbedUrl = movieData.episodes?.[currentServer]?.server_data?.[currentEpisode]?.link_embed;
   const currentEpisodeName = movieData.episodes?.[currentServer]?.server_data?.[currentEpisode]?.name;
 
   return (
@@ -41,6 +42,7 @@ const MobileWatchLayout = ({
       <Suspense fallback={<div className="aspect-video bg-gray-900 flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" /></div>}>
         <VideoPlayer 
           currentVideoUrl={currentVideoUrl}
+          currentEmbedUrl={currentEmbedUrl}
           isFullscreen={isFullscreen}
           setIsFullscreen={setIsFullscreen}
         />

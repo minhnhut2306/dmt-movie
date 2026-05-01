@@ -57,6 +57,7 @@ const findAdRanges = (fragments) => {
 
 const VideoPlayer = ({
   currentVideoUrl,
+  currentEmbedUrl,
   isFullscreen,
   setIsFullscreen,
   autoPlay = true
@@ -67,12 +68,14 @@ const VideoPlayer = ({
   const skippedRef = useRef(new Set());
   const [isLandscape, setIsLandscape] = useState(false);
   const [videoError, setVideoError] = useState(null);
+  const [useEmbed, setUseEmbed] = useState(false); // fallback sang iframe
   const retryCountRef = useRef(0);
   const [retryKey, setRetryKey] = useState(0);
 
   // Reset error + retryKey khi đổi video
   useEffect(() => {
     setVideoError(null);
+    setUseEmbed(false);
     retryCountRef.current = 0;
     setRetryKey(0);
   }, [currentVideoUrl]);
@@ -245,11 +248,19 @@ const VideoPlayer = ({
 
       hls.on(Hls.Events.ERROR, (event, data) => {
         if (data.fatal) {
-          // Proxy bị 502 → fallback direct, vẫn có lọc QC qua FRAG_LOADING
+          // Proxy bị 502 → fallback direct
           if (sourceUrl === proxyUrl && !directFallbackTriggered) {
             directFallbackTriggered = true;
-            console.log('Proxy blocked, falling back to direct (ad filter still active via FRAG_LOADING)');
+            console.log('Proxy blocked, falling back to direct...');
             createHls(currentVideoUrl);
+            return;
+          }
+
+          // Direct cũng fail (CORS/block) → fallback embed iframe
+          if (sourceUrl === currentVideoUrl && currentEmbedUrl) {
+            console.log('Direct blocked, falling back to embed iframe...');
+            hls.destroy();
+            setUseEmbed(true);
             return;
           }
 
@@ -260,16 +271,27 @@ const VideoPlayer = ({
                 console.log(`Network error, retrying... (${retryCountRef.current}/2)`);
                 setTimeout(() => hls.startLoad(), 1000 * retryCountRef.current);
               } else {
-                setVideoError('network');
-                hls.destroy();
+                // Hết retry → dùng embed nếu có
+                if (currentEmbedUrl) {
+                  hls.destroy();
+                  setUseEmbed(true);
+                } else {
+                  setVideoError('network');
+                  hls.destroy();
+                }
               }
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
               hls.recoverMediaError();
               break;
             default:
-              setVideoError('fatal');
-              hls.destroy();
+              if (currentEmbedUrl) {
+                hls.destroy();
+                setUseEmbed(true);
+              } else {
+                setVideoError('fatal');
+                hls.destroy();
+              }
               break;
           }
         }
@@ -306,6 +328,26 @@ const VideoPlayer = ({
           <Play className="w-16 h-16 mx-auto mb-4 text-red-500" fill="currentColor" />
           <p className="text-xl font-semibold">Không tìm thấy video</p>
           <p className="text-gray-400 mt-2">Vui lòng chọn tập khác</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback embed iframe khi m3u8 bị block
+  if (useEmbed && currentEmbedUrl) {
+    return (
+      <div
+        ref={containerRef}
+        className={`${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''} ${isLandscape && !isFullscreen ? 'h-screen' : ''}`}
+      >
+        <div className={`bg-black ${isFullscreen || isLandscape ? 'h-full' : 'aspect-video'} relative`}>
+          <iframe
+            src={currentEmbedUrl}
+            className="w-full h-full"
+            allowFullScreen
+            allow="autoplay; fullscreen"
+            frameBorder="0"
+          />
         </div>
       </div>
     );
@@ -356,8 +398,8 @@ const VideoPlayer = ({
           Trình duyệt của bạn không hỗ trợ video này.
         </video>
 
-        {/* Fullscreen button */}
-        <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+        {/* Fullscreen button - chỉ hiện trên desktop */}
+        <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity hidden lg:block">
           <button
             onClick={toggleNativeFullscreen}
             className="bg-black/70 text-white p-2 rounded-lg hover:bg-black/90 transition-all backdrop-blur-sm"
