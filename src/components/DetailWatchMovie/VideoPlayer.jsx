@@ -248,19 +248,18 @@ const VideoPlayer = ({
 
       hls.on(Hls.Events.ERROR, (event, data) => {
         if (data.fatal) {
-          // Proxy bị 502 → fallback direct
+          // Proxy bị 502 → skip thẳng sang embed nếu có, không cần thử direct
           if (sourceUrl === proxyUrl && !directFallbackTriggered) {
             directFallbackTriggered = true;
+            if (currentEmbedUrl) {
+              console.log('Proxy 502, skipping to embed iframe...');
+              hls.destroy();
+              setUseEmbed(true);
+              return;
+            }
+            // Không có embed → thử direct
             console.log('Proxy blocked, falling back to direct...');
             createHls(currentVideoUrl);
-            return;
-          }
-
-          // Direct cũng fail (CORS/block) → fallback embed iframe
-          if (sourceUrl === currentVideoUrl && currentEmbedUrl) {
-            console.log('Direct blocked, falling back to embed iframe...');
-            hls.destroy();
-            setUseEmbed(true);
             return;
           }
 
