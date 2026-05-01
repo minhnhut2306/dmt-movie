@@ -357,29 +357,36 @@ const VideoPlayer = ({
             frameBorder="0"
             onError={() => setEmbedFailed(true)}
           />
+          {/* Nút báo lỗi nếu embed không phát được */}
+          <div className="absolute bottom-3 right-3 z-10">
+            <button
+              onClick={() => setEmbedFailed(true)}
+              className="bg-black/70 text-gray-400 hover:text-white text-xs px-3 py-1.5 rounded-lg backdrop-blur-sm transition-colors"
+            >
+              Video không phát? Thử cách khác
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (videoError) {
+  if (videoError || (embedFailed && !currentEmbedUrl)) {
     return (
       <div className="bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center aspect-video">
         <div className="text-center text-white p-4">
           <div className="text-5xl mb-4">⚠️</div>
-          <p className="text-xl font-semibold mb-2">
-            {videoError === 'network' ? 'Không thể tải video' : 'Lỗi phát video'}
-          </p>
+          <p className="text-xl font-semibold mb-2">Không thể phát video</p>
           <p className="text-gray-400 mt-1 text-sm max-w-xs mx-auto">
-            {videoError === 'network'
-              ? 'Server video đang bận hoặc link đã hết hạn. Thử chọn server khác hoặc thử lại.'
-              : 'Định dạng video không tương thích. Thử chọn server khác.'}
+            Link video đã hết hạn hoặc không còn khả dụng. Vui lòng thử lại sau hoặc chọn phim khác.
           </p>
           <button
             onClick={() => {
               retryCountRef.current = 0;
               setRetryKey(k => k + 1);
               setVideoError(null);
+              setUseEmbed(false);
+              setEmbedFailed(false);
             }}
             className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm transition-colors"
           >
