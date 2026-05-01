@@ -351,7 +351,6 @@ const VideoPlayer = ({
           className="w-full h-full"
           autoPlay={autoPlay}
           playsInline
-          crossOrigin="anonymous"
           preload="metadata"
         >
           Trình duyệt của bạn không hỗ trợ video này.
