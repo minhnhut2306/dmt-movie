@@ -91,7 +91,7 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
             onLoad={handleLoad}
             onError={handleError}
             loading={loadingAttr}
-            fetchpriority="high"
+            fetchPriority="high"
             referrerPolicy="no-referrer"
             decoding="async"
           />

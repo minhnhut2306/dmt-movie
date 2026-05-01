@@ -14,8 +14,8 @@ const FeatureNotification = ({ onClose }) => (
             Tính năng mới
           </span>
           <span className="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-            MỚI
-          </span>
+              ĐANG PHÁT TRIỂN
+            </span>
         </div>
         <button
           onClick={onClose}
@@ -124,7 +124,7 @@ const V2Notification = () => {
               Thông báo
             </span>
             <span className="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-              MỚI
+              ĐANG PHÁT TRIỂN
             </span>
           </div>
           <button

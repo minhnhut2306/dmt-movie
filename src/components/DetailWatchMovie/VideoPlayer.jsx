@@ -353,7 +353,6 @@ const VideoPlayer = ({
           <iframe
             src={currentEmbedUrl}
             className="w-full h-full"
-            allowFullScreen
             allow="autoplay; fullscreen"
             frameBorder="0"
             onError={() => setEmbedFailed(true)}
