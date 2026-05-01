@@ -68,7 +68,8 @@ const VideoPlayer = ({
   const skippedRef = useRef(new Set());
   const [isLandscape, setIsLandscape] = useState(false);
   const [videoError, setVideoError] = useState(null);
-  const [useEmbed, setUseEmbed] = useState(false); // fallback sang iframe
+  const [useEmbed, setUseEmbed] = useState(false);
+  const [embedFailed, setEmbedFailed] = useState(false); // embed fail → dùng direct
   const retryCountRef = useRef(0);
   const [retryKey, setRetryKey] = useState(0);
 
@@ -76,6 +77,7 @@ const VideoPlayer = ({
   useEffect(() => {
     setVideoError(null);
     setUseEmbed(false);
+    setEmbedFailed(false);
     retryCountRef.current = 0;
     setRetryKey(0);
   }, [currentVideoUrl]);
@@ -132,11 +134,17 @@ const VideoPlayer = ({
 
   // HLS player
   useEffect(() => {
-    if (!currentVideoUrl || videoError) return;
+    // Chạy khi: bình thường, hoặc khi embed fail → dùng direct
+    if (!currentVideoUrl) return;
+    if (videoError) return;
+    if (useEmbed && !embedFailed) return; // đang dùng embed, chưa fail
 
     const video = videoRef.current;
     adRangesRef.current = [];
     skippedRef.current = new Set();
+
+    // Nếu embed fail → load direct thẳng (có QC nhưng xem được)
+    const loadUrl = embedFailed ? currentVideoUrl : null;
 
     // Safari native HLS
     if (!Hls.isSupported()) {
@@ -299,7 +307,8 @@ const VideoPlayer = ({
       return hls;
     };
 
-    const hls = createHls(proxyUrl);
+    // Nếu embed fail → load direct thẳng, bỏ qua proxy
+    const hls = createHls(embedFailed ? currentVideoUrl : proxyUrl);
 
     const handleTimeUpdate = () => {
       const currentTime = video.currentTime;
@@ -318,7 +327,7 @@ const VideoPlayer = ({
       video.removeEventListener('timeupdate', handleTimeUpdate);
       if (hlsInstance) hlsInstance.destroy();
     };
-  }, [currentVideoUrl, autoPlay, retryKey, videoError]);
+  }, [currentVideoUrl, autoPlay, retryKey, videoError, embedFailed]);
 
   if (!currentVideoUrl) {
     return (
@@ -333,7 +342,8 @@ const VideoPlayer = ({
   }
 
   // Fallback embed iframe khi m3u8 bị block
-  if (useEmbed && currentEmbedUrl) {
+  // Nếu embed cũng fail → dùng direct HLS (có QC nhưng xem được)
+  if (useEmbed && currentEmbedUrl && !embedFailed) {
     return (
       <div
         ref={containerRef}
@@ -346,6 +356,7 @@ const VideoPlayer = ({
             allowFullScreen
             allow="autoplay; fullscreen"
             frameBorder="0"
+            onError={() => setEmbedFailed(true)}
           />
         </div>
       </div>
