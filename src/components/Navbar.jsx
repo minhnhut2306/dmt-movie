@@ -211,9 +211,50 @@ const Navbar = () => {
                 </div>
               </div>
 
-              {/* Right Actions */}
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-1">
                 <NotificationBell />
+
+                {/* Search Icon - Mobile */}
+                <div className="lg:hidden relative">
+                  <button
+                    onClick={() => setShowSearchDropdown(!showSearchDropdown)}
+                    className="p-2 hover:text-orange-500 transition-colors"
+                  >
+                    <Search size={20} />
+                  </button>
+
+                  {showSearchDropdown && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setShowSearchDropdown(false)}
+                      />
+                      <div
+                        className="absolute right-0 mt-2 w-72 bg-gray-900 rounded-xl shadow-2xl z-50 border border-gray-800 p-3"
+                      >
+                        <form onSubmit={handleSearch}>
+                          <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+                            <input
+                              type="text"
+                              value={searchInput}
+                              onChange={(e) => setSearchInput(e.target.value)}
+                              placeholder="Nhập tên phim..."
+                              className="w-full bg-black text-white pl-9 pr-16 py-2 rounded-lg border border-gray-700 focus:border-orange-500 outline-none text-sm"
+                              autoFocus
+                            />
+                            <button
+                              type="submit"
+                              className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-md text-xs font-medium transition-all"
+                            >
+                              Tìm
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </>
+                  )}
+                </div>
                 
                 {/* Search Icon - Desktop */}
                 <div className="hidden lg:block relative">
@@ -298,21 +339,7 @@ const Navbar = () => {
               </button>
             </div>
 
-            {/* Mobile Search */}
-            <div className="p-4 border-b border-gray-800">
-              <form onSubmit={handleSearch}>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                  <input
-                    type="text"
-                    value={searchInput}
-                    onChange={(e) => setSearchInput(e.target.value)}
-                    placeholder="Tìm kiếm phim..."
-                    className="w-full bg-gray-900 text-white pl-10 pr-4 py-2.5 rounded-lg border border-gray-800 focus:border-orange-500 outline-none"
-                  />
-                </div>
-              </form>
-            </div>
+            {/* Mobile Search đã có trên navbar rồi, bỏ ở đây */}
 
             <div className="p-4 overflow-y-auto h-full pb-32">
               <div className="space-y-2">
