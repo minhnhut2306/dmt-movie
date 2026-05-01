@@ -14,6 +14,33 @@ const SearchPage = lazy(() => import('./pages/Search/SearchPage'));
 const CategoryPage = lazy(() => import('./pages/CategoryPage/CategoryPage'));
 const FilterPage = lazy(() => import('./pages/FilterPage/FilterPage'));
 
+// =============================================
+// BẬT/TẮT CHẾ ĐỘ BẢO TRÌ TẠI ĐÂY
+const MAINTENANCE_MODE = true;
+const MAINTENANCE_END_TIME = '10:40'; // giờ kết thúc bảo trì
+// =============================================
+
+const MaintenancePage = () => (
+  <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
+    <div className="text-center max-w-md mx-auto">
+      <div className="text-7xl mb-6">🔧</div>
+      <h1 className="text-3xl font-bold text-white mb-3">Đang Bảo Trì</h1>
+      <p className="text-gray-300 text-lg mb-2">
+        Website đang được nâng cấp và sửa lỗi.
+      </p>
+      <p className="text-gray-400 mb-6">
+        Dự kiến hoàn thành lúc{' '}
+        <span className="text-blue-400 font-semibold">{MAINTENANCE_END_TIME}</span>
+        . Vui lòng quay lại sau.
+      </p>
+      <div className="flex items-center justify-center gap-2 text-gray-500 text-sm">
+        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+        <span>Hệ thống sẽ tự động hoạt động trở lại</span>
+      </div>
+    </div>
+  </div>
+);
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -35,15 +62,19 @@ const App = () => {
       <BrowserRouter>
         <ScrollToTop />
         <Navbar />
-        <Suspense fallback={<div className="min-h-screen bg-gray-900" />}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/movie/:slug" element={<MovieLayouts />} />
-            <Route path="/category/:categoryType/:categorySlug" element={<CategoryPage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/filter" element={<FilterPage />} />
-          </Routes>
-        </Suspense>
+        {MAINTENANCE_MODE ? (
+          <MaintenancePage />
+        ) : (
+          <Suspense fallback={<div className="min-h-screen bg-gray-900" />}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/movie/:slug" element={<MovieLayouts />} />
+              <Route path="/category/:categoryType/:categorySlug" element={<CategoryPage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/filter" element={<FilterPage />} />
+            </Routes>
+          </Suspense>
+        )}
         <Footer/>
         <PWAUpdatePrompt />
       </BrowserRouter>

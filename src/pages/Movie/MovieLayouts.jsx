@@ -56,9 +56,11 @@ const MoviePlay = () => {
         if (!movieData?.episodes?.length) return;
         const firstEpisodeUrl = movieData.episodes[0]?.server_data?.[0]?.link_m3u8;
         if (!firstEpisodeUrl) return;
-        // Ping proxy để warm-up Vercel cold start, không cần xử lý response
-        fetch(`/api/m3u8-proxy?url=${encodeURIComponent(firstEpisodeUrl)}`)
-            .catch(() => {}); // silent fail
+        const proxyBase = import.meta.env.VITE_PROXY_URL || '';
+        const warmupUrl = proxyBase && !proxyBase.includes(window.location.hostname)
+            ? `${proxyBase}?url=${encodeURIComponent(firstEpisodeUrl)}`
+            : `/api/m3u8-proxy?url=${encodeURIComponent(firstEpisodeUrl)}`;
+        fetch(warmupUrl).catch(() => {});
     }, [movieData]);
 
     // Load watched episodes từ localStorage

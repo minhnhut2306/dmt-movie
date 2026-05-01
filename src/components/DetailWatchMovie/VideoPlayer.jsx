@@ -144,81 +144,110 @@ const VideoPlayer = ({
       return;
     }
 
-    const proxyBase = import.meta.env.DEV ? 'http://localhost:3000' : '';
-    const proxyUrl = `${proxyBase}/api/m3u8-proxy?url=${encodeURIComponent(currentVideoUrl)}`;
+    const proxyBase = import.meta.env.DEV
+      ? 'http://localhost:3000'
+      : (import.meta.env.VITE_PROXY_URL || ''); // Cloudflare Worker URL hoặc Vercel
+    const proxyUrl = proxyBase.startsWith('http') && !proxyBase.includes(window.location.hostname)
+      ? `${proxyBase}?url=${encodeURIComponent(currentVideoUrl)}`           // Cloudflare Worker
+      : `${proxyBase}/api/m3u8-proxy?url=${encodeURIComponent(currentVideoUrl)}`; // Vercel fallback
 
-    const hls = new Hls({
-      debug: false,
-      enableWorker: true,
-      lowLatencyMode: false,
-      backBufferLength: 30,
-      maxBufferLength: 30,
-      maxMaxBufferLength: 60,
-      maxBufferSize: 20 * 1000 * 1000,
-      maxBufferHole: 0.5,
-      highBufferWatchdogPeriod: 2,
-      nudgeMaxRetry: 5,
-      manifestLoadingTimeOut: 10000,
-      manifestLoadingMaxRetry: 2,
-      levelLoadingTimeOut: 10000,
-      levelLoadingMaxRetry: 2,
-      fragLoadingTimeOut: 20000,
-      fragLoadingMaxRetry: 4,
-      abrEwmaDefaultEstimate: 500000,
-      abrBandWidthFactor: 0.95,
-      abrBandWidthUpFactor: 0.7,
-      startLevel: -1,       // auto detect
-      maxLoadingDelay: 4,
-      liveSyncDurationCount: 3,
-      liveMaxLatencyDurationCount: 10,
-      startFragPrefetch: true,
-      testBandwidth: true,
-    });
+    // Dùng proxy trước để lọc QC.
+    // Nếu proxy 502 (server block Vercel IP) → fallback load trực tiếp từ browser
+    let hlsInstance = null;
+    let directFallbackTriggered = false;
 
-    hls.loadSource(proxyUrl);
-    hls.attachMedia(video);
-
-    hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
-      // Bắt đầu ở level thấp nhất để play nhanh, ABR tự nâng lên sau
-      if (data.levels.length > 1) {
-        hls.startLevel = 0; // level thấp nhất = load nhanh nhất
-        hls.nextLevel = -1; // sau đó để ABR tự chọn
+    const createHls = (sourceUrl) => {
+      if (hlsInstance) {
+        hlsInstance.destroy();
       }
-      if (autoPlay) {
-        video.play().catch(err => console.log('Autoplay prevented:', err));
-      }
-    });
 
-    hls.on(Hls.Events.LEVEL_LOADED, (event, data) => {
-      adRangesRef.current = findAdRanges(data.details.fragments);
-    });
+      const hls = new Hls({
+        debug: false,
+        enableWorker: true,
+        lowLatencyMode: false,
+        backBufferLength: 30,
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        maxBufferSize: 20 * 1000 * 1000,
+        maxBufferHole: 0.5,
+        highBufferWatchdogPeriod: 2,
+        nudgeMaxRetry: 5,
+        manifestLoadingTimeOut: 10000,
+        manifestLoadingMaxRetry: 2,
+        levelLoadingTimeOut: 10000,
+        levelLoadingMaxRetry: 2,
+        fragLoadingTimeOut: 20000,
+        fragLoadingMaxRetry: 4,
+        abrEwmaDefaultEstimate: 500000,
+        abrBandWidthFactor: 0.95,
+        abrBandWidthUpFactor: 0.7,
+        startLevel: -1,
+        maxLoadingDelay: 4,
+        liveSyncDurationCount: 3,
+        liveMaxLatencyDurationCount: 10,
+        startFragPrefetch: true,
+        testBandwidth: true,
+      });
 
-    hls.on(Hls.Events.ERROR, (event, data) => {
-      if (data.fatal) {
-        switch (data.type) {
-          case Hls.ErrorTypes.NETWORK_ERROR:
-            retryCountRef.current += 1;
-            if (retryCountRef.current <= 2) {
-              console.log(`Network error, retrying... (${retryCountRef.current}/2)`);
-              setTimeout(() => hls.startLoad(), 1000 * retryCountRef.current);
-            } else {
-              console.error('Network error after retries:', data);
-              setVideoError('network');
-              hls.destroy();
-            }
-            break;
-          case Hls.ErrorTypes.MEDIA_ERROR:
-            console.log('Media error, recovering...');
-            hls.recoverMediaError();
-            break;
-          default:
-            console.error('Fatal error:', data);
-            setVideoError('fatal');
-            hls.destroy();
-            break;
+      hlsInstance = hls;
+      hls.loadSource(sourceUrl);
+      hls.attachMedia(video);
+
+      hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+        if (data.levels.length > 1) {
+          hls.startLevel = 0;
+          hls.nextLevel = -1;
         }
-      }
-    });
+        if (autoPlay) {
+          video.play().catch(err => console.log('Autoplay prevented:', err));
+        }
+      });
+
+      hls.on(Hls.Events.LEVEL_LOADED, (event, data) => {
+        adRangesRef.current = findAdRanges(data.details.fragments);
+      });
+
+      hls.on(Hls.Events.ERROR, (event, data) => {
+        if (data.fatal) {
+          // Proxy bị 502 (server block Vercel IP) → fallback load trực tiếp từ browser
+          // Browser dùng IP user (residential) nên không bị block
+          if (sourceUrl === proxyUrl && !directFallbackTriggered) {
+            directFallbackTriggered = true;
+            console.log('Proxy blocked by upstream, falling back to direct load (ads may appear)...');
+            createHls(currentVideoUrl);
+            return;
+          }
+
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              retryCountRef.current += 1;
+              if (retryCountRef.current <= 2) {
+                console.log(`Network error, retrying... (${retryCountRef.current}/2)`);
+                setTimeout(() => hls.startLoad(), 1000 * retryCountRef.current);
+              } else {
+                console.error('Network error after retries:', data);
+                setVideoError('network');
+                hls.destroy();
+              }
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              console.log('Media error, recovering...');
+              hls.recoverMediaError();
+              break;
+            default:
+              console.error('Fatal error:', data);
+              setVideoError('fatal');
+              hls.destroy();
+              break;
+          }
+        }
+      });
+
+      return hls;
+    };
+
+    // Bắt đầu bằng proxy (có lọc QC)
+    const hls = createHls(proxyUrl);
 
     const handleTimeUpdate = () => {
       const currentTime = video.currentTime;
@@ -235,7 +264,7 @@ const VideoPlayer = ({
 
     return () => {
       video.removeEventListener('timeupdate', handleTimeUpdate);
-      hls.destroy();
+      if (hlsInstance) hlsInstance.destroy();
     };
   }, [currentVideoUrl, autoPlay, retryKey, videoError]);
 
