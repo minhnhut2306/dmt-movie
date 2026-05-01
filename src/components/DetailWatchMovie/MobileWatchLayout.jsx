@@ -1,7 +1,9 @@
 import React from 'react';
 import { ArrowLeft, Star, Calendar, Eye, Globe, Film } from 'lucide-react';
-import VideoPlayer from './VideoPlayer';
-import EpisodeList from '../EpisodeList';
+import { lazy, Suspense } from 'react';
+
+const VideoPlayer = lazy(() => import('./VideoPlayer'));
+const EpisodeList = lazy(() => import('../EpisodeList'));
 
 const MobileWatchLayout = ({
   movieData,
@@ -36,11 +38,13 @@ const MobileWatchLayout = ({
         </p>
       </div>
 
-      <VideoPlayer 
-        currentVideoUrl={currentVideoUrl}
-        isFullscreen={isFullscreen}
-        setIsFullscreen={setIsFullscreen}
-      />
+      <Suspense fallback={<div className="aspect-video bg-gray-900 flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" /></div>}>
+        <VideoPlayer 
+          currentVideoUrl={currentVideoUrl}
+          isFullscreen={isFullscreen}
+          setIsFullscreen={setIsFullscreen}
+        />
+      </Suspense>
 
       {!isFullscreen && currentVideoUrl && (
         <div className="px-3 py-3 bg-gradient-to-r from-gray-800/50 to-gray-700/50 backdrop-blur-sm border-b border-gray-600/30">
@@ -63,14 +67,16 @@ const MobileWatchLayout = ({
 
       {!isFullscreen && (
         <div className="px-3 py-4">
-          <EpisodeList
-            episodes={movieData.episodes}
-            currentServer={currentServer}
-            currentEpisode={currentEpisode}
-            setCurrentServer={setCurrentServer}
-            setCurrentEpisode={setCurrentEpisode}
-            isMobile={true}
-          />
+          <Suspense fallback={<div className="h-20 bg-gray-800/50 rounded-xl animate-pulse mb-4" />}>
+            <EpisodeList
+              episodes={movieData.episodes}
+              currentServer={currentServer}
+              currentEpisode={currentEpisode}
+              setCurrentServer={setCurrentServer}
+              setCurrentEpisode={setCurrentEpisode}
+              isMobile={true}
+            />
+          </Suspense>
           <div className="grid grid-cols-2 gap-3 mb-4">
             <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-3 rounded-xl shadow-xl">
               <h3 className="text-sm font-bold text-white mb-2">Thông Tin</h3>

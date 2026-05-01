@@ -1,7 +1,9 @@
 import React from 'react';
 import { Star, Calendar, Clock, Globe, Users, Film, Eye } from 'lucide-react';
-import VideoPlayer from './VideoPlayer';
-import EpisodeList from '../EpisodeList';
+import { lazy, Suspense } from 'react';
+
+const VideoPlayer = lazy(() => import('./VideoPlayer'));
+const EpisodeList = lazy(() => import('../EpisodeList'));
 
 const DesktopWatchLayout = ({
   movieData,
@@ -36,11 +38,13 @@ const DesktopWatchLayout = ({
       
         <div className="mb-6">
           <div className="bg-black rounded-2xl overflow-hidden shadow-2xl">
-            <VideoPlayer 
-              currentVideoUrl={currentVideoUrl}
-              isFullscreen={isFullscreen}
-              setIsFullscreen={setIsFullscreen}
-            />
+            <Suspense fallback={<div className="aspect-video bg-gray-900 flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" /></div>}>
+              <VideoPlayer 
+                currentVideoUrl={currentVideoUrl}
+                isFullscreen={isFullscreen}
+                setIsFullscreen={setIsFullscreen}
+              />
+            </Suspense>
           </div>
 
 
@@ -65,14 +69,16 @@ const DesktopWatchLayout = ({
         </div>
 
 
-        <EpisodeList
-          episodes={movieData.episodes}
-          currentServer={currentServer}
-          currentEpisode={currentEpisode}
-          setCurrentServer={setCurrentServer}
-          setCurrentEpisode={setCurrentEpisode}
-          isMobile={false}
-        />
+        <Suspense fallback={<div className="h-20 bg-gray-800/50 rounded-2xl animate-pulse mb-6" />}>
+          <EpisodeList
+            episodes={movieData.episodes}
+            currentServer={currentServer}
+            currentEpisode={currentEpisode}
+            setCurrentServer={setCurrentServer}
+            setCurrentEpisode={setCurrentEpisode}
+            isMobile={false}
+          />
+        </Suspense>
 
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">

@@ -1,14 +1,25 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { useMovieDetail } from '../../hooks/useMovies';
 import { transformMovieDetail } from '../../utils/transformFunctions';
-import MobileDetailLayout from '../../components/DetailWatchMovie/MobileDetailLayout';
-import DesktopDetailLayout from '../../components/DetailWatchMovie/DesktopDetailLayout';
-import MobileWatchLayout from '../../components/DetailWatchMovie/MobileWatchLayout';
-import DesktopWatchLayout from '../../components/DetailWatchMovie/DesktopWatchLayout';
 import { formatServerName } from '../../utils/serverUtils';
 import { saveWatchHistory, getWatchHistory } from '../../utils/watchHistory';
+
+// Lazy load các layout để giảm bundle size ban đầu
+const MobileDetailLayout = lazy(() => import('../../components/DetailWatchMovie/MobileDetailLayout'));
+const DesktopDetailLayout = lazy(() => import('../../components/DetailWatchMovie/DesktopDetailLayout'));
+const MobileWatchLayout = lazy(() => import('../../components/DetailWatchMovie/MobileWatchLayout'));
+const DesktopWatchLayout = lazy(() => import('../../components/DetailWatchMovie/DesktopWatchLayout'));
+
+const LayoutFallback = () => (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-3"></div>
+            <p className="text-white text-sm">Đang tải...</p>
+        </div>
+    </div>
+);
 
 const MoviePlay = () => {
     const { slug } = useParams();
@@ -19,8 +30,6 @@ const MoviePlay = () => {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [watchedEpisodes, setWatchedEpisodes] = useState({});
-
-    // Chặn slug bị cấm
     const blockedKeywords = ['hay-de-cho-to-toa-sang', 'hay-để-cho-tô-tỏa-sáng'];
     const isBlockedSlug = blockedKeywords.some(keyword => slug?.toLowerCase().includes(keyword.toLowerCase()));
 
@@ -41,6 +50,16 @@ const MoviePlay = () => {
             }))
         };
     }, [movieDetailData]);
+
+    // Warm-up proxy cho tập đầu tiên khi data đã load xong (trước khi user bấm xem)
+    useEffect(() => {
+        if (!movieData?.episodes?.length) return;
+        const firstEpisodeUrl = movieData.episodes[0]?.server_data?.[0]?.link_m3u8;
+        if (!firstEpisodeUrl) return;
+        // Ping proxy để warm-up Vercel cold start, không cần xử lý response
+        fetch(`/api/m3u8-proxy?url=${encodeURIComponent(firstEpisodeUrl)}`)
+            .catch(() => {}); // silent fail
+    }, [movieData]);
 
     // Load watched episodes từ localStorage
     useEffect(() => {
@@ -198,10 +217,12 @@ const MoviePlay = () => {
 
     return (
         <div>
-            {activeLayout === 'detail'
-                ? (isMobile ? <MobileDetailLayout {...commonProps} /> : <DesktopDetailLayout {...commonProps} />)
-                : (isMobile ? <MobileWatchLayout {...commonProps} /> : <DesktopWatchLayout {...commonProps} />)
-            }
+            <Suspense fallback={<LayoutFallback />}>
+                {activeLayout === 'detail'
+                    ? (isMobile ? <MobileDetailLayout {...commonProps} /> : <DesktopDetailLayout {...commonProps} />)
+                    : (isMobile ? <MobileWatchLayout {...commonProps} /> : <DesktopWatchLayout {...commonProps} />)
+                }
+            </Suspense>
         </div>
     );
 };

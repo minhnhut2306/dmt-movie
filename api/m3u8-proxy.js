@@ -18,13 +18,22 @@ export default async function handler(req, res) {
   }
 
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout, dưới giới hạn Vercel 10s
+
     const response = await fetch(decodedUrl, {
+      signal: controller.signal,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Referer': 'https://player.phimapi.com/',
         'Origin': 'https://player.phimapi.com',
       },
     });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      return res.status(502).send(`Upstream error: ${response.status} ${response.statusText}`);
+    }
 
     const text = await response.text();
     const baseUrl = decodedUrl.replace(/[^/]+$/, '');

@@ -2,6 +2,8 @@ import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Play, Star, Loader2 } from 'lucide-react';
 import { useMovieImage } from '../hooks/useMovieImage';
+import { useQueryClient } from '@tanstack/react-query';
+import { movieApi } from '../api';
 
 // Computed once at module load — không chạy lại mỗi render
 const isFacebookInApp = /FBAN|FBAV|FB_IAB|FB4A|FBAN\/Messenger|Instagram/i.test(
@@ -17,6 +19,17 @@ const isFacebookInApp = /FBAN|FBAV|FB_IAB|FB4A|FBAN\/Messenger|Instagram/i.test(
  */
 const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // Prefetch movie detail khi hover — giảm thời gian chờ khi click
+  const handleMouseEnter = () => {
+    if (!movie?.slug) return;
+    queryClient.prefetchQuery({
+      queryKey: ['movie-detail', movie.slug],
+      queryFn: () => movieApi.getMovieDetail(movie.slug),
+      staleTime: 30 * 60 * 1000,
+    });
+  };
   
   // Extract movie data
   const displayTitle = movie?.title || movie?.name || 'Untitled';
@@ -55,6 +68,7 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
         className={`group cursor-pointer transform transition-transform duration-300 hover:scale-105 flex-shrink-0
                    w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 px-2 mb-4 ${className}`}
         onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
       >
         <div className="relative overflow-hidden rounded-xl shadow-2xl">
           {/* Loading State */}
@@ -137,6 +151,7 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
       <div
         className={`group cursor-pointer transform transition-transform duration-300 hover:scale-105 w-full ${className}`}
         onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
       >
         <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
           {/* Loading State */}
@@ -244,6 +259,7 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
         to={`/movie/${movie.slug}`}
         className={`group block focus:outline-none ${className}`}
         onClick={() => window.scrollTo(0, 0)}
+        onMouseEnter={handleMouseEnter}
       >
         <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-slate-900 to-slate-800 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.55)] ring-1 ring-white/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.65)] focus-visible:ring-2 focus-visible:ring-sky-400/60">
           <div className="relative w-full aspect-[3/3]">

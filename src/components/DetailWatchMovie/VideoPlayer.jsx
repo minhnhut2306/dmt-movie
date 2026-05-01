@@ -66,6 +66,16 @@ const VideoPlayer = ({
   const adRangesRef = useRef([]);
   const skippedRef = useRef(new Set());
   const [isLandscape, setIsLandscape] = useState(false);
+  const [videoError, setVideoError] = useState(null);
+  const retryCountRef = useRef(0);
+  const [retryKey, setRetryKey] = useState(0);
+
+  // Reset error + retryKey khi đổi video
+  useEffect(() => {
+    setVideoError(null);
+    retryCountRef.current = 0;
+    setRetryKey(0);
+  }, [currentVideoUrl]);
 
   // Detect orientation change
   useEffect(() => {
@@ -77,7 +87,6 @@ const VideoPlayer = ({
       }
     };
 
-    // Debounce resize để tránh setState liên tục khi kéo cửa sổ
     let resizeTimer;
     const handleResize = () => {
       clearTimeout(resizeTimer);
@@ -114,21 +123,23 @@ const VideoPlayer = ({
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
-
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, [setIsFullscreen]);
 
+  // HLS player
   useEffect(() => {
-    if (!currentVideoUrl) return;
+    if (!currentVideoUrl || videoError) return;
 
     const video = videoRef.current;
     adRangesRef.current = [];
     skippedRef.current = new Set();
 
+    // Safari native HLS
     if (!Hls.isSupported()) {
       if (video?.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = currentVideoUrl;
+        if (autoPlay) video.play().catch(() => {});
       }
       return;
     }
@@ -140,23 +151,23 @@ const VideoPlayer = ({
       debug: false,
       enableWorker: true,
       lowLatencyMode: false,
-      backBufferLength: 30,        // 90 → 30s, tiết kiệm RAM/mobile
+      backBufferLength: 30,
       maxBufferLength: 30,
       maxMaxBufferLength: 60,
-      maxBufferSize: 20 * 1000 * 1000, // 60MB → 20MB
+      maxBufferSize: 20 * 1000 * 1000,
       maxBufferHole: 0.5,
       highBufferWatchdogPeriod: 2,
       nudgeMaxRetry: 5,
       manifestLoadingTimeOut: 10000,
-      manifestLoadingMaxRetry: 4,
+      manifestLoadingMaxRetry: 2,
       levelLoadingTimeOut: 10000,
-      levelLoadingMaxRetry: 4,
+      levelLoadingMaxRetry: 2,
       fragLoadingTimeOut: 20000,
-      fragLoadingMaxRetry: 6,
+      fragLoadingMaxRetry: 4,
       abrEwmaDefaultEstimate: 500000,
       abrBandWidthFactor: 0.95,
       abrBandWidthUpFactor: 0.7,
-      startLevel: -1,
+      startLevel: -1,       // auto detect
       maxLoadingDelay: 4,
       liveSyncDurationCount: 3,
       liveMaxLatencyDurationCount: 10,
@@ -167,9 +178,12 @@ const VideoPlayer = ({
     hls.loadSource(proxyUrl);
     hls.attachMedia(video);
 
-    // Preload optimization
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      // Auto play if enabled
+    hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+      // Bắt đầu ở level thấp nhất để play nhanh, ABR tự nâng lên sau
+      if (data.levels.length > 1) {
+        hls.startLevel = 0; // level thấp nhất = load nhanh nhất
+        hls.nextLevel = -1; // sau đó để ABR tự chọn
+      }
       if (autoPlay) {
         video.play().catch(err => console.log('Autoplay prevented:', err));
       }
@@ -182,17 +196,25 @@ const VideoPlayer = ({
     hls.on(Hls.Events.ERROR, (event, data) => {
       if (data.fatal) {
         switch (data.type) {
-          case Hls.ErrorTypes.NETWORK_ERROR: 
-            console.log('Network error, retrying...');
-            hls.startLoad(); 
+          case Hls.ErrorTypes.NETWORK_ERROR:
+            retryCountRef.current += 1;
+            if (retryCountRef.current <= 2) {
+              console.log(`Network error, retrying... (${retryCountRef.current}/2)`);
+              setTimeout(() => hls.startLoad(), 1000 * retryCountRef.current);
+            } else {
+              console.error('Network error after retries:', data);
+              setVideoError('network');
+              hls.destroy();
+            }
             break;
-          case Hls.ErrorTypes.MEDIA_ERROR: 
+          case Hls.ErrorTypes.MEDIA_ERROR:
             console.log('Media error, recovering...');
-            hls.recoverMediaError(); 
+            hls.recoverMediaError();
             break;
-          default: 
+          default:
             console.error('Fatal error:', data);
-            hls.destroy(); 
+            setVideoError('fatal');
+            hls.destroy();
             break;
         }
       }
@@ -215,11 +237,11 @@ const VideoPlayer = ({
       video.removeEventListener('timeupdate', handleTimeUpdate);
       hls.destroy();
     };
-  }, [currentVideoUrl, autoPlay]);
+  }, [currentVideoUrl, autoPlay, retryKey, videoError]);
 
   if (!currentVideoUrl) {
     return (
-      <div className="bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center h-full">
+      <div className="bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center aspect-video">
         <div className="text-center text-white p-4">
           <Play className="w-16 h-16 mx-auto mb-4 text-red-500" fill="currentColor" />
           <p className="text-xl font-semibold">Không tìm thấy video</p>
@@ -229,8 +251,36 @@ const VideoPlayer = ({
     );
   }
 
+  if (videoError) {
+    return (
+      <div className="bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center aspect-video">
+        <div className="text-center text-white p-4">
+          <div className="text-5xl mb-4">⚠️</div>
+          <p className="text-xl font-semibold mb-2">
+            {videoError === 'network' ? 'Không thể tải video' : 'Lỗi phát video'}
+          </p>
+          <p className="text-gray-400 mt-1 text-sm max-w-xs mx-auto">
+            {videoError === 'network'
+              ? 'Server video đang bận hoặc link đã hết hạn. Thử chọn server khác hoặc thử lại.'
+              : 'Định dạng video không tương thích. Thử chọn server khác.'}
+          </p>
+          <button
+            onClick={() => {
+              retryCountRef.current = 0;
+              setRetryKey(k => k + 1);
+              setVideoError(null);
+            }}
+            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm transition-colors"
+          >
+            Thử lại
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div 
+    <div
       ref={containerRef}
       className={`${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''} ${isLandscape && !isFullscreen ? 'h-screen' : ''}`}
     >
