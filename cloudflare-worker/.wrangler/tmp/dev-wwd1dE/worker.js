@@ -108,9 +108,16 @@ var worker_default = {
     const baseUrl = decodedUrl.replace(/[^/]+$/, "");
     const workerUrl = `${url.origin}${url.pathname}`;
     const cache = caches.default;
-    const cacheKey = new Request(decodedUrl);
+    const cacheKey = new Request(request.url);
     const cachedResponse = await cache.match(cacheKey);
-    if (cachedResponse) return cachedResponse;
+    if (cachedResponse) {
+      const newHeaders = new Headers(cachedResponse.headers);
+      newHeaders.set("Access-Control-Allow-Origin", "*");
+      return new Response(cachedResponse.body, {
+        status: cachedResponse.status,
+        headers: newHeaders
+      });
+    }
     try {
       const response = await fetch(decodedUrl, {
         headers: {
@@ -120,7 +127,10 @@ var worker_default = {
         }
       });
       if (!response.ok) {
-        return new Response(`Upstream error: ${response.status}`, { status: 502 });
+        return new Response(`Upstream error: ${response.status}`, {
+          status: 502,
+          headers: { "Access-Control-Allow-Origin": "*" }
+        });
       }
       const text = await response.text();
       let result;
@@ -139,7 +149,10 @@ var worker_default = {
       ctx.waitUntil(cache.put(cacheKey, finalResponse.clone()));
       return finalResponse;
     } catch (err) {
-      return new Response(`Proxy error: ${err.message}`, { status: 500 });
+      return new Response(`Proxy error: ${err.message}`, {
+        status: 500,
+        headers: { "Access-Control-Allow-Origin": "*" }
+      });
     }
   }
 };
