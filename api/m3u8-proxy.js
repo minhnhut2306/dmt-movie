@@ -2,19 +2,31 @@
 const cache = new Map();
 const CACHE_TTL = 30000; // 30 giây
 
-export default async function handler(req, res) {
-  const { url } = req.query;
-  if (!url) return res.status(400).send('Missing url');
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(req) {
+  const { searchParams } = new URL(req.url);
+  const url = searchParams.get('url');
+  
+  if (!url) {
+    return new Response('Missing url', { status: 400 });
+  }
 
   const decodedUrl = decodeURIComponent(url);
 
   // Check cache
   const cached = cache.get(decodedUrl);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Cache-Control', 'public, max-age=30');
-    return res.status(200).send(cached.data);
+    return new Response(cached.data, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/vnd.apple.mpegurl',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'public, max-age=30',
+      },
+    });
   }
 
   try {
@@ -32,7 +44,7 @@ export default async function handler(req, res) {
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      return res.status(502).send(`Upstream error: ${response.status} ${response.statusText}`);
+      return new Response(`Upstream error: ${response.status} ${response.statusText}`, { status: 502 });
     }
 
     const text = await response.text();
@@ -52,10 +64,14 @@ export default async function handler(req, res) {
       // Cache master playlist
       cache.set(decodedUrl, { data: rewritten, timestamp: Date.now() });
 
-      res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Cache-Control', 'public, max-age=30');
-      return res.status(200).send(rewritten);
+      return new Response(rewritten, {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/vnd.apple.mpegurl',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'public, max-age=30',
+        },
+      });
     }
 
     // Nếu là media playlist → lọc QC và rewrite segment URLs thành absolute
@@ -111,12 +127,16 @@ export default async function handler(req, res) {
     // Cache media playlist
     cache.set(decodedUrl, { data: result, timestamp: Date.now() });
 
-    res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Cache-Control', 'public, max-age=30');
-    res.status(200).send(result);
+    return new Response(result, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/vnd.apple.mpegurl',
+        'Access-Control-Allow-Origin': '*',
+        'Cache-Control': 'public, max-age=30',
+      },
+    });
   } catch (err) {
-    res.status(500).send('Proxy error: ' + err.message);
+    return new Response('Proxy error: ' + err.message, { status: 500 });
   }
 }
 
