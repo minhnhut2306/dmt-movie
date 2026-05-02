@@ -2,16 +2,20 @@
 const cache = new Map();
 const CACHE_TTL = 30000; // 30 giây
 
-export const config = {
-  runtime: 'edge',
-};
+export default async function handler(req, res) {
+  // Enable CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
 
-export default async function handler(req) {
-  const { searchParams } = new URL(req.url);
-  const url = searchParams.get('url');
+  const { url } = req.query;
   
   if (!url) {
-    return new Response('Missing url', { status: 400 });
+    return res.status(400).send('Missing url');
   }
 
   const decodedUrl = decodeURIComponent(url);
@@ -19,19 +23,14 @@ export default async function handler(req) {
   // Check cache
   const cached = cache.get(decodedUrl);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return new Response(cached.data, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/vnd.apple.mpegurl',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'public, max-age=30',
-      },
-    });
+    res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+    res.setHeader('Cache-Control', 'public, max-age=30');
+    return res.status(200).send(cached.data);
   }
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout, dưới giới hạn Vercel 10s
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
     const response = await fetch(decodedUrl, {
       signal: controller.signal,
@@ -44,7 +43,7 @@ export default async function handler(req) {
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      return new Response(`Upstream error: ${response.status} ${response.statusText}`, { status: 502 });
+      return res.status(502).send(`Upstream error: ${response.status} ${response.statusText}`);
     }
 
     const text = await response.text();
@@ -61,17 +60,11 @@ export default async function handler(req) {
         return line;
       }).join('\n');
 
-      // Cache master playlist
       cache.set(decodedUrl, { data: rewritten, timestamp: Date.now() });
 
-      return new Response(rewritten, {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/vnd.apple.mpegurl',
-          'Access-Control-Allow-Origin': '*',
-          'Cache-Control': 'public, max-age=30',
-        },
-      });
+      res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+      res.setHeader('Cache-Control', 'public, max-age=30');
+      return res.status(200).send(rewritten);
     }
 
     // Nếu là media playlist → lọc QC và rewrite segment URLs thành absolute
@@ -83,7 +76,6 @@ export default async function handler(req) {
       const line = lines[i].trim();
 
       if (line === '#EXT-X-DISCONTINUITY') {
-        // Peek segment tiếp theo
         const nextSeg = lines.slice(i + 1, i + 6).find(l => l.trim().endsWith('.ts'));
         if (nextSeg && isAdSegment(nextSeg.trim())) {
           skipNextSegment = true;
@@ -114,7 +106,6 @@ export default async function handler(req) {
           skipNextSegment = false;
           continue;
         }
-        // Rewrite thành absolute URL
         const absUrl = line.startsWith('http') ? line : baseUrl + line;
         filtered.push(absUrl);
         skipNextSegment = false;
@@ -124,19 +115,13 @@ export default async function handler(req) {
     }
     const result = filtered.join('\n');
 
-    // Cache media playlist
     cache.set(decodedUrl, { data: result, timestamp: Date.now() });
 
-    return new Response(result, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/vnd.apple.mpegurl',
-        'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'public, max-age=30',
-      },
-    });
+    res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+    res.setHeader('Cache-Control', 'public, max-age=30');
+    res.status(200).send(result);
   } catch (err) {
-    return new Response('Proxy error: ' + err.message, { status: 500 });
+    res.status(500).send('Proxy error: ' + err.message);
   }
 }
 
