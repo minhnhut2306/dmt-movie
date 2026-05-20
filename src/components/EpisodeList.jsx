@@ -41,10 +41,8 @@ const EpisodeList = ({
     setCurrentEpisode(episodeIndex);
   };
 
-  const handleServerChange = (validServerIndex) => {
-    // validServerIndex là index trong validServers, phải map về index trong episodes gốc
-    const actualIndex = episodes.indexOf(validServers[validServerIndex]);
-    setCurrentServer(actualIndex !== -1 ? actualIndex : validServerIndex);
+  const handleServerChange = (serverIndex) => {
+    setCurrentServer(serverIndex);
     setCurrentEpisode(0);
     setExpandedGroups({});
   };
@@ -99,8 +97,7 @@ const EpisodeList = ({
 
   // Tạo nhóm tập cho phim > 100 tập
   const episodeGroups = useMemo(() => {
-    // Dùng episodes[currentServer] (index gốc) thay vì validServers[currentServer]
-    const serverData = episodes?.[currentServer]?.server_data;
+    const serverData = validServers?.[currentServer]?.server_data;
     if (!serverData || serverData.length <= 100) {
       return null;
     }
@@ -188,20 +185,15 @@ const EpisodeList = ({
                   }`}>
                     {group.episodes.map((episode, idx) => {
                       const episodeIndex = group.startEp + idx;
-                      const isAvailable = !!episode.link_m3u8?.trim();
                       const watched = isEpisodeWatched(slug, currentServer, episodeIndex);
                       const isActive = currentEpisode === episodeIndex;
-
+                      
                       return (
                         <button
                           key={episodeIndex}
-                          onClick={() => isAvailable && handleEpisodeClick(episodeIndex)}
-                          disabled={!isAvailable}
-                          title={!isAvailable ? 'Tập này chưa có link phát' : episode.name}
+                          onClick={() => handleEpisodeClick(episodeIndex)}
                           className={`relative py-3 px-2 rounded-lg font-bold transition-all duration-200 text-sm ${
-                            !isAvailable
-                              ? 'bg-gray-800 text-gray-600 cursor-not-allowed opacity-50 line-through'
-                              : isActive
+                            isActive
                               ? 'bg-green-500 text-white shadow-lg shadow-green-500/30 scale-110 z-10'
                               : watched
                               ? 'bg-yellow-600 text-white hover:bg-yellow-500'
@@ -209,7 +201,7 @@ const EpisodeList = ({
                           }`}
                         >
                           <span className="block">{episode.name}</span>
-                          {watched && !isActive && isAvailable && (
+                          {watched && !isActive && (
                             <Check className="absolute top-1 right-1 w-3.5 h-3.5 text-white drop-shadow-lg" />
                           )}
                         </button>
@@ -226,31 +218,25 @@ const EpisodeList = ({
   };
 
   const renderNormalEpisodes = () => {
-    // Dùng episodes[currentServer] (index gốc) để đồng bộ với WatchLayout
-    const serverData = episodes[currentServer]?.server_data;
+    const serverData = validServers[currentServer]?.server_data;
     if (!serverData) return null;
 
     return (
       <div className={`grid gap-2 ${
-        isMobile
-          ? 'grid-cols-4 sm:grid-cols-5'
+        isMobile 
+          ? 'grid-cols-4 sm:grid-cols-5' 
           : 'grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12'
       }`}>
         {serverData.map((episode, episodeIndex) => {
-          const isAvailable = !!episode.link_m3u8?.trim();
           const watched = isEpisodeWatched(slug, currentServer, episodeIndex);
           const isActive = currentEpisode === episodeIndex;
-
+          
           return (
             <button
               key={episodeIndex}
-              onClick={() => isAvailable && handleEpisodeClick(episodeIndex)}
-              disabled={!isAvailable}
-              title={!isAvailable ? 'Tập này chưa có link phát' : episode.name}
+              onClick={() => handleEpisodeClick(episodeIndex)}
               className={`relative py-2 px-3 rounded-lg font-medium transition-all duration-300 text-sm ${
-                !isAvailable
-                  ? 'bg-gray-800 text-gray-600 cursor-not-allowed opacity-50 line-through'
-                  : isActive
+                isActive
                   ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg scale-105 ring-2 ring-green-400'
                   : watched
                   ? 'bg-gradient-to-r from-yellow-600 to-yellow-700 text-white hover:from-yellow-700 hover:to-yellow-800'
@@ -258,7 +244,7 @@ const EpisodeList = ({
               }`}
             >
               {episode.name}
-              {watched && !isActive && isAvailable && (
+              {watched && !isActive && (
                 <Check className="absolute top-0 right-0 w-3 h-3 text-white" />
               )}
             </button>
@@ -275,23 +261,19 @@ const EpisodeList = ({
       {validServers.length > 1 && (
         <div className="mb-4">
           <div className="flex flex-wrap gap-2">
-            {validServers.map((server, serverIndex) => {
-              // So sánh với episodes[currentServer] để highlight đúng
-              const isSelected = episodes[currentServer] === server;
-              return (
-                <button
-                  key={serverIndex}
-                  onClick={() => handleServerChange(serverIndex)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
-                    isSelected
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105'
-                      : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  }`}
-                >
-                  {server.server_name}
-                </button>
-              );
-            })}
+            {validServers.map((server, serverIndex) => (
+              <button
+                key={serverIndex}
+                onClick={() => handleServerChange(serverIndex)}
+                className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
+                  currentServer === serverIndex
+                    ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105'
+                    : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                }`}
+              >
+                {server.server_name}
+              </button>
+            ))}
           </div>
         </div>
       )}
