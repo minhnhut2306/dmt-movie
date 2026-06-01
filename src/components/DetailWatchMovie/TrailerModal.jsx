@@ -7,15 +7,18 @@ const TrailerModal = ({ isOpen, onClose, trailerUrl, movieName }) => {
 
   const getEmbedUrl = (url) => {
     if (!url) return null;
-    
-    // Check if YouTube
-    const youtubeRegex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?/\\s]{11})/;
+
+    // Bắt ID YouTube từ mọi định dạng: watch?v=, youtu.be/, /embed/, /shorts/, /v/
+    const youtubeRegex = /(?:youtube(?:-nocookie)?\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([A-Za-z0-9_-]{11})/;
     const youtubeMatch = url.match(youtubeRegex);
     if (youtubeMatch && youtubeMatch[1]) {
-      return { 
-        type: 'youtube', 
-        url: `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&rel=0&modestbranding=1`,
-        directUrl: url
+      const videoId = youtubeMatch[1];
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      return {
+        type: 'youtube',
+        // Dùng youtube-nocookie + truyền origin để tránh bị "từ chối kết nối"
+        url: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1${origin ? `&origin=${encodeURIComponent(origin)}` : ''}`,
+        directUrl: `https://www.youtube.com/watch?v=${videoId}`,
       };
     }
     
@@ -125,18 +128,6 @@ const TrailerModal = ({ isOpen, onClose, trailerUrl, movieName }) => {
               onError={() => {
                 setLoadError(true);
                 setIframeError(true);
-              }}
-              onLoad={(e) => {
-                // Kiểm tra nếu iframe bị chặn
-                try {
-                  if (!e.target.contentWindow) {
-                    setIframeError(true);
-                    setLoadError(true);
-                  }
-                } catch {
-                  setIframeError(true);
-                  setLoadError(true);
-                }
               }}
             />
           )}

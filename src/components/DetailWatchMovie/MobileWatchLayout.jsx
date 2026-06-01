@@ -138,7 +138,7 @@ const MobileWatchLayout = ({
               {movieData.actor?.length > 0 ? movieData.actor.slice(0, 6).map((actor, index) => (
                 <div
                   key={index}
-                  className="bg-gradient-to-r from-gray-700 to-gray-600 text-gray-200 px-2 py-2 rounded-lg text-xs text-center"
+                  className="bg-gray-700 border border-gray-600/60 text-gray-200 px-2 py-2 rounded-lg text-xs text-center"
                 >
                   {actor}
                 </div>
