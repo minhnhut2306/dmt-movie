@@ -72,9 +72,11 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
         onMouseEnter={handleMouseEnter}
       >
         <div className="relative overflow-hidden rounded-xl shadow-2xl">
-          {/* Loading skeleton — pulse nhẹ, cảm giác nhanh hơn spinner */}
+          {/* Loading skeleton shimmer */}
           {!isLoaded && (
-            <div className="absolute inset-0 bg-gray-800 animate-pulse aspect-[2/3] z-10" />
+            <div className="absolute inset-0 aspect-[2/3] z-10 overflow-hidden bg-gray-800">
+              <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            </div>
           )}
 
           {/* Image */}
@@ -150,9 +152,11 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
         onMouseEnter={handleMouseEnter}
       >
         <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
-          {/* Loading skeleton — pulse nhẹ, cảm giác nhanh hơn spinner */}
+          {/* Loading skeleton shimmer */}
           {!isLoaded && (
-            <div className="absolute inset-0 bg-gray-800 animate-pulse aspect-[2/3] z-10" />
+            <div className="absolute inset-0 aspect-[2/3] z-10 overflow-hidden bg-gray-800">
+              <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            </div>
           )}
 
           {/* Image */}
@@ -255,10 +259,10 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
       >
         <div className="relative overflow-hidden rounded-2xl bg-slate-900 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.55)] ring-1 ring-white/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.65)] focus-visible:ring-2 focus-visible:ring-sky-400/60">
           <div className="relative w-full aspect-[3/3]">
-            {/* Loading State */}
+            {/* Loading skeleton shimmer */}
             {!isLoaded && (
-              <div className="absolute inset-0">
-                <div className="h-full w-full bg-slate-800 animate-pulse rounded-2xl" />
+              <div className="absolute inset-0 overflow-hidden rounded-2xl bg-slate-800">
+                <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent" />
               </div>
             )}
 
