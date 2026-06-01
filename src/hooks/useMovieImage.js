@@ -1,10 +1,11 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { buildImageCandidates } from '../utils/imageHelper';
 
 export const useMovieImage = (rawUrl, fallbackText = 'No Image') => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [srcIndex, setSrcIndex] = useState(0);
+  const imgRef = useRef(null);
 
   const candidates = useMemo(
     () => buildImageCandidates(rawUrl, fallbackText),
@@ -19,6 +20,15 @@ export const useMovieImage = (rawUrl, fallbackText = 'No Image') => {
   }, [rawUrl]);
 
   const currentSrc = candidates[srcIndex];
+
+  // Nếu ảnh đã có sẵn trong cache trình duyệt, onLoad có thể không fire lại
+  // → check img.complete ngay khi gắn ref để bỏ qua spinner.
+  const setImgRef = useCallback((node) => {
+    imgRef.current = node;
+    if (node && node.complete && node.naturalWidth > 0) {
+      setIsLoaded(true);
+    }
+  }, []);
 
   const handleLoad = () => {
     setIsLoaded(true);
@@ -35,5 +45,5 @@ export const useMovieImage = (rawUrl, fallbackText = 'No Image') => {
     }
   };
 
-  return { currentSrc, isLoaded, hasError, handleLoad, handleError };
+  return { currentSrc, isLoaded, hasError, handleLoad, handleError, setImgRef };
 };

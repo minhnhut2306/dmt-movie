@@ -14,19 +14,21 @@ export function buildImageCandidates(rawUrl, fallbackText = 'No Image') {
   // Normalize URL
   const fullUrl = rawUrl.startsWith('http') ? rawUrl : `https://phimimg.com/${rawUrl}`;
 
-  // Tạo proxy URLs
+  // Tạo proxy URLs — weserv/wsrv có CDN + cache + nén webp, tải nhẹ & nhanh hơn ảnh gốc.
+  // Tham số: w=400 (resize đúng kích thước card), output=webp, q=72 (nhẹ), af (auto-format).
   let weserv = '', wsrv = '';
   try {
     const u = new URL(fullUrl);
     const hostPath = `${u.hostname}${u.pathname}${u.search}`;
-    weserv = `https://images.weserv.nl/?url=${encodeURIComponent(hostPath)}`;
-    wsrv = `https://wsrv.nl/?url=${encodeURIComponent(hostPath)}`;
+    const opts = '&w=400&output=webp&q=72&af&il';
+    weserv = `https://images.weserv.nl/?url=${encodeURIComponent(hostPath)}${opts}`;
+    wsrv = `https://wsrv.nl/?url=${encodeURIComponent(hostPath)}${opts}`;
   } catch {
     // Invalid URL, skip proxies
   }
 
-  // Thứ tự: direct -> weserv -> wsrv -> placeholder
-  return Array.from(new Set([fullUrl, weserv, wsrv, placeholder])).filter(Boolean);
+  // Thứ tự: weserv (nhẹ, nhanh) -> wsrv -> ảnh gốc -> placeholder
+  return Array.from(new Set([weserv, wsrv, fullUrl, placeholder].filter(Boolean)));
 }
 
 /**

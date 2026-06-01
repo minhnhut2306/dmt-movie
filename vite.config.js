@@ -42,7 +42,20 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         runtimeCaching: [
           {
-            // Cache ảnh poster phim từ API
+            // Cache ảnh qua CDN proxy (weserv/wsrv) và ảnh gốc phimimg — URL có query nên không khớp đuôi file
+            urlPattern: /^https:\/\/(images\.weserv\.nl|wsrv\.nl|phimimg\.com)\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'poster-cache',
+              expiration: {
+                maxEntries: 300,
+                maxAgeSeconds: 60 * 60 * 24 * 14, // 14 ngày
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Cache ảnh poster phim từ API (theo đuôi file)
             urlPattern: /^https:\/\/.*\.(png|jpg|jpeg|webp|gif|svg)$/i,
             handler: 'CacheFirst',
             options: {

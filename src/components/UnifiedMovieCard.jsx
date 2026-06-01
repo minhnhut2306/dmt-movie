@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Play, Star, Loader2 } from 'lucide-react';
+import { Play, Star } from 'lucide-react';
 import { useMovieImage } from '../hooks/useMovieImage';
 import { useQueryClient } from '@tanstack/react-query';
 import { movieApi } from '../api';
@@ -47,6 +47,7 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
     hasError,
     handleLoad,
     handleError,
+    setImgRef,
   } = useMovieImage(
     movie?.poster || movie?.poster_url || movie?.thumbnail,
     displayTitle
@@ -71,27 +72,22 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
         onMouseEnter={handleMouseEnter}
       >
         <div className="relative overflow-hidden rounded-xl shadow-2xl">
-          {/* Loading State */}
+          {/* Loading skeleton — pulse nhẹ, cảm giác nhanh hơn spinner */}
           {!isLoaded && (
-            <div className="absolute inset-0 bg-gray-800 flex items-center justify-center aspect-[2/3] z-10">
-              <div className="flex flex-col items-center space-y-3">
-                <Loader2 className="w-8 h-8 text-gray-400 animate-spin" />
-                <div className="text-gray-400 text-sm">Đang tải...</div>
-              </div>
-            </div>
+            <div className="absolute inset-0 bg-gray-800 animate-pulse aspect-[2/3] z-10" />
           )}
 
           {/* Image */}
           <img
+            ref={setImgRef}
             src={currentSrc}
             alt={displayTitle}
-            className={`w-full aspect-[2/3] object-cover object-center transition-opacity duration-300 ${
+            className={`w-full aspect-[2/3] object-cover object-center transition-opacity duration-200 ${
               isLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={handleLoad}
             onError={handleError}
             loading={loadingAttr}
-            fetchPriority="high"
             referrerPolicy="no-referrer"
             decoding="async"
           />
@@ -154,26 +150,22 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
         onMouseEnter={handleMouseEnter}
       >
         <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
-          {/* Loading State */}
+          {/* Loading skeleton — pulse nhẹ, cảm giác nhanh hơn spinner */}
           {!isLoaded && (
-            <div className="absolute inset-0 bg-gray-800 flex items-center justify-center aspect-[2/3] z-10">
-              <div className="flex flex-col items-center space-y-2">
-                <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 text-gray-400 animate-spin" />
-                <div className="text-gray-400 text-xs sm:text-sm">Đang tải...</div>
-              </div>
-            </div>
+            <div className="absolute inset-0 bg-gray-800 animate-pulse aspect-[2/3] z-10" />
           )}
 
           {/* Image */}
           <img
+            ref={setImgRef}
             src={currentSrc}
             alt={displayTitle}
-            className={`w-full aspect-[2/3] object-cover object-center transition-opacity duration-300 ${
+            className={`w-full aspect-[2/3] object-cover object-center transition-opacity duration-200 ${
               isLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={handleLoad}
             onError={handleError}
-            loading="lazy"
+            loading={loadingAttr}
             referrerPolicy="no-referrer"
             decoding="async"
           />
@@ -272,12 +264,14 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
 
             {/* Image */}
             <img
+              ref={setImgRef}
               src={currentSrc}
               alt={displayTitle}
-              loading="lazy"
+              loading={loadingAttr}
               onLoad={handleLoad}
               onError={handleError}
-              className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-500 ${
+              referrerPolicy="no-referrer"
+              className={`absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-200 ${
                 isLoaded ? 'opacity-100' : 'opacity-0'
               } scale-[1.02] group-hover:scale-[1.06] ease-out`}
             />
