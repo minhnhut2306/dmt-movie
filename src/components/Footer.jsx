@@ -1,13 +1,9 @@
 import React from 'react';
 import {
-  Play,
-  Mail,
-  Phone,
   Facebook,
   Youtube,
   Film,
   Tv,
-  Clock,
   MessageCircle
 } from 'lucide-react';
 import { 
@@ -32,7 +28,7 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="container mx-auto px-4 py-12 max-w-7xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
           <div className="space-y-4 md:pr-6 md:border-r md:border-gray-600">
             <div className="flex items-center space-x-2">
@@ -131,28 +127,6 @@ const Footer = () => {
                 </li>
               ))}
             </ul>
-          </div>
-
-          {/* Contact Info */}
-          <div className="space-y-4 md:pl-6">
-            <h3 className="text-lg font-semibold text-white">Thông Tin Liên Hệ</h3>
-
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3 text-sm">
-                <Mail className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-                <span className="break-words">nhutnm2306@gmail.com</span>
-              </div>
-              <div className="flex items-center space-x-3 text-sm">
-                <Phone className="w-4 h-4 text-red-600 flex-shrink-0" />
-                <span>+84 345 093 534</span>
-              </div>
-              <div className="flex items-center space-x-3 text-sm">
-                <MessageCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
-                <a href="https://zalo.me/0345093534" className="hover:text-orange-400 transition-colors duration-200">
-                  Zalo: +84 345 093 534
-                </a>
-              </div>
-            </div>
           </div>
         </div>
       </div>
