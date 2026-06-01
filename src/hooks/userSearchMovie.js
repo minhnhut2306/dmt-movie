@@ -31,7 +31,7 @@ export const transformSearchResults = (data) => {
   return (
     data?.data?.items?.map((movie) => {
       const getPosterUrl = (posterUrl) => {
-        if (!posterUrl) return "https://via.placeholder.com/300x450/374151/ffffff?text=No+Image";
+        if (!posterUrl) return "/404.jpg";
         return posterUrl.startsWith("http") 
           ? posterUrl 
           : `https://phimimg.com/${posterUrl}`;

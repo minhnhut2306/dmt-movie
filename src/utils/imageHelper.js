@@ -3,12 +3,14 @@
 /**
  * Tạo danh sách URL ảnh để thử lần lượt khi load fail
  * @param {string} rawUrl - URL gốc từ API
- * @param {string} fallbackText - Text hiển thị khi không có ảnh
- * @returns {string[]} - Mảng URLs để thử theo thứ tự
+ * @param {string} _fallbackText - (không dùng) giữ để tương thích nơi gọi cũ
+ * @returns {string[]} - Mảng URLs để thử theo thứ tự, kết thúc bằng /404.jpg
  */
-export function buildImageCandidates(rawUrl, fallbackText = 'No Image') {
-  const placeholder = `https://via.placeholder.com/400x600/374151/ffffff?text=${encodeURIComponent(fallbackText)}`;
-  
+// eslint-disable-next-line no-unused-vars
+export function buildImageCandidates(rawUrl, _fallbackText = 'No Image') {
+  // Ảnh mặc định khi load lỗi hoặc không có ảnh
+  const placeholder = '/404.jpg';
+
   if (!rawUrl) return [placeholder];
 
   // Normalize URL
