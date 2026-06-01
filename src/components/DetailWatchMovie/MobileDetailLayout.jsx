@@ -26,7 +26,7 @@ const MobileDetailLayout = ({
             className="h-64 sm:h-80 bg-cover bg-center rounded-xl relative overflow-hidden"
             style={{ backgroundImage: `url(${getSafeImageUrl(movieData.thumb_url, movieData.name)})` }}
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-black/60"></div>
             <div className="absolute bottom-4 left-4 right-4 z-10">
               <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-white">{movieData.name}</h1>
               <p className="text-lg text-gray-200 mb-3">{movieData.origin_name}</p>

@@ -96,8 +96,8 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
             decoding="async"
           />
 
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+          {/* Bottom shade (1 màu phẳng) */}
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-black/60 pointer-events-none" />
 
           {/* Hover Play Button */}
           {isLoaded && (
@@ -178,8 +178,8 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
             decoding="async"
           />
 
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+          {/* Bottom shade (1 màu phẳng) */}
+          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-black/60 pointer-events-none" />
 
           {/* Hover Play Button */}
           {isLoaded && (
@@ -206,7 +206,7 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
           {/* Movie Info */}
           {isLoaded && (
             <div className="absolute bottom-0 left-0 right-0">
-              <div className="bg-gradient-to-t from-black/90 to-transparent p-3 sm:p-4">
+              <div className="bg-black/80 p-3 sm:p-4">
                 <h3 className="text-white font-bold text-sm sm:text-base lg:text-lg mb-1 sm:mb-2 line-clamp-2 leading-tight">
                   {displayTitle}
                 </h3>
@@ -267,7 +267,6 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
             {!isLoaded && (
               <div className="absolute inset-0">
                 <div className="h-full w-full bg-slate-800 animate-pulse rounded-2xl" />
-                <div className="absolute inset-0 bg-[linear-gradient(110deg,transparent,rgba(255,255,255,0.06),transparent)] bg-[length:200%_100%] animate-[shimmer_1.2s_infinite]" />
               </div>
             )}
 
@@ -283,8 +282,8 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
               } scale-[1.02] group-hover:scale-[1.06] ease-out`}
             />
 
-            {/* Gradient Overlay */}
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+            {/* Bottom shade (1 màu phẳng) */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-black/60" />
 
             {/* Rating Badge */}
             {isLoaded && displayRating && (

@@ -265,7 +265,7 @@ const HeroBanner = ({
             className={`absolute inset-0 bg-cover bg-center transition-all duration-500 ease-out ${index === currentIndex ? 'opacity-100' : 'opacity-0'
               }`}
             style={{
-              backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)), url('${movie.backgroundImage}')`,
+              backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('${movie.backgroundImage}')`,
               transform: isDraggingLocal && dragDirection === 'horizontal' ? `translateX(${localDragOffset}px)` :
                 (isDragging && activeSection === 'hero') ? `translateX(${dragOffset}px)` :
                   'translateX(0)'

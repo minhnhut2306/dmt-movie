@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  Facebook,
-  Youtube,
-  Film,
-  Tv,
-  MessageCircle
-} from 'lucide-react';
+import { Film, Tv } from 'lucide-react';
 import { 
   CATEGORY_TYPES, 
   STATIC_SPECIAL_LISTS,
@@ -15,12 +9,6 @@ import {
 const Footer = () => {
   // ✅ Fetch từ API
   const { genres } = useDynamicGenres();
-
-  const socialLinks = [
-    { icon: Facebook, href: 'https://www.facebook.com/nhut2306', label: 'Facebook' },
-    { icon: Youtube, href: '#', label: 'YouTube' },
-    { icon: MessageCircle, href: 'https://zalo.me/0345093534', label: 'Zalo' }
-  ];
 
   const popularMovieCategories = STATIC_SPECIAL_LISTS.slice(0, 6);
   const popularGenres = genres.slice(0, 6);
@@ -142,23 +130,6 @@ const Footer = () => {
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
-              <div className="flex space-x-3">
-                {socialLinks.map((social, index) => {
-                  const IconComponent = social.icon;
-                  return (
-                    <a
-                      key={index}
-                      href={social.href}
-                      aria-label={social.label}
-                      className="p-2 bg-gray-800 hover:bg-red-600 rounded-full transition-all duration-300 hover:scale-110"
-                    >
-                      <IconComponent className="w-4 h-4" />
-                    </a>
-                  );
-                })}
-              </div>
-            </div>
           </div>
         </div>
       </div>

@@ -26,7 +26,7 @@ const DesktopDetailLayout = ({
             className="h-96 bg-cover bg-center rounded-2xl relative overflow-hidden"
             style={{ backgroundImage: `url(${getSafeImageUrl(movieData.thumb_url, movieData.name)})` }}
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent"></div>
+            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-black/60"></div>
             <div className="absolute bottom-6 left-6 z-10">
               <h1 className="text-4xl font-bold mb-2 text-white">{movieData.name}</h1>
               <p className="text-xl text-gray-200 mb-4">{movieData.origin_name}</p>
