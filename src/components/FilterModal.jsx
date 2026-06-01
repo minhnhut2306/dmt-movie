@@ -71,9 +71,9 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
       
       <div className="relative bg-black w-full max-w-lg sm:max-w-4xl rounded-2xl shadow-2xl max-h-[85vh] overflow-hidden border border-orange-500/30">
         {/* Header - Compact */}
-        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-800 bg-gradient-to-r from-orange-500/10 to-blue-500/10">
+        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-800 bg-gray-900">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg">
+            <div className="p-1.5 bg-orange-500 rounded-lg">
               <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <h2 className="text-lg sm:text-xl font-bold text-white">Bộ lọc</h2>
@@ -309,7 +309,7 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
           </button>
           <button
             onClick={handleApply}
-            className="px-3 py-2.5 text-sm bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg font-medium shadow-lg transition-all"
+            className="px-3 py-2.5 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium shadow-lg transition-all"
           >
             Áp dụng
           </button>

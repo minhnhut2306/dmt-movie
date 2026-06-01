@@ -261,7 +261,7 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
         onClick={() => window.scrollTo(0, 0)}
         onMouseEnter={handleMouseEnter}
       >
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-slate-900 to-slate-800 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.55)] ring-1 ring-white/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.65)] focus-visible:ring-2 focus-visible:ring-sky-400/60">
+        <div className="relative overflow-hidden rounded-2xl bg-slate-900 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.55)] ring-1 ring-white/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.65)] focus-visible:ring-2 focus-visible:ring-sky-400/60">
           <div className="relative w-full aspect-[3/3]">
             {/* Loading State */}
             {!isLoaded && (

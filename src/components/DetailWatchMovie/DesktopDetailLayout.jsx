@@ -11,7 +11,7 @@ const DesktopDetailLayout = ({
   const [showTrailer, setShowTrailer] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900">
+    <div className="min-h-screen bg-gray-900">
       <div className="container mx-auto px-4 py-8">
         <button
           onClick={() => navigate(-1)}
@@ -58,7 +58,7 @@ const DesktopDetailLayout = ({
             />
             <button
               onClick={() => setActiveLayout('watch')}
-              className="w-full mt-6 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+              className="w-full mt-6 bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
             >
               <Play className="w-5 h-5" fill="currentColor" />
               Xem Phim
@@ -67,7 +67,7 @@ const DesktopDetailLayout = ({
             {movieData.trailer_url && (
               <button
                 onClick={() => setShowTrailer(true)}
-                className="w-full mt-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
               >
                 <Youtube className="w-5 h-5" />
                 Xem Trailer
@@ -76,7 +76,7 @@ const DesktopDetailLayout = ({
           </div>
 
           <div className="lg:col-span-3 space-y-6">
-            <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
+            <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold mb-4 text-white">Thông Tin Phim</h2>
               <p className="text-gray-300 mb-6 leading-relaxed">{movieData.content}</p>
 
@@ -113,13 +113,13 @@ const DesktopDetailLayout = ({
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
+            <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
               <h3 className="text-xl font-bold mb-4 text-white">Thể Loại</h3>
               <div className="flex flex-wrap gap-2">
                 {movieData.category?.map((cat, index) => (
                   <span
                     key={index}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105"
+                    className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105"
                   >
                     {cat.name}
                   </span>
@@ -127,7 +127,7 @@ const DesktopDetailLayout = ({
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
+            <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
               <h3 className="text-xl font-bold mb-4 text-white">Diễn Viên</h3>
               <div className="flex flex-wrap gap-2">
                 {movieData.actor?.length > 0 ? movieData.actor.map((actor, index) => (

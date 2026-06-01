@@ -67,7 +67,7 @@ const TrailerModal = ({ isOpen, onClose, trailerUrl, movieName }) => {
         className="relative w-full max-w-5xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-red-900/50 to-purple-900/50 border-b border-gray-700">
+        <div className="flex items-center justify-between p-4 bg-gray-800 border-b border-gray-700">
           <h3 className="text-white font-bold text-lg flex items-center gap-2">
             <span className="text-red-500">▶</span>
             Trailer - {movieName}

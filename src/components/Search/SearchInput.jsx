@@ -149,7 +149,7 @@ const SearchInput = ({
         onChange={handleInputChange}
         onKeyDown={handleKeyPress}
         placeholder={placeholder}
-        className={`bg-gradient-to-r from-gray-800 to-gray-900 text-white rounded-xl pl-11 pr-12 py-3 w-full outline-none transition-all text-sm lg:text-base border ${
+        className={`bg-gray-800 text-white rounded-xl pl-11 pr-12 py-3 w-full outline-none transition-all text-sm lg:text-base border ${
           isBlocked 
             ? 'border-red-500 ring-2 ring-red-500/50 focus:ring-red-600 focus:border-red-600' 
             : 'border-gray-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500'

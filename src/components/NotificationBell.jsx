@@ -190,7 +190,7 @@ const NotificationBell = () => {
                       href={LATEST_VERSION.v2Url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-400 hover:to-orange-300 active:scale-95 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all"
+                      className="inline-flex items-center gap-1.5 bg-orange-500 hover:bg-orange-400 active:scale-95 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all"
                     >
                       <Sparkles size={11} />
                       Chuyển sang {LATEST_VERSION.label}

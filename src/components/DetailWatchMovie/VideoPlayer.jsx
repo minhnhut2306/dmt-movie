@@ -331,7 +331,7 @@ const VideoPlayer = ({
 
   if (!currentVideoUrl) {
     return (
-      <div className="bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center aspect-video">
+      <div className="bg-gray-800 flex items-center justify-center aspect-video">
         <div className="text-center text-white p-4">
           <Play className="w-16 h-16 mx-auto mb-4 text-red-500" fill="currentColor" />
           <p className="text-xl font-semibold">Không tìm thấy video</p>
@@ -373,7 +373,7 @@ const VideoPlayer = ({
 
   if (videoError || (embedFailed && !currentEmbedUrl)) {
     return (
-      <div className="bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center aspect-video">
+      <div className="bg-gray-800 flex items-center justify-center aspect-video">
         <div className="text-center text-white p-4">
           <div className="text-5xl mb-4">⚠️</div>
           <p className="text-xl font-semibold mb-2">Không thể phát video</p>

@@ -59,7 +59,7 @@ const PWAInstallPrompt = () => {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 animate-slide-up">
-      <div className="bg-gradient-to-r from-[#1a252f] to-[#0d1117] border border-orange-500/30 rounded-2xl shadow-2xl p-4 flex items-center gap-3">
+      <div className="bg-[#1a252f] border border-orange-500/30 rounded-2xl shadow-2xl p-4 flex items-center gap-3">
         <img
           src="/icon-192x192.png"
           alt="DMT Movie"

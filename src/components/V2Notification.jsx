@@ -6,7 +6,7 @@ const FEATURE_NOTIF_KEY = "dmt_adskip_notif_shown";
 
 const FeatureNotification = ({ onClose }) => (
   <div className="fixed bottom-4 left-4 right-4 z-50 animate-slide-up max-w-lg mx-auto">
-    <div className="bg-gradient-to-br from-[#1a1f2e] to-[#0d1117] border border-blue-500/40 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="bg-[#1a1f2e] border border-blue-500/40 rounded-2xl shadow-2xl overflow-hidden">
       <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-white/5">
         <div className="flex items-center gap-2">
           <Zap size={14} className="text-blue-400" />
@@ -114,7 +114,7 @@ const V2Notification = () => {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 animate-slide-up max-w-lg mx-auto">
-      <div className="bg-gradient-to-br from-[#1a1f2e] to-[#0d1117] border border-orange-500/40 rounded-2xl shadow-2xl overflow-hidden">
+      <div className="bg-[#1a1f2e] border border-orange-500/40 rounded-2xl shadow-2xl overflow-hidden">
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-white/5">

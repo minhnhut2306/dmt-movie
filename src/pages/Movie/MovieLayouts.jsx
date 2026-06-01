@@ -13,7 +13,7 @@ const MobileWatchLayout = lazy(() => import('../../components/DetailWatchMovie/M
 const DesktopWatchLayout = lazy(() => import('../../components/DetailWatchMovie/DesktopWatchLayout'));
 
 const LayoutFallback = () => (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-3"></div>
             <p className="text-white text-sm">Đang tải...</p>
@@ -138,7 +138,7 @@ const MoviePlay = () => {
     // Hiển thị lỗi nếu slug bị chặn
     if (isBlockedSlug) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
+            <div className="min-h-screen bg-gray-900 flex items-center justify-center">
                 <div className="text-center max-w-md mx-auto px-4">
                     <div className="text-red-500 text-6xl mb-4">🚫</div>
                     <h2 className="text-white text-2xl mb-2">Phim này đã bị phong sát</h2>
@@ -164,7 +164,7 @@ const MoviePlay = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
+            <div className="min-h-screen bg-gray-900 flex items-center justify-center">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
                     <p className="text-white text-lg">Đang tải thông tin phim...</p>
@@ -176,7 +176,7 @@ const MoviePlay = () => {
 
     if (isError || error || !movieData) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center">
+            <div className="min-h-screen bg-gray-900 flex items-center justify-center">
                 <div className="text-center max-w-md mx-auto px-4">
                     <div className="text-red-500 text-6xl mb-4">⚠️</div>
                     <h2 className="text-white text-2xl mb-2">Không tìm thấy phim</h2>

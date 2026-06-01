@@ -20,7 +20,7 @@ const MobileWatchLayout = ({
   const currentEpisodeName = movieData.episodes?.[currentServer]?.server_data?.[currentEpisode]?.name;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
+    <div className="min-h-screen bg-gray-900">
       <div className="px-3 py-3 border-b border-gray-700/50">
         <div className="flex items-center gap-3 mb-2">
           <button
@@ -49,7 +49,7 @@ const MobileWatchLayout = ({
       </Suspense>
 
       {!isFullscreen && currentVideoUrl && (
-        <div className="px-3 py-3 bg-gradient-to-r from-gray-800/50 to-gray-700/50 backdrop-blur-sm border-b border-gray-600/30">
+        <div className="px-3 py-3 bg-gray-800/50 backdrop-blur-sm border-b border-gray-600/30">
           <div className="flex flex-wrap items-center gap-3 text-xs text-gray-300">
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -80,7 +80,7 @@ const MobileWatchLayout = ({
             />
           </Suspense>
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-3 rounded-xl shadow-xl">
+            <div className="bg-gray-800/80 backdrop-blur-sm p-3 rounded-xl shadow-xl">
               <h3 className="text-sm font-bold text-white mb-2">Thông Tin</h3>
               <div className="space-y-2 text-xs">
                 <div className="flex items-center gap-1">
@@ -96,7 +96,7 @@ const MobileWatchLayout = ({
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-3 rounded-xl shadow-xl">
+            <div className="bg-gray-800/80 backdrop-blur-sm p-3 rounded-xl shadow-xl">
               <h3 className="text-sm font-bold text-white mb-2">Chi Tiết</h3>
               <div className="space-y-2 text-xs">
                 <div className="flex items-center gap-1">
@@ -113,18 +113,18 @@ const MobileWatchLayout = ({
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
+          <div className="bg-gray-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
             <h3 className="text-sm font-bold text-white mb-2">Nội Dung Phim</h3>
             <p className="text-gray-300 leading-relaxed text-xs">{movieData.content}</p>
           </div>
 
-          <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
+          <div className="bg-gray-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
             <h3 className="text-sm font-bold text-white mb-2">Thể Loại</h3>
             <div className="flex flex-wrap gap-1">
               {movieData.category?.map((cat, index) => (
                 <span
                   key={index}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-2 py-1 rounded-full text-xs font-medium"
+                  className="bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-medium"
                 >
                   {cat.name}
                 </span>
@@ -132,7 +132,7 @@ const MobileWatchLayout = ({
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-gray-800/80 to-gray-700/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
+          <div className="bg-gray-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
             <h3 className="text-sm font-bold text-white mb-3">Diễn Viên</h3>
             <div className="grid grid-cols-2 gap-2">
               {movieData.actor?.length > 0 ? movieData.actor.slice(0, 6).map((actor, index) => (

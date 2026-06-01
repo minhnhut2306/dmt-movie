@@ -39,7 +39,7 @@ const SearchPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900">
+    <div className="min-h-screen bg-gray-900">
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center mb-6">
           <button 

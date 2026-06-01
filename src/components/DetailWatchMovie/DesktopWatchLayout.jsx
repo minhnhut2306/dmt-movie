@@ -20,7 +20,7 @@ const DesktopWatchLayout = ({
   const currentEpisodeName = movieData.episodes?.[currentServer]?.server_data?.[currentEpisode]?.name;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
+    <div className="min-h-screen bg-gray-900">
       <div className="container mx-auto px-4 py-6">
         <div className="mb-6">
           <button
@@ -51,7 +51,7 @@ const DesktopWatchLayout = ({
 
 
           {currentVideoUrl && (
-            <div className="mt-4 p-4 bg-gradient-to-r from-gray-800/50 to-gray-700/50 backdrop-blur-sm rounded-xl border border-gray-600/30">
+            <div className="mt-4 p-4 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30">
               <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -84,7 +84,7 @@ const DesktopWatchLayout = ({
 
 
         <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
+          <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
             <h3 className="text-lg font-bold text-white mb-4">Thông Tin Phim</h3>
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-2">
@@ -105,7 +105,7 @@ const DesktopWatchLayout = ({
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
+          <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
             <h3 className="text-lg font-bold text-white mb-4">Chi Tiết</h3>
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-2">
@@ -126,13 +126,13 @@ const DesktopWatchLayout = ({
             </div>
           </div>
 
-          <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl">
+          <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
             <h3 className="text-lg font-bold text-white mb-4">Thể Loại</h3>
             <div className="flex flex-wrap gap-2">
               {movieData.category?.slice(0, 4).map((cat, index) => (
                 <span
                   key={index}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium"
+                  className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium"
                 >
                   {cat.name}
                 </span>
@@ -142,13 +142,13 @@ const DesktopWatchLayout = ({
         </div>
 
  
-        <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl mb-8">
+        <div className="bg-gray-800 p-6 rounded-2xl shadow-xl mb-8">
           <h3 className="text-lg font-bold text-white mb-4">Nội Dung Phim</h3>
           <p className="text-gray-300 leading-relaxed">{movieData.content}</p>
         </div>
 
 
-        <div className="bg-gradient-to-r from-gray-800 to-gray-700 p-6 rounded-2xl shadow-xl mb-8">
+        <div className="bg-gray-800 p-6 rounded-2xl shadow-xl mb-8">
           <h3 className="text-lg font-bold text-white mb-4">Diễn Viên</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {movieData.actor?.length > 0 ? movieData.actor.map((actor, index) => (
