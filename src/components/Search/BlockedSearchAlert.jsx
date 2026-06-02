@@ -13,7 +13,6 @@ const BLOCKED_KEYWORDS = [
   "everest nguoi tuyet be nho",
   "abominable",
   "uncharted",
-  "barbie",
   "pine gap",
   "put your head on my shoulder",
   "hãy để tôi tỏa sáng (love's ambition)",
