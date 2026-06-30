@@ -47,7 +47,7 @@ function filterMediaPlaylist(text, baseUrl) {
       continue;
     }
 
-    if (line.endsWith('.ts')) {
+    if (line.endsWith('.ts') || line.endsWith('.m4s') || line.endsWith('.mp4')) {
       if (isAdSegment(line)) {
         skipNextSegment = false;
         continue;

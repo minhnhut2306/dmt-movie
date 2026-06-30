@@ -1,13 +1,15 @@
-import { useState } from "react";
-import { Menu, X, Search, ChevronDown, Filter } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Menu, X, Search, ChevronDown, Filter, History, Play, Trash2 } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import FilterModal from "./FilterModal";
-import { 
-  useDynamicGenres, 
-  useDynamicCountries, 
-  ALL_YEARS 
+import {
+  useDynamicGenres,
+  useDynamicCountries,
+  ALL_YEARS
 } from "../utils/CategoryConfigDynamic";
 import NotificationBell from "./NotificationBell";
+import { getAllWatchHistory, removeFromWatchHistory } from "../utils/watchHistory";
+import { getSafeImageUrl } from "../utils/imageHelper";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -16,6 +18,20 @@ const Navbar = () => {
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showSearchDropdown, setShowSearchDropdown] = useState(false);
   const [searchInput, setSearchInput] = useState('');
+  const [showHistory, setShowHistory] = useState(false);
+  const [historyItems, setHistoryItems] = useState([]);
+
+  const openHistory = () => {
+    setHistoryItems(getAllWatchHistory().slice(0, 12));
+    setShowHistory(true);
+  };
+
+  const handleRemoveHistory = (e, slug) => {
+    e.preventDefault();
+    e.stopPropagation();
+    removeFromWatchHistory(slug);
+    setHistoryItems(prev => prev.filter(h => h.slug !== slug));
+  };
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -213,6 +229,86 @@ const Navbar = () => {
 
               <div className="flex items-center space-x-1">
                 <NotificationBell />
+
+                {/* History Dropdown */}
+                <div className="relative">
+                  <button
+                    onClick={() => showHistory ? setShowHistory(false) : openHistory()}
+                    className="p-2 hover:text-orange-500 transition-colors"
+                    title="Lịch sử xem"
+                  >
+                    <History size={20} />
+                  </button>
+
+                  {showHistory && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setShowHistory(false)} />
+                      <div className="absolute right-0 mt-2 w-80 bg-gray-900 rounded-xl shadow-2xl z-50 border border-gray-800 overflow-hidden top-full">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+                          <span className="text-sm font-semibold text-white">Xem gần đây</span>
+                          <Link
+                            to="/history"
+                            onClick={() => setShowHistory(false)}
+                            className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
+                          >
+                            Xem tất cả →
+                          </Link>
+                        </div>
+
+                        {historyItems.length === 0 ? (
+                          <div className="py-10 text-center text-gray-500 text-sm">
+                            Chưa có lịch sử xem
+                          </div>
+                        ) : (
+                          <div className="max-h-96 overflow-y-auto scrollbar-hide">
+                            {historyItems.map(item => (
+                              <div
+                                key={item.slug}
+                                className="group flex items-center gap-3 px-3 py-2.5 hover:bg-gray-800 cursor-pointer transition-colors"
+                                onClick={() => { navigate(`/movie/${item.slug}`); setShowHistory(false); }}
+                              >
+                                <div className="relative flex-shrink-0 w-10 h-14 rounded overflow-hidden bg-gray-800">
+                                  <img
+                                    src={getSafeImageUrl(item.poster, item.title)}
+                                    alt={item.title}
+                                    className="w-full h-full object-cover"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <Play className="w-4 h-4 text-white fill-white" />
+                                  </div>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-white text-sm font-medium truncate">{item.title}</p>
+                                  {item.lastEpisodeName && (
+                                    <p className="text-orange-400 text-xs truncate">{item.lastEpisodeName}</p>
+                                  )}
+                                  <p className="text-gray-500 text-xs mt-0.5">
+                                    {item.timestamp ? (() => {
+                                      const diff = Date.now() - item.timestamp;
+                                      const m = Math.floor(diff / 60000);
+                                      if (m < 1) return 'Vừa xem';
+                                      if (m < 60) return `${m} phút trước`;
+                                      const h = Math.floor(m / 60);
+                                      if (h < 24) return `${h} giờ trước`;
+                                      return `${Math.floor(h / 24)} ngày trước`;
+                                    })() : ''}
+                                  </p>
+                                </div>
+                                <button
+                                  onClick={(e) => handleRemoveHistory(e, item.slug)}
+                                  className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-600/30 hover:text-red-400 text-gray-600 rounded transition-all flex-shrink-0"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
 
                 {/* Search Icon - Mobile */}
                 <div className="lg:hidden relative">

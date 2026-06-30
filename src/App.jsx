@@ -13,6 +13,7 @@ const MovieLayouts = lazy(() => import('./pages/Movie/MovieLayouts'));
 const SearchPage = lazy(() => import('./pages/Search/SearchPage'));
 const CategoryPage = lazy(() => import('./pages/CategoryPage/CategoryPage'));
 const FilterPage = lazy(() => import('./pages/FilterPage/FilterPage'));
+const HistoryPage = lazy(() => import('./pages/HistoryPage/HistoryPage'));
 
 // =============================================
 // BẬT/TẮT CHẾ ĐỘ BẢO TRÌ TẠI ĐÂY
@@ -72,6 +73,7 @@ const App = () => {
               <Route path="/category/:categoryType/:categorySlug" element={<CategoryPage />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/filter" element={<FilterPage />} />
+              <Route path="/history" element={<HistoryPage />} />
             </Routes>
           </Suspense>
         )}

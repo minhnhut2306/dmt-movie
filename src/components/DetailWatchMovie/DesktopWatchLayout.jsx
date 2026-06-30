@@ -40,11 +40,14 @@ const DesktopWatchLayout = ({
         <div className="mb-6">
           <div className="bg-black rounded-2xl overflow-hidden shadow-2xl">
             <Suspense fallback={<div className="aspect-video bg-gray-900 flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" /></div>}>
-              <VideoPlayer 
+              <VideoPlayer
                 currentVideoUrl={currentVideoUrl}
                 currentEmbedUrl={currentEmbedUrl}
                 isFullscreen={isFullscreen}
                 setIsFullscreen={setIsFullscreen}
+                slug={movieData.slug}
+                episodeIndex={currentEpisode}
+                serverIndex={currentServer}
               />
             </Suspense>
           </div>

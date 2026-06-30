@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Play, Minimize, Maximize } from 'lucide-react';
 import Hls from 'hls.js';
+import { saveWatchPosition, getWatchPosition } from '../../utils/watchHistory';
 
 const isRoundDuration = (d) => Number.isInteger(d) || Math.abs(d - Math.round(d)) < 0.05;
 
@@ -55,25 +56,33 @@ const findAdRanges = (fragments) => {
   return adRanges;
 };
 
+const formatTime = (s) => {
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, '0')}`;
+};
+
 const VideoPlayer = ({
   currentVideoUrl,
   currentEmbedUrl,
   isFullscreen,
   setIsFullscreen,
-  autoPlay = true
+  autoPlay = true,
+  slug,
+  episodeIndex = 0,
+  serverIndex = 0,
 }) => {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
-  const adRangesRef = useRef([]);
-  const skippedRef = useRef(new Set());
   const [isLandscape, setIsLandscape] = useState(false);
   const [videoError, setVideoError] = useState(null);
   const [useEmbed, setUseEmbed] = useState(false);
-  const [embedFailed, setEmbedFailed] = useState(false); // embed fail → dùng direct
+  const [embedFailed, setEmbedFailed] = useState(false);
   const retryCountRef = useRef(0);
   const [retryKey, setRetryKey] = useState(0);
+  const [resumePrompt, setResumePrompt] = useState(null); // { time: number }
+  const savePositionTimerRef = useRef(null);
 
-  // Reset error + retryKey khi đổi video
   useEffect(() => {
     setVideoError(null);
     setUseEmbed(false);
@@ -82,7 +91,6 @@ const VideoPlayer = ({
     setRetryKey(0);
   }, [currentVideoUrl]);
 
-  // Detect orientation change
   useEffect(() => {
     const handleOrientationChange = () => {
       const isLandscapeMode = window.matchMedia('(orientation: landscape)').matches;
@@ -109,7 +117,6 @@ const VideoPlayer = ({
     };
   }, [setIsFullscreen]);
 
-  // Native fullscreen API
   const toggleNativeFullscreen = async () => {
     if (!document.fullscreenElement) {
       try {
@@ -132,21 +139,13 @@ const VideoPlayer = ({
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, [setIsFullscreen]);
 
-  // HLS player
   useEffect(() => {
-    // Chạy khi: bình thường, hoặc khi embed fail → dùng direct
     if (!currentVideoUrl) return;
     if (videoError) return;
-    if (useEmbed && !embedFailed) return; // đang dùng embed, chưa fail
+    if (useEmbed && !embedFailed) return;
 
     const video = videoRef.current;
-    adRangesRef.current = [];
-    skippedRef.current = new Set();
 
-    // Nếu embed fail → load direct thẳng (có QC nhưng xem được)
-    const loadUrl = embedFailed ? currentVideoUrl : null;
-
-    // Safari native HLS
     if (!Hls.isSupported()) {
       if (video?.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = currentVideoUrl;
@@ -155,14 +154,11 @@ const VideoPlayer = ({
       return;
     }
 
-    const proxyBase = import.meta.env.DEV
-      ? 'http://localhost:8787'
-      : (import.meta.env.VITE_PROXY_URL || '');
-    const proxyUrl = proxyBase && !proxyBase.includes(window.location.hostname)
+    const proxyBase = import.meta.env.VITE_PROXY_URL || '';
+    const proxyUrl = proxyBase
       ? `${proxyBase}?url=${encodeURIComponent(currentVideoUrl)}`
       : `/api/m3u8-proxy?url=${encodeURIComponent(currentVideoUrl)}`;
 
-    // Hàm kiểm tra URL có phải QC không (dùng cho cả proxy lẫn direct)
     const isAdUrl = (url) => {
       if (!url) return false;
       return (
@@ -186,10 +182,11 @@ const VideoPlayer = ({
         debug: false,
         enableWorker: true,
         lowLatencyMode: false,
-        backBufferLength: 30,
-        maxBufferLength: 30,
-        maxMaxBufferLength: 60,
-        maxBufferSize: 20 * 1000 * 1000,
+        // [FIX] tăng buffer để giảm stall khi mạng không ổn
+        backBufferLength: 60,
+        maxBufferLength: 60,
+        maxMaxBufferLength: 120,
+        maxBufferSize: 40 * 1000 * 1000,
         maxBufferHole: 0.5,
         highBufferWatchdogPeriod: 2,
         nudgeMaxRetry: 5,
@@ -199,7 +196,8 @@ const VideoPlayer = ({
         levelLoadingMaxRetry: 2,
         fragLoadingTimeOut: 20000,
         fragLoadingMaxRetry: 4,
-        abrEwmaDefaultEstimate: 500000,
+        // [FIX] estimate băng thông cao hơn để chọn quality tốt ngay từ đầu
+        abrEwmaDefaultEstimate: 2000000,
         abrBandWidthFactor: 0.95,
         abrBandWidthUpFactor: 0.7,
         startLevel: -1,
@@ -214,30 +212,25 @@ const VideoPlayer = ({
       hls.loadSource(sourceUrl);
       hls.attachMedia(video);
 
-      hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
-        if (data.levels.length > 1) {
-          hls.startLevel = 0;
-          hls.nextLevel = -1;
-        }
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
         if (autoPlay) {
           video.play().catch(err => console.log('Autoplay prevented:', err));
         }
+        // Kiểm tra vị trí xem trước đó
+        if (slug) {
+          const savedTime = getWatchPosition(slug, episodeIndex, serverIndex);
+          if (savedTime && savedTime > 30) {
+            setResumePrompt({ time: savedTime });
+          }
+        }
       });
 
-      hls.on(Hls.Events.LEVEL_LOADED, (event, data) => {
-        adRangesRef.current = findAdRanges(data.details.fragments);
-      });
-
-      // Chặn QC ở tầng fragment — trước khi decode và phát
-      // Hoạt động cả khi dùng proxy lẫn direct load
+      // Chặn QC ở tầng fragment — trước khi download
       hls.on(Hls.Events.FRAG_LOADING, (event, data) => {
         const fragUrl = data.frag?.url || '';
         if (isAdUrl(fragUrl)) {
-          // Hủy load fragment QC, skip sang fragment tiếp theo
-          console.log('Ad fragment blocked:', fragUrl);
           try {
             hls.stopLoad();
-            // Tìm fragment tiếp theo không phải QC
             const level = hls.levels[hls.currentLevel];
             if (level?.details?.fragments) {
               const frags = level.details.fragments;
@@ -256,17 +249,10 @@ const VideoPlayer = ({
 
       hls.on(Hls.Events.ERROR, (event, data) => {
         if (data.fatal) {
-          // Proxy bị 502 → skip thẳng sang embed nếu có, không cần thử direct
           if (sourceUrl === proxyUrl && !directFallbackTriggered) {
             directFallbackTriggered = true;
-            if (currentEmbedUrl) {
-              console.log('Proxy 502, skipping to embed iframe...');
-              hls.destroy();
-              setUseEmbed(true);
-              return;
-            }
-            // Không có embed → thử direct
-            console.log('Proxy blocked, falling back to direct...');
+            // Thử direct HLS trước — FRAG_LOADING có thể chặn QC
+            // Chỉ dùng embed nếu direct cũng fail
             createHls(currentVideoUrl);
             return;
           }
@@ -275,10 +261,8 @@ const VideoPlayer = ({
             case Hls.ErrorTypes.NETWORK_ERROR:
               retryCountRef.current += 1;
               if (retryCountRef.current <= 2) {
-                console.log(`Network error, retrying... (${retryCountRef.current}/2)`);
                 setTimeout(() => hls.startLoad(), 1000 * retryCountRef.current);
               } else {
-                // Hết retry → dùng embed nếu có
                 if (currentEmbedUrl) {
                   hls.destroy();
                   setUseEmbed(true);
@@ -307,17 +291,15 @@ const VideoPlayer = ({
       return hls;
     };
 
-    // Nếu embed fail → load direct thẳng, bỏ qua proxy
     const hls = createHls(embedFailed ? currentVideoUrl : proxyUrl);
 
+    let lastSavedTime = 0;
     const handleTimeUpdate = () => {
       const currentTime = video.currentTime;
-      for (const ad of adRangesRef.current) {
-        if (currentTime >= ad.start - 0.5 && currentTime < ad.end && !skippedRef.current.has(ad.start)) {
-          skippedRef.current.add(ad.start);
-          video.currentTime = ad.end + 0.1;
-          break;
-        }
+      // Lưu vị trí mỗi 5 giây
+      if (slug && currentTime > 10 && currentTime - lastSavedTime >= 5) {
+        lastSavedTime = currentTime;
+        saveWatchPosition(slug, episodeIndex, serverIndex, currentTime);
       }
     };
 
@@ -341,8 +323,6 @@ const VideoPlayer = ({
     );
   }
 
-  // Fallback embed iframe khi m3u8 bị block
-  // Nếu embed cũng fail → dùng direct HLS (có QC nhưng xem được)
   if (useEmbed && currentEmbedUrl && !embedFailed) {
     return (
       <div
@@ -357,8 +337,7 @@ const VideoPlayer = ({
             frameBorder="0"
             onError={() => setEmbedFailed(true)}
           />
-          {/* Nút báo lỗi nếu embed không phát được */}
-          <div className="absolute bottom-3 right-3 z-10">
+          <div className="absolute bottom-3 right-3 z-10 opacity-0 hover:opacity-100 transition-opacity duration-300">
             <button
               onClick={() => setEmbedFailed(true)}
               className="bg-black/70 text-gray-400 hover:text-white text-xs px-3 py-1.5 rounded-lg backdrop-blur-sm transition-colors"
@@ -414,7 +393,6 @@ const VideoPlayer = ({
           Trình duyệt của bạn không hỗ trợ video này.
         </video>
 
-        {/* Fullscreen button - chỉ hiện trên desktop */}
         <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity hidden lg:block">
           <button
             onClick={toggleNativeFullscreen}
@@ -424,6 +402,31 @@ const VideoPlayer = ({
             {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
           </button>
         </div>
+
+        {resumePrompt && (
+          <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 w-max max-w-[90%]">
+            <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-700 rounded-xl px-4 py-3 shadow-2xl flex items-center gap-3">
+              <span className="text-white text-sm">
+                Bạn đã xem đến <span className="text-orange-400 font-semibold">{formatTime(resumePrompt.time)}</span>, tiếp tục?
+              </span>
+              <button
+                onClick={() => {
+                  if (videoRef.current) videoRef.current.currentTime = resumePrompt.time;
+                  setResumePrompt(null);
+                }}
+                className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+              >
+                Tiếp tục
+              </button>
+              <button
+                onClick={() => setResumePrompt(null)}
+                className="text-gray-400 hover:text-white text-xs px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+              >
+                Xem lại
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

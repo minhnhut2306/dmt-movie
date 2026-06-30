@@ -131,7 +131,13 @@ const MoviePlay = () => {
     
     useEffect(() => {
         if (slug && movieData && activeLayout === 'watch') {
-            saveWatchHistory(slug, currentEpisode, currentServer);
+            const episodeName = movieData.episodes?.[currentServer]?.server_data?.[currentEpisode]?.name;
+            saveWatchHistory(slug, currentEpisode, currentServer, {
+                title: movieData.name,
+                poster: movieData.poster_url || movieData.thumb_url,
+                episodeName,
+                type: movieData.type,
+            });
         }
     }, [slug, currentEpisode, currentServer, movieData, activeLayout]);
 
