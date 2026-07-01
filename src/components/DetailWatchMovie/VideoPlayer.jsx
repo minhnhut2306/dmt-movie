@@ -158,6 +158,8 @@ const VideoPlayer = ({
     const proxyUrl = proxyBase
       ? `${proxyBase}?url=${encodeURIComponent(currentVideoUrl)}`
       : `/api/m3u8-proxy?url=${encodeURIComponent(currentVideoUrl)}`;
+    console.log('[PROXY] VITE_PROXY_URL =', proxyBase || '(not set)');
+    console.log('[PROXY] Using proxy URL =', proxyUrl.split('?')[0]);
 
     const isAdUrl = (url) => {
       if (!url) return false;
@@ -228,7 +230,9 @@ const VideoPlayer = ({
       // Chặn QC ở tầng fragment — trước khi download
       hls.on(Hls.Events.FRAG_LOADING, (event, data) => {
         const fragUrl = data.frag?.url || '';
+        console.log('[FRAG]', fragUrl.substring(0, 80));
         if (isAdUrl(fragUrl)) {
+          console.log('[AD BLOCKED]', fragUrl);
           try {
             hls.stopLoad();
             const level = hls.levels[hls.currentLevel];
@@ -251,8 +255,7 @@ const VideoPlayer = ({
         if (data.fatal) {
           if (sourceUrl === proxyUrl && !directFallbackTriggered) {
             directFallbackTriggered = true;
-            // Thử direct HLS trước — FRAG_LOADING có thể chặn QC
-            // Chỉ dùng embed nếu direct cũng fail
+            console.log('[PROXY] Proxy failed! Error:', data.type, data.details, '→ fallback to direct HLS');
             createHls(currentVideoUrl);
             return;
           }
