@@ -6,9 +6,10 @@ const CACHE_TTL = 30;
 
 function isAdSegment(path) {
   return (
-    /\/v\d+\//.test(path) ||
+    path.includes('/adjump/') ||
     path.includes('convertv7/') ||
     path.includes('convertv8/') ||
+    /\/v\d+\//.test(path) ||
     /segment_\d+\.ts/.test(path)
   );
 }
@@ -47,7 +48,7 @@ function filterMediaPlaylist(text, baseUrl) {
       continue;
     }
 
-    if (line.endsWith('.ts') || line.endsWith('.m4s') || line.endsWith('.mp4')) {
+    if (line.endsWith('.ts') || line.endsWith('.t') || line.endsWith('.m4s') || line.endsWith('.mp4')) {
       if (isAdSegment(line)) {
         skipNextSegment = false;
         continue;

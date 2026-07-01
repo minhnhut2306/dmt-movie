@@ -166,9 +166,10 @@ const VideoPlayer = ({
     const isAdUrl = (url) => {
       if (!url) return false;
       return (
-        /\/v\d+\//.test(url) ||
+        url.includes('/adjump/') ||
         url.includes('convertv7/') ||
         url.includes('convertv8/') ||
+        /\/v\d+\//.test(url) ||
         /segment_\d+\.ts/.test(url) ||
         url.includes('/ads/') ||
         url.includes('/ad/') ||
