@@ -112,11 +112,13 @@ export default {
     }
 
     try {
+      // Tự động lấy origin/referer từ domain của URL gốc
+      const targetOrigin = new URL(decodedUrl).origin;
       const response = await fetch(decodedUrl, {
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          'Referer': 'https://player.phimapi.com/',
-          'Origin': 'https://player.phimapi.com',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Referer': targetOrigin + '/',
+          'Origin': targetOrigin,
         },
       });
 
