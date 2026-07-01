@@ -146,13 +146,6 @@ const VideoPlayer = ({
 
     const video = videoRef.current;
 
-    if (!Hls.isSupported()) {
-      if (video?.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = currentVideoUrl;
-        if (autoPlay) video.play().catch(() => {});
-      }
-      return;
-    }
 
     const proxyBase = import.meta.env.VITE_PROXY_URL || '';
     const proxyUrl = proxyBase
@@ -160,6 +153,15 @@ const VideoPlayer = ({
       : `/api/m3u8-proxy?url=${encodeURIComponent(currentVideoUrl)}`;
     console.log('[PROXY] VITE_PROXY_URL =', proxyBase || '(not set)');
     console.log('[PROXY] Using proxy URL =', proxyUrl.split('?')[0]);
+
+    // iOS/Safari: native HLS, không dùng HLS.js — vẫn cần qua proxy để lọc QC
+    if (!Hls.isSupported()) {
+      if (video?.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = proxyUrl;
+        if (autoPlay) video.play().catch(() => {});
+      }
+      return;
+    }
 
     const isAdUrl = (url) => {
       if (!url) return false;
