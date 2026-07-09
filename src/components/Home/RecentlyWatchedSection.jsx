@@ -83,13 +83,13 @@ const RecentlyWatchedSection = () => {
 
               {/* Episode badge */}
               {item.lastEpisodeName && (
-                <div className="absolute bottom-1.5 left-1.5 bg-black/80 text-ink-primary text-xs px-1.5 py-0.5 rounded-full truncate max-w-[80%]">
+                <div className="absolute bottom-1.5 left-1.5 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded-full truncate max-w-[80%]">
                   {item.lastEpisodeName}
                 </div>
               )}
             </div>
 
-            <p className="text-ink-primary text-xs font-medium mt-1.5 line-clamp-2 leading-tight">
+            <p className="text-white text-xs font-medium mt-1.5 line-clamp-2 leading-tight">
               {item.title}
             </p>
             <p className="text-ink-muted text-xs mt-0.5">

@@ -93,9 +93,6 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
             decoding="async"
           />
 
-          {/* Bottom shade */}
-          <div className="absolute inset-x-0 bottom-0 h-1/2 poster-scrim pointer-events-none" />
-
           {/* Hover Play Button */}
           {isLoaded && (
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -120,12 +117,9 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
             </div>
           )}
 
-          {/* Movie Info */}
+          {/* Movie Info — khối nền đen đặc, ranh giới rõ ràng, không chồng lên chữ trong poster */}
           {isLoaded && (
-            <div
-              className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 pt-6 sm:pt-8 bg-gradient-to-t from-black via-black/95 to-transparent"
-              style={{ textShadow: '0 1px 3px rgba(0,0,0,1), 0 2px 8px rgba(0,0,0,0.95), 0 0 2px rgba(0,0,0,1)' }}
-            >
+            <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-black/60">
               <h3 className="text-white font-bold text-sm sm:text-base lg:text-lg mb-1.5 sm:mb-2 line-clamp-2 leading-tight">
                 {displayTitle}
               </h3>
@@ -134,7 +128,7 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
                 <span className="whitespace-nowrap">
                   {displayYear}
                 </span>
-                <span className="w-1 h-1 rounded-full bg-white" />
+                <span className="w-1 h-1 rounded-full bg-white/70" />
                 <span className="truncate max-w-20 sm:max-w-24">
                   {displayGenre}
                 </span>
@@ -192,9 +186,6 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
             decoding="async"
           />
 
-          {/* Bottom shade */}
-          <div className="absolute inset-x-0 bottom-0 h-1/2 poster-scrim pointer-events-none" />
-
           {/* Hover Play Button */}
           {isLoaded && (
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -219,12 +210,9 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
             </div>
           )}
 
-          {/* Movie Info */}
+          {/* Movie Info — khối nền đen đặc, ranh giới rõ ràng, không chồng lên chữ trong poster */}
           {isLoaded && (
-            <div
-              className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 pt-6 sm:pt-8 bg-gradient-to-t from-black via-black/95 to-transparent"
-              style={{ textShadow: '0 1px 3px rgba(0,0,0,1), 0 2px 8px rgba(0,0,0,0.95), 0 0 2px rgba(0,0,0,1)' }}
-            >
+            <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 bg-black">
               <h3 className="text-white font-bold text-sm sm:text-base lg:text-lg mb-1.5 sm:mb-2 line-clamp-2 leading-tight">
                 {displayTitle}
               </h3>
@@ -233,7 +221,7 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
                 <span className="whitespace-nowrap">
                   {displayYear}
                 </span>
-                <span className="w-1 h-1 rounded-full bg-white" />
+                <span className="w-1 h-1 rounded-full bg-white/70" />
                 <span className="truncate max-w-20 sm:max-w-24">
                   {displayGenre}
                 </span>

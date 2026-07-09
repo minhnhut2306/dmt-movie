@@ -30,11 +30,11 @@ const MobileDetailLayout = ({
             className="h-64 sm:h-80 bg-cover bg-center rounded-2xl relative overflow-hidden shadow-cinema"
             style={{ backgroundImage: `url(${backdropUrl})` }}
           >
-            <div className="absolute inset-0 poster-scrim"></div>
+            <div className="absolute inset-x-0 bottom-0 h-2/3 bg-black/75"></div>
             <div className="absolute bottom-4 left-4 right-4 z-10">
-              <h1 className="text-2xl sm:text-3xl font-extrabold mb-2 text-ink-primary tracking-tight">{movieData.name}</h1>
-              <p className="text-lg text-ink-secondary mb-3">{movieData.origin_name}</p>
-              <div className="flex items-center gap-3 text-sm text-ink-secondary flex-wrap">
+              <h1 className="text-2xl sm:text-3xl font-extrabold mb-2 text-white tracking-tight">{movieData.name}</h1>
+              <p className="text-lg text-white/80 mb-3">{movieData.origin_name}</p>
+              <div className="flex items-center gap-3 text-sm text-white/80 flex-wrap">
                 <div className="flex items-center gap-1 text-gold-light">
                   <Star className="w-4 h-4" fill="currentColor" />
                   <span className="font-semibold">{movieData.vote_average}/10</span>

@@ -156,7 +156,7 @@ const HistoryPage = () => {
 
                 {/* Type badge */}
                 {item.type && (
-                  <div className="absolute top-2 left-2 bg-black/70 text-xs px-2 py-0.5 rounded-full text-ink-secondary border border-white/10">
+                  <div className="absolute top-2 left-2 bg-black/70 text-xs px-2 py-0.5 rounded-full text-white border border-white/10">
                     {TYPE_LABEL[item.type] || item.type}
                   </div>
                 )}
@@ -171,7 +171,7 @@ const HistoryPage = () => {
                 )}
               </div>
 
-              <p className="text-ink-primary text-xs font-medium mt-2 line-clamp-2 leading-tight">
+              <p className="text-white text-xs font-medium mt-2 line-clamp-2 leading-tight">
                 {item.title}
               </p>
               <p className="text-ink-muted text-xs mt-0.5">

@@ -288,7 +288,7 @@ const HeroBanner = ({
             className={`absolute inset-0 bg-cover bg-center transition-all duration-500 ease-out ${index === currentIndex ? 'opacity-100' : 'opacity-0'
               }`}
             style={{
-              backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.65) 35%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.25) 100%), linear-gradient(to right, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 35%, rgba(0,0,0,0.15) 70%, rgba(0,0,0,0) 100%), url('${movie.backgroundImage}')`,
+              backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.7) 45%, rgba(0,0,0,0.35) 100%), url('${movie.backgroundImage}')`,
               transform: isDraggingLocal && dragDirection === 'horizontal' ? `translateX(${localDragOffset}px)` :
                 (isDragging && activeSection === 'hero') ? `translateX(${dragOffset}px)` :
                   'translateX(0)'
@@ -328,15 +328,14 @@ const HeroBanner = ({
                 'translateX(0)',
             opacity: isDraggingLocal && dragDirection === 'horizontal' ? Math.max(0.7, 1 - Math.abs(localDragOffset) / 400) :
               (isDragging && activeSection === 'hero') ? Math.max(0.7, 1 - Math.abs(dragOffset) / 400) :
-                1,
-            textShadow: '0 2px 12px rgba(0,0,0,0.85), 0 1px 3px rgba(0,0,0,0.9)'
+                1
           }}
         >
-          <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-extrabold mb-3 sm:mb-4 transition-all duration-500 leading-tight tracking-tight drop-shadow-lg">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-extrabold mb-3 sm:mb-4 transition-all duration-500 leading-tight tracking-tight text-white">
             {currentFeaturedMovie.title}
           </h1>
 
-          <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4 text-xs sm:text-sm text-ink-secondary">
+          <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4 text-xs sm:text-sm text-white/80">
             {currentFeaturedMovie.rating && (
               <div className="flex items-center text-gold-light">
                 <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 fill-current" />
@@ -364,12 +363,12 @@ const HeroBanner = ({
               </span>
             )}
             {currentFeaturedMovie.language && (
-              <span className="bg-white/10 border border-subtle px-2 py-1 rounded-full text-xs font-semibold text-ink-primary">
+              <span className="bg-white/10 border border-subtle px-2 py-1 rounded-full text-xs font-semibold text-white">
                 {currentFeaturedMovie.language}
               </span>
             )}
             {currentFeaturedMovie.type && (
-              <span className="text-ink-secondary text-xs">
+              <span className="text-white/80 text-xs">
                 {currentFeaturedMovie.type}
               </span>
             )}
@@ -381,7 +380,7 @@ const HeroBanner = ({
           </div>
 
           {currentFeaturedMovie.description && (
-            <p className="text-xs sm:text-sm md:text-base mb-5 sm:mb-7 text-ink-secondary leading-relaxed line-clamp-2 sm:line-clamp-3 transition-all duration-500 max-w-lg">
+            <p className="text-xs sm:text-sm md:text-base mb-5 sm:mb-7 text-white/80 leading-relaxed line-clamp-2 sm:line-clamp-3 transition-all duration-500 max-w-lg">
               {currentFeaturedMovie.description}
             </p>
           )}

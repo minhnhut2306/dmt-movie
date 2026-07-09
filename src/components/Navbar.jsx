@@ -282,7 +282,7 @@ const Navbar = () => {
                                   </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-ink-primary text-sm font-medium truncate">{item.title}</p>
+                                  <p className="text-white text-sm font-medium truncate">{item.title}</p>
                                   {item.lastEpisodeName && (
                                     <p className="text-brand-hover text-xs truncate">{item.lastEpisodeName}</p>
                                   )}

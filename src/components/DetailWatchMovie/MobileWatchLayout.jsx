@@ -30,7 +30,7 @@ const MobileWatchLayout = ({
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold text-ink-primary truncate tracking-tight">{movieData.name}</h1>
+            <h1 className="text-lg font-bold text-white truncate tracking-tight">{movieData.name}</h1>
             <p className="text-sm text-ink-secondary truncate">{movieData.origin_name}</p>
           </div>
         </div>

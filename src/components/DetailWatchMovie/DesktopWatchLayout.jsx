@@ -29,7 +29,7 @@ const DesktopWatchLayout = ({
           >
             ← Quay lại chi tiết
           </button>
-          <h1 className="text-3xl font-bold text-ink-primary tracking-tight">{movieData.name}</h1>
+          <h1 className="text-3xl font-bold text-white tracking-tight">{movieData.name}</h1>
           <p className="text-ink-secondary">{movieData.origin_name}</p>
           <p className="text-sm text-ink-muted mt-1">
             Đang xem: {currentEpisodeName} - {movieData.episodes?.[currentServer]?.server_name}
