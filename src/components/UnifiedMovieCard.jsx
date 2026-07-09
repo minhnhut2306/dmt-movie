@@ -66,15 +66,15 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
   if (variant === 'carousel') {
     return (
       <div
-        className={`group cursor-pointer transform transition-transform duration-300 hover:scale-105 flex-shrink-0
+        className={`group cursor-pointer transform transition-all duration-300 ease-out hover:scale-[1.04] hover:z-10 flex-shrink-0
                    w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5 px-2 mb-4 ${className}`}
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
       >
-        <div className="relative overflow-hidden rounded-xl shadow-2xl">
+        <div className="relative overflow-hidden rounded-2xl shadow-cinema group-hover:shadow-cinema-lg transition-shadow duration-300">
           {/* Loading skeleton shimmer */}
           {!isLoaded && (
-            <div className="absolute inset-0 aspect-[2/3] z-10 overflow-hidden bg-gray-800">
+            <div className="absolute inset-0 aspect-[2/3] z-10 overflow-hidden bg-base-elevated">
               <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent" />
             </div>
           )}
@@ -94,45 +94,74 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
             decoding="async"
           />
 
-          {/* Bottom shade (1 màu phẳng) */}
-          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-black/60 pointer-events-none" />
+          {/* Bottom shade */}
+          <div className="absolute inset-x-0 bottom-0 h-2/3 poster-scrim pointer-events-none" />
 
           {/* Hover Play Button */}
-          {isLoaded && (
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Play className="w-16 h-16 sm:w-20 sm:h-20 text-white drop-shadow-lg" />
+          {isLoaded && !hasError && (
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <div className="rounded-full bg-white/10 backdrop-blur-md border border-white/20 p-3 sm:p-4 scale-90 group-hover:scale-100 transition-transform duration-300">
+                <Play className="w-7 h-7 sm:w-9 sm:h-9 lg:w-10 lg:h-10 text-white fill-white drop-shadow-lg" />
+              </div>
             </div>
           )}
 
           {/* Rating Badge */}
-          {isLoaded && displayRating && (
-            <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm px-3 py-2 rounded-lg text-yellow-400 text-sm sm:text-base flex items-center shadow-lg">
-              <Star className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />
-              <span className="font-medium">{displayRating}</span>
+          {isLoaded && !hasError && displayRating && (
+            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-black/70 backdrop-blur-md px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full text-gold-light text-xs sm:text-sm flex items-center gap-1 shadow-cinema border border-white/10">
+              <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
+              <span className="font-semibold">{displayRating}</span>
+            </div>
+          )}
+
+          {/* Quality Badge */}
+          {isLoaded && !hasError && displayQuality && (
+            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-brand backdrop-blur-sm px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full text-white text-xs sm:text-sm font-semibold shadow-cinema">
+              {displayQuality}
             </div>
           )}
 
           {/* Movie Info */}
-          {isLoaded && (
-            <div className="absolute bottom-0 left-0 right-0">
-              <div className="bg-gray-800/40 backdrop-blur-sm border-t border-gray-400/30 p-3 sm:p-4">
-                <h3 className="text-white font-bold text-base sm:text-lg mb-2 truncate leading-tight">
-                  {displayTitle}
-                </h3>
-                <div className="flex items-center text-gray-200 text-sm sm:text-base space-x-3">
-                  <span className="bg-gray-800/50 px-1 py-1 rounded whitespace-nowrap">{displayYear}</span>
-                  <span className="bg-gray-800/50 px-1 py-1 rounded whitespace-nowrap truncate">{displayGenre}</span>
-                </div>
+          {isLoaded && !hasError && (
+            <div
+              className="absolute bottom-0 left-0 right-0 p-3 sm:p-4"
+              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,0.9)' }}
+            >
+              <h3 className="text-ink-primary font-bold text-sm sm:text-base lg:text-lg mb-1.5 sm:mb-2 line-clamp-2 leading-tight">
+                {displayTitle}
+              </h3>
+
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-ink-secondary text-xs sm:text-sm">
+                <span className="whitespace-nowrap">
+                  {displayYear}
+                </span>
+                <span className="w-1 h-1 rounded-full bg-ink-muted" />
+                <span className="truncate max-w-20 sm:max-w-24">
+                  {displayGenre}
+                </span>
+                {displayType && (
+                  <span className="bg-white/10 px-1.5 py-0.5 rounded-full text-xs border border-subtle">
+                    {displayType}
+                  </span>
+                )}
               </div>
+
+              {displayEpisode && displayEpisode !== "Full" && (
+                <div className="mt-1.5 sm:mt-2">
+                  <span className="bg-emerald-600/90 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs sm:text-sm text-white font-semibold">
+                    {displayEpisode}
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
           {/* Error State */}
           {hasError && isLoaded && (
-            <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
-              <div className="text-center text-gray-400 p-4">
-                <div className="text-xs sm:text-sm mb-2">Lỗi tải ảnh</div>
-                <div className="text-xs font-medium">{displayTitle}</div>
+            <div className="absolute inset-0 bg-base-elevated flex items-center justify-center border border-subtle">
+              <div className="text-center text-ink-primary p-4">
+                <div className="text-xs sm:text-sm mb-2 text-ink-secondary">Lỗi tải ảnh</div>
+                <div className="text-xs sm:text-sm font-semibold line-clamp-2">{displayTitle}</div>
               </div>
             </div>
           )}
@@ -147,14 +176,14 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
   if (variant === 'grid') {
     return (
       <div
-        className={`group cursor-pointer transform transition-transform duration-300 hover:scale-105 w-full ${className}`}
+        className={`group cursor-pointer transform transition-all duration-300 ease-out hover:scale-[1.04] hover:z-10 w-full ${className}`}
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
       >
-        <div className="relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-shadow duration-300">
+        <div className="relative overflow-hidden rounded-2xl shadow-cinema group-hover:shadow-cinema-lg transition-shadow duration-300">
           {/* Loading skeleton shimmer */}
           {!isLoaded && (
-            <div className="absolute inset-0 aspect-[2/3] z-10 overflow-hidden bg-gray-800">
+            <div className="absolute inset-0 aspect-[2/3] z-10 overflow-hidden bg-base-elevated">
               <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent" />
             </div>
           )}
@@ -174,70 +203,74 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
             decoding="async"
           />
 
-          {/* Bottom shade (1 màu phẳng) */}
-          <div className="absolute inset-x-0 bottom-0 h-1/3 bg-black/60 pointer-events-none" />
+          {/* Bottom shade */}
+          <div className="absolute inset-x-0 bottom-0 h-2/3 poster-scrim pointer-events-none" />
 
           {/* Hover Play Button */}
-          {isLoaded && (
-            <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Play className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 text-white drop-shadow-lg" />
+          {isLoaded && !hasError && (
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+              <div className="rounded-full bg-white/10 backdrop-blur-md border border-white/20 p-3 sm:p-4 scale-90 group-hover:scale-100 transition-transform duration-300">
+                <Play className="w-7 h-7 sm:w-9 sm:h-9 lg:w-10 lg:h-10 text-white fill-white drop-shadow-lg" />
+              </div>
             </div>
           )}
 
           {/* Rating Badge */}
-          {isLoaded && displayRating && (
-            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-black/80 backdrop-blur-sm px-2 py-1 sm:px-3 sm:py-2 rounded-lg text-yellow-400 text-xs sm:text-sm lg:text-base flex items-center shadow-lg">
-              <Star className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 mr-1" />
-              <span className="font-medium">{displayRating}</span>
+          {isLoaded && !hasError && displayRating && (
+            <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-black/70 backdrop-blur-md px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full text-gold-light text-xs sm:text-sm flex items-center gap-1 shadow-cinema border border-white/10">
+              <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
+              <span className="font-semibold">{displayRating}</span>
             </div>
           )}
 
           {/* Quality Badge */}
-          {isLoaded && displayQuality && (
-            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-red-600 backdrop-blur-sm px-2 py-1 sm:px-3 sm:py-2 rounded-lg text-white text-xs sm:text-sm font-medium shadow-lg">
+          {isLoaded && !hasError && displayQuality && (
+            <div className="absolute top-2 left-2 sm:top-3 sm:left-3 bg-brand backdrop-blur-sm px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full text-white text-xs sm:text-sm font-semibold shadow-cinema">
               {displayQuality}
             </div>
           )}
 
           {/* Movie Info */}
-          {isLoaded && (
-            <div className="absolute bottom-0 left-0 right-0">
-              <div className="bg-black/80 p-3 sm:p-4">
-                <h3 className="text-white font-bold text-sm sm:text-base lg:text-lg mb-1 sm:mb-2 line-clamp-2 leading-tight">
-                  {displayTitle}
-                </h3>
+          {isLoaded && !hasError && (
+            <div
+              className="absolute bottom-0 left-0 right-0 p-3 sm:p-4"
+              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,0.9)' }}
+            >
+              <h3 className="text-ink-primary font-bold text-sm sm:text-base lg:text-lg mb-1.5 sm:mb-2 line-clamp-2 leading-tight">
+                {displayTitle}
+              </h3>
 
-                <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-gray-200 text-xs sm:text-sm">
-                  <span className="bg-gray-800/60 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded whitespace-nowrap">
-                    {displayYear}
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 text-ink-secondary text-xs sm:text-sm">
+                <span className="whitespace-nowrap">
+                  {displayYear}
+                </span>
+                <span className="w-1 h-1 rounded-full bg-ink-muted" />
+                <span className="truncate max-w-20 sm:max-w-24">
+                  {displayGenre}
+                </span>
+                {displayType && (
+                  <span className="bg-white/10 px-1.5 py-0.5 rounded-full text-xs border border-subtle">
+                    {displayType}
                   </span>
-                  <span className="bg-gray-800/60 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded truncate max-w-20 sm:max-w-24">
-                    {displayGenre}
-                  </span>
-                  {displayType && (
-                    <span className="bg-blue-600/60 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-xs">
-                      {displayType}
-                    </span>
-                  )}
-                </div>
-
-                {displayEpisode && displayEpisode !== "Full" && (
-                  <div className="mt-1 sm:mt-2">
-                    <span className="bg-green-600/80 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-xs sm:text-sm text-white font-medium">
-                      {displayEpisode}
-                    </span>
-                  </div>
                 )}
               </div>
+
+              {displayEpisode && displayEpisode !== "Full" && (
+                <div className="mt-1.5 sm:mt-2">
+                  <span className="bg-emerald-600/90 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-xs sm:text-sm text-white font-semibold">
+                    {displayEpisode}
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
           {/* Error State */}
           {hasError && isLoaded && (
-            <div className="absolute inset-0 bg-gray-800 flex items-center justify-center">
-              <div className="text-center text-gray-400 p-4">
-                <div className="text-xs sm:text-sm mb-2">Lỗi tải ảnh</div>
-                <div className="text-xs font-medium">{displayTitle}</div>
+            <div className="absolute inset-0 bg-base-elevated flex items-center justify-center border border-subtle">
+              <div className="text-center text-ink-primary p-4">
+                <div className="text-xs sm:text-sm mb-2 text-ink-secondary">Lỗi tải ảnh</div>
+                <div className="text-xs sm:text-sm font-semibold line-clamp-2">{displayTitle}</div>
               </div>
             </div>
           )}
@@ -257,11 +290,11 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
         onClick={() => window.scrollTo(0, 0)}
         onMouseEnter={handleMouseEnter}
       >
-        <div className="relative overflow-hidden rounded-2xl bg-slate-900 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.55)] ring-1 ring-white/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-12px_rgba(0,0,0,0.65)] focus-visible:ring-2 focus-visible:ring-sky-400/60">
-          <div className="relative w-full aspect-[3/3]">
+        <div className="relative overflow-hidden rounded-2xl bg-base-elevated shadow-cinema ring-1 ring-white/5 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-cinema-lg focus-visible:ring-2 focus-visible:ring-brand/60">
+          <div className="relative w-full aspect-[2/3]">
             {/* Loading skeleton shimmer */}
             {!isLoaded && (
-              <div className="absolute inset-0 overflow-hidden rounded-2xl bg-slate-800">
+              <div className="absolute inset-0 overflow-hidden rounded-2xl bg-base-elevated">
                 <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/10 to-transparent" />
               </div>
             )}
@@ -280,40 +313,45 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
               } scale-[1.02] group-hover:scale-[1.06] ease-out`}
             />
 
-            {/* Bottom shade (1 màu phẳng) */}
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-black/60" />
+            {/* Bottom shade */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 poster-scrim" />
 
             {/* Rating Badge */}
-            {isLoaded && displayRating && (
-              <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-lg bg-black/70 backdrop-blur px-2.5 py-1.5 text-amber-300 text-sm font-medium shadow">
-                <Star className="h-4 w-4" />
+            {isLoaded && !hasError && displayRating && (
+              <div className="absolute top-3 right-3 flex items-center gap-1.5 rounded-full bg-black/70 backdrop-blur-md px-2.5 py-1.5 text-gold-light text-sm font-semibold shadow-cinema border border-white/10">
+                <Star className="h-3.5 w-3.5 fill-current" />
                 <span>{displayRating}</span>
               </div>
             )}
 
             {/* Hover Play Button */}
-            {isLoaded && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="pointer-events-none opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                  <div className="rounded-full bg-black/60 p-4 backdrop-blur">
-                    <Play className="h-8 w-8 md:h-10 md:w-10 text-white drop-shadow" />
-                  </div>
+            {isLoaded && !hasError && (
+              <div className="absolute inset-0 bg-black/30 opacity-0 transition-opacity duration-300 group-hover:opacity-100 flex items-center justify-center">
+                <div className="rounded-full bg-white/10 backdrop-blur-md border border-white/20 p-4 scale-90 group-hover:scale-100 transition-transform duration-300">
+                  <Play className="h-7 w-7 md:h-9 md:w-9 text-white fill-white drop-shadow" />
                 </div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {hasError && isLoaded && (
+              <div className="absolute inset-0 bg-base-elevated flex items-center justify-center">
+                <div className="text-center text-ink-secondary p-4 text-xs">Lỗi tải ảnh</div>
               </div>
             )}
           </div>
 
           {/* Movie Info */}
-          <div className="relative p-4 bg-slate-950/85 backdrop-blur-sm border-t border-white/5">
-            <h3 className="mb-2 line-clamp-2 text-white text-base font-bold leading-snug">
+          <div className="relative p-4 bg-base-elevated/90 backdrop-blur-sm border-t border-subtle">
+            <h3 className="mb-2 line-clamp-2 text-ink-primary text-base font-bold leading-snug">
               {displayTitle}
             </h3>
 
-            <div className="mb-2 flex items-center justify-between text-xs text-slate-200">
-              <span className="rounded-md bg-sky-600/90 px-2 py-1 font-semibold">
+            <div className="mb-2 flex items-center justify-between text-xs text-ink-secondary">
+              <span className="rounded-full bg-white/10 px-2 py-1 font-semibold border border-subtle">
                 {displayYear}
               </span>
-              <span className="rounded-md bg-emerald-600/90 px-2 py-1 font-semibold">
+              <span className="rounded-full bg-brand/20 text-brand-hover px-2 py-1 font-semibold">
                 {displayType}
               </span>
             </div>

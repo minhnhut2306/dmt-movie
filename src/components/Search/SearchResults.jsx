@@ -65,24 +65,24 @@ const SearchResults = ({
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
+          className="p-2 rounded-full bg-white/5 hover:bg-white/10 border border-subtle disabled:opacity-40 disabled:cursor-not-allowed text-ink-primary transition-all duration-200 cursor-pointer"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
-        
+
         <div className="flex space-x-1 overflow-x-auto max-w-xs md:max-w-none">
           {getVisiblePages().map((page, index) => (
             <React.Fragment key={index}>
               {page === '...' ? (
-                <span className="px-3 py-2 text-gray-400">...</span>
+                <span className="px-3 py-2 text-ink-muted">...</span>
               ) : (
                 <button
                   onClick={() => handlePageChange(page)}
-                  className={`px-3 py-2 rounded whitespace-nowrap ${
+                  className={`px-3 py-2 rounded-full whitespace-nowrap font-semibold transition-all duration-200 cursor-pointer ${
                     currentPage === page
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  } transition-colors`}
+                      ? 'bg-brand text-white shadow-glow'
+                      : 'bg-white/5 text-ink-secondary border border-subtle hover:bg-white/10 hover:text-ink-primary'
+                  }`}
                 >
                   {page}
                 </button>
@@ -90,11 +90,11 @@ const SearchResults = ({
             </React.Fragment>
           ))}
         </div>
-        
+
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
+          className="p-2 rounded-full bg-white/5 hover:bg-white/10 border border-subtle disabled:opacity-40 disabled:cursor-not-allowed text-ink-primary transition-all duration-200 cursor-pointer"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -105,9 +105,9 @@ const SearchResults = ({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-white text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-          <p>Đang tìm kiếm...</p>
+        <div className="text-ink-primary text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-brand" />
+          <p className="text-ink-secondary">Đang tìm kiếm...</p>
         </div>
       </div>
     );
@@ -115,13 +115,13 @@ const SearchResults = ({
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
-        <div className="text-white text-center">
-          <p className="text-red-400 mb-2">Lỗi tìm kiếm</p>
-          <p className="text-gray-400 text-sm">{error.message}</p>
-          <button 
+      <div className="flex items-center justify-center h-64 bg-base-elevated rounded-2xl border border-subtle">
+        <div className="text-ink-primary text-center">
+          <p className="text-brand-hover mb-2 font-semibold">Lỗi tìm kiếm</p>
+          <p className="text-ink-muted text-sm">{error.message}</p>
+          <button
             onClick={() => window.location.reload()}
-            className="mt-4 bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm transition-colors"
+            className="mt-4 bg-brand hover:bg-brand-hover px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer shadow-cinema"
           >
             Thử lại
           </button>
@@ -132,14 +132,14 @@ const SearchResults = ({
 
   if (!movies || movies.length === 0) {
     return (
-      <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
-        <div className="text-white text-center">
-          <Search className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-          <p className="text-xl mb-2">Không tìm thấy kết quả</p>
-          <p className="text-gray-400">
-            Không có kết quả nào cho "<span className="text-white">{keyword}</span>"
+      <div className="flex items-center justify-center h-64 bg-base-elevated rounded-2xl border border-subtle">
+        <div className="text-ink-primary text-center">
+          <Search className="w-16 h-16 mx-auto mb-4 text-ink-muted" strokeWidth={1.5} />
+          <p className="text-xl mb-2 font-semibold">Không tìm thấy kết quả</p>
+          <p className="text-ink-secondary">
+            Không có kết quả nào cho "<span className="text-ink-primary">{keyword}</span>"
           </p>
-          <p className="text-gray-400 text-sm mt-1">Thử tìm kiếm với từ khóa khác</p>
+          <p className="text-ink-muted text-sm mt-1">Thử tìm kiếm với từ khóa khác</p>
         </div>
       </div>
     );
@@ -148,15 +148,15 @@ const SearchResults = ({
   return (
     <div>
       <div className="mb-6">
-        <p className="text-gray-300">
-          Kết quả cho: <span className="text-white font-semibold">"{keyword}"</span>
+        <p className="text-ink-secondary">
+          Kết quả cho: <span className="text-ink-primary font-semibold">"{keyword}"</span>
         </p>
-        <p className="text-gray-400 text-sm">
+        <p className="text-ink-muted text-sm">
           {searchUtils.formatSearchStats(totalItems, currentPage, itemsPerPage)}
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-8 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 2xl:grid-cols-8 gap-3 sm:gap-4 mb-8">
         {movies.map((movie) => (
           <UnifiedMovieCard key={movie.id} movie={movie} variant="search" />
         ))}

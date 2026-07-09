@@ -6,33 +6,33 @@ const FEATURE_NOTIF_KEY = "dmt_adskip_notif_shown";
 
 const FeatureNotification = ({ onClose }) => (
   <div className="fixed bottom-4 left-4 right-4 z-50 animate-slide-up max-w-lg mx-auto">
-    <div className="bg-[#1a1f2e] border border-blue-500/40 rounded-2xl shadow-2xl overflow-hidden">
-      <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-white/5">
+    <div className="glass-panel rounded-2xl shadow-cinema-lg overflow-hidden">
+      <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-subtle">
         <div className="flex items-center gap-2">
-          <Zap size={14} className="text-blue-400" />
-          <span className="text-gray-400 text-xs font-medium uppercase tracking-wider">
+          <Zap size={14} className="text-sky-400" />
+          <span className="text-ink-muted text-xs font-medium uppercase tracking-wider">
             Tính năng mới
           </span>
-          <span className="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+          <span className="bg-sky-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
               ĐANG PHÁT TRIỂN
             </span>
         </div>
         <button
           onClick={onClose}
-          className="p-1 hover:bg-white/10 rounded-lg transition-colors text-gray-500 hover:text-white"
+          className="p-1 hover:bg-white/10 rounded-full transition-colors duration-200 text-ink-muted hover:text-ink-primary cursor-pointer"
         >
           <X size={15} />
         </button>
       </div>
       <div className="flex items-start gap-3 p-4">
-        <div className="w-11 h-11 rounded-xl flex-shrink-0 mt-0.5 bg-blue-500/20 flex items-center justify-center">
-          <Zap size={22} className="text-blue-400" />
+        <div className="w-11 h-11 rounded-xl flex-shrink-0 mt-0.5 bg-sky-500/15 flex items-center justify-center">
+          <Zap size={22} className="text-sky-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold text-sm mb-1">
+          <p className="text-ink-primary font-semibold text-sm mb-1">
             Tự động bỏ qua quảng cáo!
           </p>
-          <p className="text-gray-400 text-xs leading-relaxed">
+          <p className="text-ink-muted text-xs leading-relaxed">
             DMT Movie giờ tự động phát hiện và bỏ qua quảng cáo trong video, không cần bấm gì thêm.
           </p>
         </div>
@@ -114,22 +114,22 @@ const V2Notification = () => {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 animate-slide-up max-w-lg mx-auto">
-      <div className="bg-[#1a1f2e] border border-orange-500/40 rounded-2xl shadow-2xl overflow-hidden">
+      <div className="glass-panel rounded-2xl shadow-cinema-lg overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-white/5">
+        <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-subtle">
           <div className="flex items-center gap-2">
-            <Bell size={14} className="text-orange-400" />
-            <span className="text-gray-400 text-xs font-medium uppercase tracking-wider">
+            <Bell size={14} className="text-brand-hover" />
+            <span className="text-ink-muted text-xs font-medium uppercase tracking-wider">
               Thông báo
             </span>
-            <span className="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+            <span className="bg-brand text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
               ĐANG PHÁT TRIỂN
             </span>
           </div>
           <button
             onClick={handleDismiss}
-            className="p-1 hover:bg-white/10 rounded-lg transition-colors text-gray-500 hover:text-white"
+            className="p-1 hover:bg-white/10 rounded-full transition-colors duration-200 text-ink-muted hover:text-ink-primary cursor-pointer"
           >
             <X size={15} />
           </button>
@@ -143,19 +143,19 @@ const V2Notification = () => {
             className="w-11 h-11 rounded-xl flex-shrink-0 mt-0.5"
           />
           <div className="flex-1 min-w-0">
-            <p className="text-white font-semibold text-sm mb-1">
+            <p className="text-ink-primary font-semibold text-sm mb-1">
               Đã có phiên bản dành cho điện thoại!
             </p>
             {isIOS ? (
-              <p className="text-gray-400 text-xs leading-relaxed">
+              <p className="text-ink-muted text-xs leading-relaxed">
                 Nhấn{" "}
-                <Share2 size={11} className="inline mb-0.5 text-blue-400" />{" "}
-                <span className="text-blue-400 font-medium">Chia sẻ</span> rồi chọn{" "}
-                <span className="text-orange-400 font-medium">"Thêm vào màn hình chính"</span>{" "}
+                <Share2 size={11} className="inline mb-0.5 text-sky-400" />{" "}
+                <span className="text-sky-400 font-medium">Chia sẻ</span> rồi chọn{" "}
+                <span className="text-brand-hover font-medium">"Thêm vào màn hình chính"</span>{" "}
                 để cài DMT Movie V1 lên điện thoại.
               </p>
             ) : (
-              <p className="text-gray-400 text-xs leading-relaxed">
+              <p className="text-ink-muted text-xs leading-relaxed">
                 Đã có phiên bản DMT Movie V1 dành cho điện thoại, chọn vào đây để tải về!
               </p>
             )}
@@ -167,7 +167,7 @@ const V2Notification = () => {
           <div className="px-4 pb-4 flex justify-end">
             <button
               onClick={handleInstall}
-              className="flex items-center gap-2 bg-orange-500 hover:bg-orange-400 active:scale-95 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all"
+              className="flex items-center gap-2 bg-brand hover:bg-brand-hover active:scale-95 text-white text-sm font-semibold px-4 py-2 rounded-full transition-all duration-200 cursor-pointer shadow-cinema"
             >
               <Download size={15} />
               Tải về

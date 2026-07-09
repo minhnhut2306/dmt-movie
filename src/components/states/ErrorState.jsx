@@ -14,18 +14,18 @@ const ErrorState = ({
   title = 'Lỗi'
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center py-20 px-4">
-      <div className="bg-red-500/10 rounded-full p-4 mb-4">
-        <AlertCircle className="w-12 h-12 text-red-500" />
+    <div className="flex flex-col items-center justify-center py-20 px-4 animate-fade-in">
+      <div className="bg-brand/10 border border-brand/20 rounded-full p-4 mb-5">
+        <AlertCircle className="w-11 h-11 text-brand-hover" strokeWidth={1.5} />
       </div>
-      
-      <h3 className="text-xl font-semibold text-white mb-2">{title}</h3>
-      <p className="text-gray-400 text-center mb-6 max-w-md">{message}</p>
-      
+
+      <h3 className="text-xl font-bold text-ink-primary mb-2 tracking-tight">{title}</h3>
+      <p className="text-ink-secondary text-center mb-6 max-w-md leading-relaxed">{message}</p>
+
       {onRetry && (
         <button
           onClick={onRetry}
-          className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          className="flex items-center gap-2 px-6 py-3 bg-brand hover:bg-brand-hover text-white rounded-full font-semibold transition-all duration-200 active:scale-95 cursor-pointer shadow-cinema focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/60"
         >
           <RefreshCw className="w-4 h-4" />
           Thử lại

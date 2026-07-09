@@ -63,45 +63,47 @@ const TrailerModal = ({ isOpen, onClose, trailerUrl, movieName }) => {
       className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
-      <div 
-        className="relative w-full max-w-5xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
+      <div
+        className="relative w-full max-w-5xl glass-panel rounded-2xl overflow-hidden shadow-cinema-lg animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 bg-gray-800 border-b border-gray-700">
-          <h3 className="text-white font-bold text-lg flex items-center gap-2">
-            <span className="text-red-500">▶</span>
+        <div className="flex items-center justify-between p-4 bg-white/5 border-b border-subtle">
+          <h3 className="text-ink-primary font-bold text-lg flex items-center gap-2">
+            <span className="text-brand">▶</span>
             Trailer - {movieName}
           </h3>
           <div className="flex items-center gap-2">
             <button
               onClick={handleOpenInNewTab}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors duration-200 group"
+              className="p-2 hover:bg-white/10 rounded-full transition-colors duration-200 group cursor-pointer"
               title="Mở trong tab mới"
             >
-              <ExternalLink className="w-5 h-5 text-gray-300 group-hover:text-white" />
+              <ExternalLink className="w-5 h-5 text-ink-secondary group-hover:text-ink-primary" />
             </button>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors duration-200 group"
+              className="p-2 hover:bg-white/10 rounded-full transition-colors duration-200 group cursor-pointer"
             >
-              <X className="w-6 h-6 text-gray-300 group-hover:text-white" />
+              <X className="w-6 h-6 text-ink-secondary group-hover:text-ink-primary" />
             </button>
           </div>
         </div>
-        
+
         <div className="relative bg-black" style={{ paddingTop: '56.25%' }}>
           {loadError ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
-              <div className="text-red-500 text-5xl mb-4">⚠️</div>
-              <h3 className="text-white text-xl font-bold mb-3">
+              <div className="bg-brand/10 border border-brand/20 rounded-full p-4 mb-4">
+                <div className="text-4xl">⚠️</div>
+              </div>
+              <h3 className="text-ink-primary text-xl font-bold mb-3">
                 Không thể phát trailer trong trình duyệt
               </h3>
-              <p className="text-gray-400 mb-6 max-w-md">
+              <p className="text-ink-secondary mb-6 max-w-md">
                 Video này không cho phép nhúng. Vui lòng mở trực tiếp trên YouTube.
               </p>
               <button
                 onClick={handleOpenInNewTab}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors duration-300"
+                className="bg-brand hover:bg-brand-hover text-white px-6 py-3 rounded-full font-semibold flex items-center gap-2 transition-all duration-200 cursor-pointer shadow-cinema"
               >
                 <ExternalLink className="w-5 h-5" />
                 Xem trên YouTube
@@ -134,12 +136,12 @@ const TrailerModal = ({ isOpen, onClose, trailerUrl, movieName }) => {
         </div>
         
         {!loadError && (
-          <div className="p-3 bg-gray-800/50 border-t border-gray-700">
-            <p className="text-gray-400 text-sm text-center">
-              Nếu trailer không hiển thị, 
-              <button 
+          <div className="p-3 bg-white/5 border-t border-subtle">
+            <p className="text-ink-muted text-sm text-center">
+              Nếu trailer không hiển thị,
+              <button
                 onClick={handleOpenInNewTab}
-                className="text-blue-400 hover:text-blue-300 ml-1 underline"
+                className="text-brand-hover hover:text-brand ml-1 underline cursor-pointer"
               >
                 nhấn vào đây để xem trên YouTube
               </button>

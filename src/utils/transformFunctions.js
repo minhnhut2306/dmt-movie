@@ -84,7 +84,7 @@ export const transformMovieDetail = (data) => {
 };
 
 export const transformLatestMovies = (data) => {
-  const items = data?.items || [];
+  const items = data?.data?.items || data?.items || [];
 
   return items.map((movie) => ({
     id: movie._id,

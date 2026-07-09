@@ -37,13 +37,13 @@ const RecentlyWatchedSection = () => {
   return (
     <div className="mb-8 sm:mb-12">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <h2 className="text-white text-xl sm:text-2xl font-bold flex items-center gap-2">
-          <Clock className="w-5 h-5 text-orange-400" />
+        <h2 className="text-ink-primary text-lg sm:text-2xl font-bold tracking-tight flex items-center gap-2">
+          <Clock className="w-5 h-5 text-brand-hover" />
           Xem Gần Đây
         </h2>
         <Link
           to="/history"
-          className="text-xs sm:text-sm text-orange-400 hover:text-orange-300 transition-colors border border-orange-500/40 hover:border-orange-400/70 px-3 py-1 rounded-full"
+          className="text-xs sm:text-sm text-brand-hover hover:text-brand transition-colors duration-200 border border-brand/30 hover:border-brand/60 px-3 py-1.5 rounded-full cursor-pointer"
         >
           Xem tất cả →
         </Link>
@@ -56,7 +56,7 @@ const RecentlyWatchedSection = () => {
             className="group flex-shrink-0 w-32 sm:w-36 cursor-pointer"
             onClick={() => navigate(`/movie/${item.slug}`)}
           >
-            <div className="relative overflow-hidden rounded-lg aspect-[2/3] bg-gray-800">
+            <div className="relative overflow-hidden rounded-2xl aspect-[2/3] bg-base-elevated shadow-cinema">
               <img
                 src={getSafeImageUrl(item.poster, item.title)}
                 alt={item.title}
@@ -66,8 +66,8 @@ const RecentlyWatchedSection = () => {
               />
 
               {/* Overlay khi hover */}
-              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                <div className="rounded-full bg-orange-500/90 p-2.5">
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <div className="rounded-full bg-white/10 backdrop-blur-md border border-white/20 p-2.5">
                   <Play className="w-5 h-5 text-white fill-white" />
                 </div>
               </div>
@@ -75,7 +75,7 @@ const RecentlyWatchedSection = () => {
               {/* Nút xóa */}
               <button
                 onClick={(e) => handleRemove(e, item.slug)}
-                className="absolute top-1.5 right-1.5 bg-black/70 hover:bg-red-600 text-gray-300 hover:text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-all"
+                className="absolute top-1.5 right-1.5 bg-black/70 hover:bg-brand text-ink-secondary hover:text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
                 title="Xóa khỏi lịch sử"
               >
                 <Trash2 className="w-3 h-3" />
@@ -83,16 +83,16 @@ const RecentlyWatchedSection = () => {
 
               {/* Episode badge */}
               {item.lastEpisodeName && (
-                <div className="absolute bottom-1.5 left-1.5 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded truncate max-w-[80%]">
+                <div className="absolute bottom-1.5 left-1.5 bg-black/80 text-ink-primary text-xs px-1.5 py-0.5 rounded-full truncate max-w-[80%]">
                   {item.lastEpisodeName}
                 </div>
               )}
             </div>
 
-            <p className="text-white text-xs font-medium mt-1.5 line-clamp-2 leading-tight">
+            <p className="text-ink-primary text-xs font-medium mt-1.5 line-clamp-2 leading-tight">
               {item.title}
             </p>
-            <p className="text-gray-500 text-xs mt-0.5">
+            <p className="text-ink-muted text-xs mt-0.5">
               {timeAgo(item.timestamp)}
             </p>
           </div>

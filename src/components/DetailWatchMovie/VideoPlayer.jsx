@@ -320,11 +320,11 @@ const VideoPlayer = ({
 
   if (!currentVideoUrl) {
     return (
-      <div className="bg-gray-800 flex items-center justify-center aspect-video">
-        <div className="text-center text-white p-4">
-          <Play className="w-16 h-16 mx-auto mb-4 text-red-500" fill="currentColor" />
+      <div className="bg-base-elevated flex items-center justify-center aspect-video">
+        <div className="text-center text-ink-primary p-4">
+          <Play className="w-16 h-16 mx-auto mb-4 text-brand" fill="currentColor" />
           <p className="text-xl font-semibold">Không tìm thấy video</p>
-          <p className="text-gray-400 mt-2">Vui lòng chọn tập khác</p>
+          <p className="text-ink-muted mt-2">Vui lòng chọn tập khác</p>
         </div>
       </div>
     );
@@ -347,7 +347,7 @@ const VideoPlayer = ({
           <div className="absolute bottom-3 right-3 z-10 opacity-0 hover:opacity-100 transition-opacity duration-300">
             <button
               onClick={() => setEmbedFailed(true)}
-              className="bg-black/70 text-gray-400 hover:text-white text-xs px-3 py-1.5 rounded-lg backdrop-blur-sm transition-colors"
+              className="bg-black/70 text-ink-muted hover:text-ink-primary text-xs px-3 py-1.5 rounded-full backdrop-blur-sm transition-colors duration-200 cursor-pointer"
             >
               Video không phát? Thử cách khác
             </button>
@@ -359,11 +359,11 @@ const VideoPlayer = ({
 
   if (videoError || (embedFailed && !currentEmbedUrl)) {
     return (
-      <div className="bg-gray-800 flex items-center justify-center aspect-video">
-        <div className="text-center text-white p-4">
+      <div className="bg-base-elevated flex items-center justify-center aspect-video">
+        <div className="text-center text-ink-primary p-4">
           <div className="text-5xl mb-4">⚠️</div>
           <p className="text-xl font-semibold mb-2">Không thể phát video</p>
-          <p className="text-gray-400 mt-1 text-sm max-w-xs mx-auto">
+          <p className="text-ink-muted mt-1 text-sm max-w-xs mx-auto">
             Link video đã hết hạn hoặc không còn khả dụng. Vui lòng thử lại sau hoặc chọn phim khác.
           </p>
           <button
@@ -374,7 +374,7 @@ const VideoPlayer = ({
               setUseEmbed(false);
               setEmbedFailed(false);
             }}
-            className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm transition-colors"
+            className="mt-4 bg-brand hover:bg-brand-hover text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer shadow-cinema"
           >
             Thử lại
           </button>
@@ -400,10 +400,10 @@ const VideoPlayer = ({
           Trình duyệt của bạn không hỗ trợ video này.
         </video>
 
-        <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity hidden lg:block">
+        <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hidden lg:block">
           <button
             onClick={toggleNativeFullscreen}
-            className="bg-black/70 text-white p-2 rounded-lg hover:bg-black/90 transition-all backdrop-blur-sm"
+            className="bg-black/70 text-white p-2 rounded-full hover:bg-black/90 transition-all duration-200 backdrop-blur-sm cursor-pointer"
             title={isFullscreen ? 'Thoát toàn màn hình' : 'Toàn màn hình'}
           >
             {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
@@ -412,22 +412,22 @@ const VideoPlayer = ({
 
         {resumePrompt && (
           <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 w-max max-w-[90%]">
-            <div className="bg-gray-900/95 backdrop-blur-sm border border-gray-700 rounded-xl px-4 py-3 shadow-2xl flex items-center gap-3">
-              <span className="text-white text-sm">
-                Bạn đã xem đến <span className="text-orange-400 font-semibold">{formatTime(resumePrompt.time)}</span>, tiếp tục?
+            <div className="glass-panel rounded-2xl px-4 py-3 shadow-cinema-lg flex items-center gap-3 animate-scale-in">
+              <span className="text-ink-primary text-sm">
+                Bạn đã xem đến <span className="text-gold-light font-semibold">{formatTime(resumePrompt.time)}</span>, tiếp tục?
               </span>
               <button
                 onClick={() => {
                   if (videoRef.current) videoRef.current.currentTime = resumePrompt.time;
                   setResumePrompt(null);
                 }}
-                className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+                className="bg-brand hover:bg-brand-hover text-white text-xs font-semibold px-3 py-1.5 rounded-full transition-all duration-200 whitespace-nowrap cursor-pointer"
               >
                 Tiếp tục
               </button>
               <button
                 onClick={() => setResumePrompt(null)}
-                className="text-gray-400 hover:text-white text-xs px-2 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+                className="text-ink-muted hover:text-ink-primary text-xs px-2 py-1.5 rounded-full transition-colors duration-200 whitespace-nowrap cursor-pointer"
               >
                 Xem lại
               </button>

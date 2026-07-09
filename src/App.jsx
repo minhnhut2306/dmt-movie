@@ -22,20 +22,22 @@ const MAINTENANCE_END_TIME = '10:40'; // giờ kết thúc bảo trì
 // =============================================
 
 const MaintenancePage = () => (
-  <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
-    <div className="text-center max-w-md mx-auto">
-      <div className="text-7xl mb-6">🔧</div>
-      <h1 className="text-3xl font-bold text-white mb-3">Đang Bảo Trì</h1>
-      <p className="text-gray-300 text-lg mb-2">
+  <div className="min-h-screen bg-black flex items-center justify-center px-4">
+    <div className="text-center max-w-md mx-auto animate-fade-in">
+      <div className="bg-brand/10 border border-brand/20 rounded-full p-6 w-fit mx-auto mb-6">
+        <div className="text-6xl">🔧</div>
+      </div>
+      <h1 className="text-3xl font-bold text-ink-primary mb-3 tracking-tight">Đang Bảo Trì</h1>
+      <p className="text-ink-secondary text-lg mb-2">
         Website đang được nâng cấp và sửa lỗi.
       </p>
-      <p className="text-gray-400 mb-6">
+      <p className="text-ink-muted mb-6">
         Dự kiến hoàn thành lúc{' '}
-        <span className="text-blue-400 font-semibold">{MAINTENANCE_END_TIME}</span>
+        <span className="text-brand-hover font-semibold">{MAINTENANCE_END_TIME}</span>
         . Vui lòng quay lại sau.
       </p>
-      <div className="flex items-center justify-center gap-2 text-gray-500 text-sm">
-        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+      <div className="flex items-center justify-center gap-2 text-ink-muted text-sm">
+        <div className="w-2 h-2 bg-gold-light rounded-full animate-pulse"></div>
         <span>Hệ thống sẽ tự động hoạt động trở lại</span>
       </div>
     </div>
@@ -66,7 +68,7 @@ const App = () => {
         {MAINTENANCE_MODE ? (
           <MaintenancePage />
         ) : (
-          <Suspense fallback={<div className="min-h-screen bg-gray-900" />}>
+          <Suspense fallback={<div className="min-h-screen bg-black" />}>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/movie/:slug" element={<MovieLayouts />} />
@@ -85,17 +87,20 @@ const App = () => {
         toastOptions={{
           duration: 3000,
           style: {
-            background: '#363636',
-            color: '#fff',
+            background: '#14141f',
+            color: '#F8FAFC',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '9999px',
+            boxShadow: '0 8px 30px rgb(0,0,0,0.4)',
           },
           success: {
             style: {
-              background: '#22c55e',
+              background: '#059669',
             },
           },
           error: {
             style: {
-              background: '#ef4444',
+              background: '#E11D48',
             },
           },
         }}

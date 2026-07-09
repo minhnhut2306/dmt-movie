@@ -143,3 +143,17 @@ export const useAllCountries = () => {
     gcTime: 7 * 24 * 60 * 60 * 1000, // 7 ngày
   });
 };
+
+// ============================================
+// MOVIE IMAGES HOOK - Backdrop/poster chất lượng cao (TMDB) cho 1 phim
+// ============================================
+export const useMovieImages = (slug) => {
+  return useQuery({
+    queryKey: ["movie-images", slug],
+    queryFn: () => movieApi.getMovieImages(slug),
+    enabled: !!slug,
+    staleTime: 60 * 60 * 1000, // 1 giờ
+    gcTime: 24 * 60 * 60 * 1000, // 24 giờ
+    retry: 1,
+  });
+};

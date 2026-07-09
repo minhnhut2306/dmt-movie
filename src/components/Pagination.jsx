@@ -47,30 +47,30 @@ const Pagination = ({
   const showFirstPage = pages[0] > 1;
   const showLastPage = pages[pages.length - 1] < totalPages;
 
+  const baseBtn =
+    'flex items-center justify-center px-3 py-2 text-sm font-semibold rounded-full border border-subtle bg-white/5 text-ink-secondary hover:bg-white/10 hover:text-ink-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/60';
+
   return (
     <div className="flex flex-wrap items-center justify-center gap-2 mt-8 px-4">
       {/* Previous Button */}
       <button
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className={baseBtn}
         aria-label="Trang trước"
       >
-        <ChevronLeft className="w-4 h-4 mr-1" />
+        <ChevronLeft className="w-4 h-4 sm:mr-1" />
         <span className="hidden sm:inline">Trước</span>
       </button>
 
       {/* First Page + Ellipsis */}
       {showFirstPage && (
         <>
-          <button
-            onClick={() => handlePageChange(1)}
-            className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 hover:text-white transition-colors"
-          >
+          <button onClick={() => handlePageChange(1)} className={baseBtn}>
             1
           </button>
           {pages[0] > 2 && (
-            <span className="text-gray-500 px-1">...</span>
+            <span className="text-ink-muted px-1">...</span>
           )}
         </>
       )}
@@ -80,10 +80,10 @@ const Pagination = ({
         <button
           key={page}
           onClick={() => handlePageChange(page)}
-          className={`px-3 py-2 text-sm font-medium border rounded-lg transition-colors ${
+          className={`w-10 h-10 flex items-center justify-center text-sm font-semibold border rounded-full transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/60 ${
             currentPage === page
-              ? 'text-white bg-red-600 border-red-600'
-              : 'text-gray-300 bg-gray-800 border-gray-700 hover:bg-gray-700 hover:text-white'
+              ? 'text-white bg-brand border-brand shadow-glow'
+              : 'text-ink-secondary bg-white/5 border-subtle hover:bg-white/10 hover:text-ink-primary'
           }`}
           aria-label={`Trang ${page}`}
           aria-current={currentPage === page ? 'page' : undefined}
@@ -96,12 +96,9 @@ const Pagination = ({
       {showLastPage && (
         <>
           {pages[pages.length - 1] < totalPages - 1 && (
-            <span className="text-gray-500 px-1">...</span>
+            <span className="text-ink-muted px-1">...</span>
           )}
-          <button
-            onClick={() => handlePageChange(totalPages)}
-            className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 hover:text-white transition-colors"
-          >
+          <button onClick={() => handlePageChange(totalPages)} className={baseBtn}>
             {totalPages}
           </button>
         </>
@@ -111,11 +108,11 @@ const Pagination = ({
       <button
         onClick={() => handlePageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className={baseBtn}
         aria-label="Trang sau"
       >
         <span className="hidden sm:inline">Sau</span>
-        <ChevronRight className="w-4 h-4 ml-1" />
+        <ChevronRight className="w-4 h-4 sm:ml-1" />
       </button>
     </div>
   );

@@ -37,13 +37,13 @@ const EmptyState = ({
   const displayMessage = message || config.defaultMessage;
 
   return (
-    <div className="flex flex-col items-center justify-center py-20 px-4">
-      <div className="bg-gray-800/50 rounded-full p-6 mb-4">
-        <Icon className="w-16 h-16 text-gray-600" />
+    <div className="flex flex-col items-center justify-center py-20 px-4 animate-fade-in">
+      <div className="bg-white/5 border border-subtle rounded-full p-6 mb-5">
+        <Icon className="w-14 h-14 text-ink-muted" strokeWidth={1.5} />
       </div>
-      
-      <h3 className="text-xl font-semibold text-white mb-2">{displayTitle}</h3>
-      <p className="text-gray-400 text-center max-w-md">{displayMessage}</p>
+
+      <h3 className="text-xl font-bold text-ink-primary mb-2 tracking-tight">{displayTitle}</h3>
+      <p className="text-ink-secondary text-center max-w-md leading-relaxed">{displayMessage}</p>
     </div>
   );
 };

@@ -41,3 +41,34 @@ export function getSafeImageUrl(url, fallbackText = "No Image") {
   const candidates = buildImageCandidates(url, fallbackText);
   return candidates[0]; // Return first candidate
 }
+
+/**
+ * Lấy URL ảnh backdrop (nền rộng) chất lượng cao từ response của
+ * GET /v1/api/phim/{slug}/images — dùng cho Hero Banner thay vì poster dọc.
+ * @param {object} imagesResponse - Response trả về từ movieApi.getMovieImages
+ * @returns {string|null}
+ */
+export function getBackdropUrl(imagesResponse) {
+  const payload = imagesResponse?.data;
+  const backdropBase = payload?.image_sizes?.backdrop?.w1280;
+  const backdrop = payload?.images?.find((img) => img.type === "backdrop");
+  if (!backdropBase || !backdrop?.file_path) return null;
+  return `${backdropBase}${backdrop.file_path}`;
+}
+
+/**
+ * Lấy URL poster dọc (tỉ lệ 2:3) chất lượng cao từ cùng response trên,
+ * dùng cho ảnh poster ở trang chi tiết phim.
+ * @param {object} imagesResponse - Response trả về từ movieApi.getMovieImages
+ * @returns {string|null}
+ */
+export function getPosterUrl(imagesResponse) {
+  const payload = imagesResponse?.data;
+  const posterBase = payload?.image_sizes?.poster?.w500;
+  const posters = payload?.images?.filter((img) => img.type === "poster") || [];
+  // Ưu tiên ảnh đúng tỉ lệ 2:3 (0.667) để khớp khung poster đang dùng trong UI
+  const poster =
+    posters.find((img) => Math.abs(img.aspect_ratio - 0.667) < 0.02) || posters[0];
+  if (!posterBase || !poster?.file_path) return null;
+  return `${posterBase}${poster.file_path}`;
+}

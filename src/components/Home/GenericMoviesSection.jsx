@@ -53,14 +53,14 @@ const GenericMoviesSection = ({
     return (
       <div className="mb-8 sm:mb-12">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
-          <h2 className="text-white text-xl sm:text-2xl font-bold flex items-center">
+          <h2 className="text-ink-primary text-lg sm:text-2xl font-bold tracking-tight flex items-center gap-2">
             {emoji} {title}
           </h2>
         </div>
-        <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
-          <div className="text-white text-center">
-            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-            <p>Đang tải {title.toLowerCase()}...</p>
+        <div className="flex items-center justify-center h-64 bg-base-elevated rounded-2xl border border-subtle">
+          <div className="text-ink-primary text-center">
+            <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-brand" />
+            <p className="text-ink-secondary">Đang tải {title.toLowerCase()}...</p>
           </div>
         </div>
       </div>
@@ -71,17 +71,17 @@ const GenericMoviesSection = ({
     return (
       <div className="mb-8 sm:mb-12">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
-          <h2 className="text-white text-xl sm:text-2xl font-bold flex items-center">
+          <h2 className="text-ink-primary text-lg sm:text-2xl font-bold tracking-tight flex items-center gap-2">
             {emoji} {title}
           </h2>
         </div>
-        <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
-          <div className="text-white text-center">
-            <p className="text-red-400 mb-2">Lỗi tải dữ liệu</p>
-            <p className="text-gray-400 text-sm">{error}</p>
-            <button 
+        <div className="flex items-center justify-center h-64 bg-base-elevated rounded-2xl border border-subtle">
+          <div className="text-ink-primary text-center">
+            <p className="text-brand-hover mb-2 font-semibold">Lỗi tải dữ liệu</p>
+            <p className="text-ink-muted text-sm">{error}</p>
+            <button
               onClick={() => window.location.reload()}
-              className="mt-4 bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm"
+              className="mt-4 bg-brand hover:bg-brand-hover px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer shadow-cinema"
             >
               Thử lại
             </button>
@@ -95,12 +95,12 @@ const GenericMoviesSection = ({
     return (
       <div className="mb-8 sm:mb-12">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
-          <h2 className="text-white text-xl sm:text-2xl font-bold flex items-center">
+          <h2 className="text-ink-primary text-lg sm:text-2xl font-bold tracking-tight flex items-center gap-2">
             {emoji} {title}
           </h2>
         </div>
-        <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
-          <div className="text-white text-center">
+        <div className="flex items-center justify-center h-64 bg-base-elevated rounded-2xl border border-subtle">
+          <div className="text-ink-secondary text-center">
             <p>Không có {title.toLowerCase()}</p>
           </div>
         </div>
@@ -114,14 +114,14 @@ const GenericMoviesSection = ({
   return (
     <div className="mb-8 sm:mb-12">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
-        <h2 className="text-white text-xl sm:text-2xl font-bold flex items-center">
+        <h2 className="text-ink-primary text-lg sm:text-2xl font-bold tracking-tight flex items-center gap-2">
           {emoji} {title}
         </h2>
         <div className="flex items-center space-x-3">
           {viewMoreLink && (
-            <button 
+            <button
               onClick={handleViewMore}
-              className="text-gray-400 hover:text-white transition-colors text-sm sm:text-base hover:underline"
+              className="text-ink-primary bg-white/5 hover:bg-white/10 border border-subtle transition-all duration-200 text-xs sm:text-sm font-semibold px-3 py-1.5 rounded-full cursor-pointer"
             >
               Xem thêm
             </button>
@@ -130,14 +130,14 @@ const GenericMoviesSection = ({
             <button
               onClick={() => handleSlide('prev')}
               disabled={currentSlideIndex === 0}
-              className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
+              className="p-2 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed text-ink-primary transition-all duration-200 cursor-pointer border border-subtle"
             >
               <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
             <button
               onClick={() => handleSlide('next')}
               disabled={currentSlideIndex >= maxIndex}
-              className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors"
+              className="p-2 rounded-full bg-white/5 hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed text-ink-primary transition-all duration-200 cursor-pointer border border-subtle"
             >
               <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>

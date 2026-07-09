@@ -59,7 +59,7 @@ const PWAInstallPrompt = () => {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 animate-slide-up">
-      <div className="bg-[#1a252f] border border-orange-500/30 rounded-2xl shadow-2xl p-4 flex items-center gap-3">
+      <div className="glass-panel rounded-2xl shadow-cinema-lg p-4 flex items-center gap-3">
         <img
           src="/icon-192x192.png"
           alt="DMT Movie"
@@ -67,14 +67,14 @@ const PWAInstallPrompt = () => {
         />
 
         <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold text-sm">Cài đặt DMT Movie</p>
+          <p className="text-ink-primary font-semibold text-sm">Cài đặt DMT Movie</p>
           {isIOS ? (
-            <p className="text-gray-400 text-xs mt-0.5 leading-relaxed">
+            <p className="text-ink-muted text-xs mt-0.5 leading-relaxed">
               Nhấn <Share size={11} className="inline mb-0.5" /> rồi chọn{" "}
-              <strong className="text-orange-400">"Thêm vào màn hình chính"</strong>
+              <strong className="text-brand-hover">"Thêm vào màn hình chính"</strong>
             </p>
           ) : (
-            <p className="text-gray-400 text-xs mt-0.5">
+            <p className="text-ink-muted text-xs mt-0.5">
               Xem phim nhanh hơn, không cần mạng mạnh
             </p>
           )}
@@ -84,7 +84,7 @@ const PWAInstallPrompt = () => {
           {!isIOS && deferredPrompt && (
             <button
               onClick={handleInstall}
-              className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-400 text-white text-xs font-semibold px-3 py-2 rounded-xl transition-colors"
+              className="flex items-center gap-1.5 bg-brand hover:bg-brand-hover text-white text-xs font-semibold px-3 py-2 rounded-full transition-all duration-200 cursor-pointer shadow-cinema"
             >
               <Download size={14} />
               Tải về
@@ -92,7 +92,7 @@ const PWAInstallPrompt = () => {
           )}
           <button
             onClick={handleDismiss}
-            className="p-1.5 hover:bg-gray-700 rounded-lg transition-colors text-gray-400 hover:text-white"
+            className="p-1.5 hover:bg-white/10 rounded-full transition-colors duration-200 text-ink-muted hover:text-ink-primary cursor-pointer"
           >
             <X size={16} />
           </button>

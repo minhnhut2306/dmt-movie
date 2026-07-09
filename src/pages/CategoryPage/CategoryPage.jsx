@@ -4,20 +4,53 @@ import { useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import UnifiedMovieCard from '../../components/UnifiedMovieCard';
-import { CATEGORY_TYPES } from '../../utils/CategoryConfigDynamic';
+import { CATEGORY_TYPES, STATIC_SPECIAL_LISTS, useDynamicGenres, useDynamicCountries } from '../../utils/CategoryConfigDynamic';
 import { movieApi } from '../../api'; // Import từ api/index.js
 import { getSafeImageUrl } from '../../utils/imageHelper';
+
+const CATEGORY_BADGE_COLORS = {
+  'the-loai': 'bg-purple-600',
+  'quoc-gia': 'bg-emerald-600',
+  'nam': 'bg-brand',
+  'danh-sach': 'bg-sky-600',
+};
+
+const formatSlugToName = (slug) =>
+  slug
+    ?.split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ') || '';
 
 const CategoryPage = () => {
   const { categoryType, categorySlug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const currentPage = parseInt(searchParams.get('page') || '1');
 
+  const { genres } = useDynamicGenres();
+  const { countries } = useDynamicCountries();
+
   // ✅ Đơn giản hóa - chỉ cần check categoryType có tồn tại
   const categoryConfig = CATEGORY_TYPES[categoryType];
+  const categoryDisplayName = (() => {
+    if (categoryType === 'the-loai') {
+      return genres.find((g) => g.slug === categorySlug)?.name || formatSlugToName(categorySlug);
+    }
+    if (categoryType === 'quoc-gia') {
+      return countries.find((c) => c.slug === categorySlug)?.name || formatSlugToName(categorySlug);
+    }
+    if (categoryType === 'danh-sach') {
+      return STATIC_SPECIAL_LISTS.find((s) => s.slug === categorySlug)?.name || formatSlugToName(categorySlug);
+    }
+    if (categoryType === 'nam') {
+      return `Năm ${categorySlug}`;
+    }
+    return formatSlugToName(categorySlug);
+  })();
   const categoryInfo = categoryConfig ? {
     type: categoryConfig.title,
     slug: categorySlug,
+    name: categoryDisplayName,
+    color: CATEGORY_BADGE_COLORS[categoryType] || 'bg-brand',
   } : null;
 
   const { data, isLoading, error } = useQuery({
@@ -160,9 +193,9 @@ const CategoryPage = () => {
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center px-3 py-2 text-sm font-semibold text-ink-secondary bg-white/5 border border-subtle rounded-full hover:bg-white/10 hover:text-ink-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
         >
-          <ChevronLeft className="w-4 h-4 mr-1" />
+          <ChevronLeft className="w-4 h-4 sm:mr-1" />
           <span className="hidden sm:inline">Trước</span>
         </button>
 
@@ -170,12 +203,12 @@ const CategoryPage = () => {
           <>
             <button
               onClick={() => handlePageChange(1)}
-              className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 hover:text-white transition-colors"
+              className="px-3 py-2 text-sm font-semibold text-ink-secondary bg-white/5 border border-subtle rounded-full hover:bg-white/10 hover:text-ink-primary transition-all duration-200 cursor-pointer"
             >
               1
             </button>
             {startPage > 2 && (
-              <span className="text-gray-500 px-1">...</span>
+              <span className="text-ink-muted px-1">...</span>
             )}
           </>
         )}
@@ -184,9 +217,9 @@ const CategoryPage = () => {
           <button
             key={page}
             onClick={() => handlePageChange(page)}
-            className={`px-3 py-2 text-sm font-medium border rounded-lg transition-colors ${currentPage === page
-                ? 'text-white bg-red-600 border-red-600'
-                : 'text-gray-300 bg-gray-800 border-gray-700 hover:bg-gray-700 hover:text-white'
+            className={`w-10 h-10 flex items-center justify-center text-sm font-semibold border rounded-full transition-all duration-200 cursor-pointer ${currentPage === page
+                ? 'text-white bg-brand border-brand shadow-glow'
+                : 'text-ink-secondary bg-white/5 border-subtle hover:bg-white/10 hover:text-ink-primary'
               }`}
           >
             {page}
@@ -196,11 +229,11 @@ const CategoryPage = () => {
         {endPage < totalPages && (
           <>
             {endPage < totalPages - 1 && (
-              <span className="text-gray-500 px-1">...</span>
+              <span className="text-ink-muted px-1">...</span>
             )}
             <button
               onClick={() => handlePageChange(totalPages)}
-              className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 hover:text-white transition-colors"
+              className="px-3 py-2 text-sm font-semibold text-ink-secondary bg-white/5 border border-subtle rounded-full hover:bg-white/10 hover:text-ink-primary transition-all duration-200 cursor-pointer"
             >
               {totalPages}
             </button>
@@ -210,10 +243,10 @@ const CategoryPage = () => {
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="flex items-center px-3 py-2 text-sm font-semibold text-ink-secondary bg-white/5 border border-subtle rounded-full hover:bg-white/10 hover:text-ink-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 cursor-pointer"
         >
           <span className="hidden sm:inline">Sau</span>
-          <ChevronRight className="w-4 h-4 ml-1" />
+          <ChevronRight className="w-4 h-4 sm:ml-1" />
         </button>
       </div>
     );
@@ -221,10 +254,10 @@ const CategoryPage = () => {
 
   if (!categoryInfo) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
-        <div className="text-center text-white">
-          <h1 className="text-2xl font-bold mb-4">Không tìm thấy danh mục</h1>
-          <p className="text-gray-400">Danh mục bạn tìm kiếm không tồn tại.</p>
+      <div className="min-h-screen bg-black flex items-center justify-center px-4">
+        <div className="text-center text-ink-primary">
+          <h1 className="text-2xl font-bold mb-4 tracking-tight">Không tìm thấy danh mục</h1>
+          <p className="text-ink-secondary">Danh mục bạn tìm kiếm không tồn tại.</p>
         </div>
       </div>
     );
@@ -232,12 +265,12 @@ const CategoryPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900">
+      <div className="min-h-screen bg-black">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
-            <div className="text-white text-center">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-              <p className="text-lg">Đang tải...</p>
+            <div className="text-ink-primary text-center">
+              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-brand" />
+              <p className="text-lg text-ink-secondary">Đang tải...</p>
             </div>
           </div>
         </div>
@@ -247,20 +280,20 @@ const CategoryPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-900">
+      <div className="min-h-screen bg-black">
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
-            <div className="text-white text-center">
-              <p className="text-red-400 mb-2 text-lg">Lỗi tải dữ liệu</p>
-              <p className="text-gray-400 text-sm mb-4">
+            <div className="text-ink-primary text-center">
+              <p className="text-brand-hover mb-2 text-lg font-semibold">Lỗi tải dữ liệu</p>
+              <p className="text-ink-muted text-sm mb-4">
                 {error.message || 'Không thể tải dữ liệu danh mục'}
               </p>
-              <p className="text-gray-500 text-xs mb-4">
+              <p className="text-ink-muted text-xs mb-4">
                 Category: {categoryType}/{categorySlug}
               </p>
               <button
                 onClick={() => window.location.reload()}
-                className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg text-sm font-medium transition-colors"
+                className="bg-brand hover:bg-brand-hover px-6 py-3 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer shadow-cinema"
               >
                 Thử lại
               </button>
@@ -277,22 +310,22 @@ const CategoryPage = () => {
   console.log('Pagination Info:', paginationInfo);
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-black">
       <div className="container mx-auto px-4 py-6 sm:py-8">
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <span
-              className={`px-3 py-1 rounded-full text-sm font-medium text-white ${categoryInfo.color}`}
+              className={`px-3 py-1 rounded-full text-sm font-semibold text-white ${categoryInfo.color}`}
             >
               {categoryInfo.type}
             </span>
-            <h1 className="text-white text-xl sm:text-2xl md:text-3xl font-bold">
+            <h1 className="text-ink-primary text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
               {categoryInfo.name}
             </h1>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-4">
-            <p className="text-gray-400 text-sm sm:text-base">
+            <p className="text-ink-secondary text-sm sm:text-base">
               Trang {currentPage} / {totalPages} - Tổng cộng {movies.length} phim
             </p>
           </div>
@@ -314,7 +347,7 @@ const CategoryPage = () => {
           </>
         ) : (
           <div className="flex items-center justify-center h-64">
-            <div className="text-white text-center">
+            <div className="text-ink-secondary text-center">
               <p className="text-lg">Không có phim nào trong danh mục này.</p>
             </div>
           </div>

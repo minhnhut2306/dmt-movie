@@ -48,7 +48,7 @@ const Navbar = () => {
     if (filters.lang) params.append('lang', filters.lang);
     params.append('sort_field', filters.sortField);
     params.append('sort_type', filters.sortType);
-    
+
     navigate(`/filter?${params.toString()}`);
   };
 
@@ -65,6 +65,9 @@ const Navbar = () => {
   const { countries: displayCountries } = useDynamicCountries();
   const displayYears = ALL_YEARS;
 
+  const navLinkClass = "text-sm font-medium text-ink-secondary hover:text-ink-primary transition-colors duration-200 cursor-pointer";
+  const dropdownItemClass = "px-3 py-2 bg-white/5 hover:bg-brand rounded-lg text-sm transition-all duration-200 text-center border border-subtle text-ink-secondary hover:text-white cursor-pointer";
+
   return (
     <>
       <style>{`
@@ -79,62 +82,62 @@ const Navbar = () => {
           display: none;
         }
       `}</style>
-      
-      <nav className="bg-black text-white shadow-lg fixed top-0 left-0 right-0 z-[9999]">
+
+      <nav className="bg-black/95 backdrop-blur-md text-ink-primary shadow-cinema fixed top-0 left-0 right-0 z-[9999] border-b border-subtle">
         {/* Hàng 1: Logo + Menu chính + Actions */}
-        <div className="border-b border-gray-800">
+        <div>
           <div className="max-w-full px-2">
             <div className="flex items-center justify-between h-14">
-              
+
               {/* Logo */}
               <Link to="/" className="flex items-center">
-                <h1 className="text-2xl font-bold">
-                  <span className="text-orange-500">DMT</span>
-                  <span className="text-blue-400">Movie</span>
+                <h1 className="text-2xl font-extrabold tracking-tight">
+                  <span className="text-brand">DMT</span>
+                  <span className="text-ink-primary">Movie</span>
                 </h1>
               </Link>
 
               {/* Desktop Menu chính */}
               <div className="hidden lg:flex items-center space-x-8">
-                <Link to="/category/danh-sach/phim-bo" className="text-sm font-medium hover:text-orange-500 transition-colors">
+                <Link to="/category/danh-sach/phim-bo" className={navLinkClass}>
                   Phim Bộ
                 </Link>
-                <Link to="/category/danh-sach/phim-le" className="text-sm font-medium hover:text-orange-500 transition-colors">
+                <Link to="/category/danh-sach/phim-le" className={navLinkClass}>
                   Phim Lẻ
                 </Link>
-                <Link to="/category/danh-sach/phim-chieu-rap" className="text-sm font-medium hover:text-orange-500 transition-colors">
+                <Link to="/category/danh-sach/phim-chieu-rap" className={navLinkClass}>
                   Phim Chiếu Rạp
                 </Link>
-                <Link to="/category/danh-sach/hoat-hinh" className="text-sm font-medium hover:text-orange-500 transition-colors">
+                <Link to="/category/danh-sach/hoat-hinh" className={navLinkClass}>
                   Hoạt Hình
                 </Link>
-                <Link to="/category/danh-sach/phim-vietsub" className="text-sm font-medium hover:text-orange-500 transition-colors">
+                <Link to="/category/danh-sach/phim-vietsub" className={navLinkClass}>
                   Vietsub
                 </Link>
-                <Link to="/category/danh-sach/phim-thuyet-minh" className="text-sm font-medium hover:text-orange-500 transition-colors">
+                <Link to="/category/danh-sach/phim-thuyet-minh" className={navLinkClass}>
                   Thuyết Minh
                 </Link>
-                <Link to="/category/danh-sach/phim-long-tieng" className="text-sm font-medium hover:text-orange-500 transition-colors">
+                <Link to="/category/danh-sach/phim-long-tieng" className={navLinkClass}>
                   Lồng Tiếng
                 </Link>
 
                 {/* Thể loại Dropdown */}
                 <div className="relative">
-                  <button 
+                  <button
                     onClick={() => setActiveDropdown(activeDropdown === 'genres-desktop' ? null : 'genres-desktop')}
-                    className="flex items-center text-sm font-medium hover:text-orange-500 transition-colors whitespace-nowrap"
+                    className={`flex items-center whitespace-nowrap cursor-pointer ${navLinkClass}`}
                   >
                     Thể Loại
-                    <ChevronDown size={14} className="ml-1" />
+                    <ChevronDown size={14} className={`ml-1 transition-transform duration-200 ${activeDropdown === 'genres-desktop' ? 'rotate-180' : ''}`} />
                   </button>
                   {activeDropdown === 'genres-desktop' && (
                     <>
-                      <div 
+                      <div
                         className="fixed inset-0 z-[99998]"
                         onClick={() => setActiveDropdown(null)}
                       />
-                      <div 
-                        className="fixed bg-gray-900 rounded-lg shadow-2xl w-96 border border-gray-800 z-[99999] right-4"
+                      <div
+                        className="fixed glass-panel rounded-2xl shadow-cinema-lg w-96 z-[99999] right-4 animate-scale-in"
                         style={{ top: '64px' }}
                       >
                         <div className="p-4 grid grid-cols-3 gap-2 max-h-96 overflow-y-auto scrollbar-hide">
@@ -143,7 +146,7 @@ const Navbar = () => {
                               key={genre.slug}
                               to={genre.fullPath}
                               onClick={() => setActiveDropdown(null)}
-                              className="px-3 py-2 bg-black hover:bg-orange-500 rounded-lg text-sm transition-all text-center border border-gray-800"
+                              className={dropdownItemClass}
                             >
                               {genre.name}
                             </Link>
@@ -156,21 +159,21 @@ const Navbar = () => {
 
                 {/* Quốc gia Dropdown */}
                 <div className="relative">
-                  <button 
+                  <button
                     onClick={() => setActiveDropdown(activeDropdown === 'countries-desktop' ? null : 'countries-desktop')}
-                    className="flex items-center text-sm font-medium hover:text-orange-500 transition-colors whitespace-nowrap"
+                    className={`flex items-center whitespace-nowrap cursor-pointer ${navLinkClass}`}
                   >
                     Quốc Gia
-                    <ChevronDown size={14} className="ml-1" />
+                    <ChevronDown size={14} className={`ml-1 transition-transform duration-200 ${activeDropdown === 'countries-desktop' ? 'rotate-180' : ''}`} />
                   </button>
                   {activeDropdown === 'countries-desktop' && (
                     <>
-                      <div 
+                      <div
                         className="fixed inset-0 z-[99998]"
                         onClick={() => setActiveDropdown(null)}
                       />
-                      <div 
-                        className="fixed bg-gray-900 rounded-lg shadow-2xl w-96 border border-gray-800 z-[99999] right-4"
+                      <div
+                        className="fixed glass-panel rounded-2xl shadow-cinema-lg w-96 z-[99999] right-4 animate-scale-in"
                         style={{ top: '64px' }}
                       >
                         <div className="p-4 grid grid-cols-3 gap-2 max-h-96 overflow-y-auto scrollbar-hide">
@@ -179,7 +182,7 @@ const Navbar = () => {
                               key={country.slug}
                               to={country.fullPath}
                               onClick={() => setActiveDropdown(null)}
-                              className="px-3 py-2 bg-black hover:bg-orange-500 rounded-lg text-sm transition-all text-center border border-gray-800"
+                              className={dropdownItemClass}
                             >
                               {country.name}
                             </Link>
@@ -192,21 +195,21 @@ const Navbar = () => {
 
                 {/* Năm Dropdown */}
                 <div className="relative">
-                  <button 
+                  <button
                     onClick={() => setActiveDropdown(activeDropdown === 'years-desktop' ? null : 'years-desktop')}
-                    className="flex items-center text-sm font-medium hover:text-orange-500 transition-colors whitespace-nowrap"
+                    className={`flex items-center whitespace-nowrap cursor-pointer ${navLinkClass}`}
                   >
                     Năm
-                    <ChevronDown size={14} className="ml-1" />
+                    <ChevronDown size={14} className={`ml-1 transition-transform duration-200 ${activeDropdown === 'years-desktop' ? 'rotate-180' : ''}`} />
                   </button>
                   {activeDropdown === 'years-desktop' && (
                     <>
-                      <div 
+                      <div
                         className="fixed inset-0 z-[99998]"
                         onClick={() => setActiveDropdown(null)}
                       />
-                      <div 
-                        className="fixed bg-gray-900 rounded-lg shadow-2xl w-80 max-h-96 overflow-y-auto scrollbar-hide border border-gray-800 z-[99999] right-4"
+                      <div
+                        className="fixed glass-panel rounded-2xl w-80 max-h-96 overflow-y-auto scrollbar-hide shadow-cinema-lg z-[99999] right-4 animate-scale-in"
                         style={{ top: '64px' }}
                       >
                         <div className="p-4 grid grid-cols-4 gap-2">
@@ -215,7 +218,7 @@ const Navbar = () => {
                               key={year.slug}
                               to={year.fullPath}
                               onClick={() => setActiveDropdown(null)}
-                              className="px-2 py-2 bg-black hover:bg-orange-500 rounded-lg text-sm transition-all text-center border border-gray-800"
+                              className={dropdownItemClass}
                             >
                               {year.name}
                             </Link>
@@ -234,7 +237,7 @@ const Navbar = () => {
                 <div className="relative">
                   <button
                     onClick={() => showHistory ? setShowHistory(false) : openHistory()}
-                    className="p-2 hover:text-orange-500 transition-colors"
+                    className="p-2 text-ink-secondary hover:text-brand-hover transition-colors duration-200 cursor-pointer rounded-full hover:bg-white/5"
                     title="Lịch sử xem"
                   >
                     <History size={20} />
@@ -243,20 +246,20 @@ const Navbar = () => {
                   {showHistory && (
                     <>
                       <div className="fixed inset-0 z-40" onClick={() => setShowHistory(false)} />
-                      <div className="absolute right-0 mt-2 w-80 bg-gray-900 rounded-xl shadow-2xl z-50 border border-gray-800 overflow-hidden top-full">
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
-                          <span className="text-sm font-semibold text-white">Xem gần đây</span>
+                      <div className="absolute right-0 mt-2 w-80 glass-panel rounded-2xl shadow-cinema-lg z-50 overflow-hidden top-full animate-scale-in">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-subtle">
+                          <span className="text-sm font-semibold text-ink-primary">Xem gần đây</span>
                           <Link
                             to="/history"
                             onClick={() => setShowHistory(false)}
-                            className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
+                            className="text-xs text-brand-hover hover:text-brand transition-colors duration-200 cursor-pointer"
                           >
                             Xem tất cả →
                           </Link>
                         </div>
 
                         {historyItems.length === 0 ? (
-                          <div className="py-10 text-center text-gray-500 text-sm">
+                          <div className="py-10 text-center text-ink-muted text-sm">
                             Chưa có lịch sử xem
                           </div>
                         ) : (
@@ -264,10 +267,10 @@ const Navbar = () => {
                             {historyItems.map(item => (
                               <div
                                 key={item.slug}
-                                className="group flex items-center gap-3 px-3 py-2.5 hover:bg-gray-800 cursor-pointer transition-colors"
+                                className="group flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 cursor-pointer transition-colors duration-200"
                                 onClick={() => { navigate(`/movie/${item.slug}`); setShowHistory(false); }}
                               >
-                                <div className="relative flex-shrink-0 w-10 h-14 rounded overflow-hidden bg-gray-800">
+                                <div className="relative flex-shrink-0 w-10 h-14 rounded-lg overflow-hidden bg-base-elevated">
                                   <img
                                     src={getSafeImageUrl(item.poster, item.title)}
                                     alt={item.title}
@@ -279,11 +282,11 @@ const Navbar = () => {
                                   </div>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-white text-sm font-medium truncate">{item.title}</p>
+                                  <p className="text-ink-primary text-sm font-medium truncate">{item.title}</p>
                                   {item.lastEpisodeName && (
-                                    <p className="text-orange-400 text-xs truncate">{item.lastEpisodeName}</p>
+                                    <p className="text-brand-hover text-xs truncate">{item.lastEpisodeName}</p>
                                   )}
-                                  <p className="text-gray-500 text-xs mt-0.5">
+                                  <p className="text-ink-muted text-xs mt-0.5">
                                     {item.timestamp ? (() => {
                                       const diff = Date.now() - item.timestamp;
                                       const m = Math.floor(diff / 60000);
@@ -297,7 +300,7 @@ const Navbar = () => {
                                 </div>
                                 <button
                                   onClick={(e) => handleRemoveHistory(e, item.slug)}
-                                  className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-600/30 hover:text-red-400 text-gray-600 rounded transition-all flex-shrink-0"
+                                  className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-brand/20 hover:text-brand-hover text-ink-muted rounded-full transition-all duration-200 flex-shrink-0 cursor-pointer"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
@@ -314,7 +317,7 @@ const Navbar = () => {
                 <div className="lg:hidden relative">
                   <button
                     onClick={() => setShowSearchDropdown(!showSearchDropdown)}
-                    className="p-2 hover:text-orange-500 transition-colors"
+                    className="p-2 text-ink-secondary hover:text-brand-hover transition-colors duration-200 cursor-pointer rounded-full hover:bg-white/5"
                   >
                     <Search size={20} />
                   </button>
@@ -326,22 +329,22 @@ const Navbar = () => {
                         onClick={() => setShowSearchDropdown(false)}
                       />
                       <div
-                        className="absolute right-0 mt-2 w-72 bg-gray-900 rounded-xl shadow-2xl z-50 border border-gray-800 p-3"
+                        className="absolute right-0 mt-2 w-72 glass-panel rounded-2xl shadow-cinema-lg z-50 p-3 animate-scale-in"
                       >
                         <form onSubmit={handleSearch}>
                           <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" size={15} />
                             <input
                               type="text"
                               value={searchInput}
                               onChange={(e) => setSearchInput(e.target.value)}
                               placeholder="Nhập tên phim..."
-                              className="w-full bg-black text-white pl-9 pr-16 py-2 rounded-lg border border-gray-700 focus:border-orange-500 outline-none text-sm"
+                              className="w-full bg-white/5 text-ink-primary placeholder:text-ink-muted pl-9 pr-16 py-2 rounded-full border border-subtle focus:border-brand outline-none text-sm transition-colors duration-200"
                               autoFocus
                             />
                             <button
                               type="submit"
-                              className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-md text-xs font-medium transition-all"
+                              className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-brand hover:bg-brand-hover text-white px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 cursor-pointer"
                             >
                               Tìm
                             </button>
@@ -351,39 +354,39 @@ const Navbar = () => {
                     </>
                   )}
                 </div>
-                
+
                 {/* Search Icon - Desktop */}
                 <div className="hidden lg:block relative">
                   <button
                     onClick={() => setShowSearchDropdown(!showSearchDropdown)}
-                    className="p-2 hover:text-orange-500 transition-colors"
+                    className="p-2 text-ink-secondary hover:text-brand-hover transition-colors duration-200 cursor-pointer rounded-full hover:bg-white/5"
                     title="Tìm kiếm"
                   >
                     <Search size={20} />
                   </button>
-                  
+
                   {showSearchDropdown && (
                     <>
-                      <div 
-                        className="fixed inset-0 z-40" 
+                      <div
+                        className="fixed inset-0 z-40"
                         onClick={() => setShowSearchDropdown(false)}
                       />
-                      <div className="absolute right-0 mt-2 w-80 bg-gray-900 rounded-lg shadow-2xl z-50 border border-gray-800 p-4 top-full">
+                      <div className="absolute right-0 mt-2 w-80 glass-panel rounded-2xl shadow-cinema-lg z-50 p-4 top-full animate-scale-in">
                         <form onSubmit={handleSearch}>
                           <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-ink-muted" size={18} />
                             <input
                               type="text"
                               value={searchInput}
                               onChange={(e) => setSearchInput(e.target.value)}
                               placeholder="Nhập tên phim..."
-                              className="w-full bg-black text-white pl-10 pr-4 py-2.5 rounded-lg border border-gray-800 focus:border-orange-500 outline-none transition-all"
+                              className="w-full bg-white/5 text-ink-primary placeholder:text-ink-muted pl-10 pr-4 py-2.5 rounded-full border border-subtle focus:border-brand outline-none transition-colors duration-200"
                               autoFocus
                             />
                           </div>
                           <button
                             type="submit"
-                            className="w-full mt-3 bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-lg font-medium transition-all"
+                            className="w-full mt-3 bg-brand hover:bg-brand-hover text-white py-2.5 rounded-full font-semibold transition-all duration-200 cursor-pointer shadow-cinema"
                           >
                             Tìm kiếm
                           </button>
@@ -396,7 +399,7 @@ const Navbar = () => {
                 {/* Filter Icon - Desktop */}
                 <button
                   onClick={() => setShowFilterModal(true)}
-                  className="hidden lg:block p-2 hover:text-orange-500 transition-colors"
+                  className="hidden lg:block p-2 text-ink-secondary hover:text-brand-hover transition-colors duration-200 cursor-pointer rounded-full hover:bg-white/5"
                   title="Bộ lọc"
                 >
                   <Filter size={20} />
@@ -405,7 +408,7 @@ const Navbar = () => {
                 {/* Mobile Menu Button */}
                 <button
                   onClick={toggleMenu}
-                  className="lg:hidden p-2 hover:text-orange-500 transition-colors"
+                  className="lg:hidden p-2 text-ink-secondary hover:text-brand-hover transition-colors duration-200 cursor-pointer rounded-full hover:bg-white/5"
                 >
                   {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
@@ -419,18 +422,18 @@ const Navbar = () => {
         {/* Mobile Menu */}
         <div className={`lg:hidden fixed inset-0 z-50 transition-all duration-300 ${isMenuOpen ? 'visible' : 'invisible'}`}>
           <div
-            className={`absolute inset-0 bg-black transition-opacity duration-300 ${isMenuOpen ? 'opacity-70' : 'opacity-0'}`}
+            className={`absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'}`}
             onClick={toggleMenu}
           />
 
-          <div className={`absolute left-0 top-0 h-full w-80 bg-black shadow-2xl transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} border-r border-gray-800`}>
+          <div className={`absolute left-0 top-0 h-full w-80 bg-black shadow-cinema-lg transform transition-transform duration-300 ease-out ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} border-r border-subtle`}>
 
-            <div className="flex items-center justify-between p-4 border-b border-gray-800">
-              <h2 className="text-xl font-bold">
-                <span className="text-orange-500">DMT</span>
-                <span className="text-blue-400">Movie</span>
+            <div className="flex items-center justify-between p-4 border-b border-subtle">
+              <h2 className="text-xl font-extrabold tracking-tight">
+                <span className="text-brand">DMT</span>
+                <span className="text-ink-primary">Movie</span>
               </h2>
-              <button onClick={toggleMenu} className="p-2 hover:text-orange-500 transition-colors">
+              <button onClick={toggleMenu} className="p-2 text-ink-secondary hover:text-brand-hover transition-colors duration-200 cursor-pointer rounded-full hover:bg-white/5">
                 <X size={20} />
               </button>
             </div>
@@ -441,32 +444,32 @@ const Navbar = () => {
               <div className="space-y-2">
                 {/* Grid 2 cột cho mobile */}
                 <div className="grid grid-cols-2 gap-2">
-                  <Link to="/category/danh-sach/phim-bo" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
+                  <Link to="/category/danh-sach/phim-bo" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-white/5 hover:bg-white/10 hover:text-brand-hover rounded-xl transition-all duration-200 text-center border border-subtle cursor-pointer">
                     Phim Bộ
                   </Link>
-                  <Link to="/category/danh-sach/phim-le" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
+                  <Link to="/category/danh-sach/phim-le" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-white/5 hover:bg-white/10 hover:text-brand-hover rounded-xl transition-all duration-200 text-center border border-subtle cursor-pointer">
                     Phim Lẻ
                   </Link>
-                  <Link to="/category/danh-sach/phim-chieu-rap" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
+                  <Link to="/category/danh-sach/phim-chieu-rap" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-white/5 hover:bg-white/10 hover:text-brand-hover rounded-xl transition-all duration-200 text-center border border-subtle cursor-pointer">
                     Phim Chiếu Rạp
                   </Link>
-                  <Link to="/category/danh-sach/hoat-hinh" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
+                  <Link to="/category/danh-sach/hoat-hinh" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-white/5 hover:bg-white/10 hover:text-brand-hover rounded-xl transition-all duration-200 text-center border border-subtle cursor-pointer">
                     Hoạt Hình
                   </Link>
-                  <Link to="/category/danh-sach/phim-vietsub" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
+                  <Link to="/category/danh-sach/phim-vietsub" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-white/5 hover:bg-white/10 hover:text-brand-hover rounded-xl transition-all duration-200 text-center border border-subtle cursor-pointer">
                     Vietsub
                   </Link>
-                  <Link to="/category/danh-sach/phim-thuyet-minh" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
+                  <Link to="/category/danh-sach/phim-thuyet-minh" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-white/5 hover:bg-white/10 hover:text-brand-hover rounded-xl transition-all duration-200 text-center border border-subtle cursor-pointer">
                     Thuyết Minh
                   </Link>
-                  <Link to="/category/danh-sach/phim-long-tieng" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
+                  <Link to="/category/danh-sach/phim-long-tieng" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-white/5 hover:bg-white/10 hover:text-brand-hover rounded-xl transition-all duration-200 text-center border border-subtle cursor-pointer">
                     Lồng Tiếng
                   </Link>
                 </div>
 
                 <button
                   onClick={() => setShowFilterModal(true)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-all mt-4"
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-brand hover:bg-brand-hover text-white rounded-full font-semibold transition-all duration-200 mt-4 cursor-pointer shadow-cinema active:scale-95"
                 >
                   <Filter className="w-4 h-4" />
                   Bộ lọc nâng cao
@@ -476,13 +479,13 @@ const Navbar = () => {
                   <div>
                     <button
                       onClick={() => toggleDropdown('genres')}
-                      className="flex items-center justify-between w-full px-4 py-3 text-base font-medium hover:bg-gray-900 hover:text-orange-500 rounded-lg transition-all"
+                      className="flex items-center justify-between w-full px-4 py-3 text-base font-medium text-ink-secondary hover:bg-white/5 hover:text-brand-hover rounded-xl transition-all duration-200 cursor-pointer"
                     >
                       <span>Thể Loại</span>
                       <ChevronDown size={18} className={`transition-transform duration-200 ${activeDropdown === 'genres' ? 'rotate-180' : ''}`} />
                     </button>
                     <div className={`overflow-hidden transition-all duration-300 ${activeDropdown === 'genres' ? 'max-h-64' : 'max-h-0'}`}>
-                      <div className="mt-2 p-2 bg-gray-900 rounded-lg">
+                      <div className="mt-2 p-2 bg-white/5 rounded-xl border border-subtle">
                         <div className="max-h-48 overflow-y-auto scrollbar-hide">
                           <div className="grid grid-cols-2 gap-2">
                             {displayGenres.map(genre => (
@@ -490,7 +493,7 @@ const Navbar = () => {
                                 key={genre.slug}
                                 to={genre.fullPath}
                                 onClick={toggleMenu}
-                                className="block px-2 py-2 text-sm text-gray-300 hover:bg-orange-500 hover:text-white rounded-lg transition-all text-center"
+                                className="block px-2 py-2 text-sm text-ink-secondary hover:bg-brand hover:text-white rounded-lg transition-all duration-200 text-center cursor-pointer"
                               >
                                 {genre.name}
                               </Link>
@@ -504,13 +507,13 @@ const Navbar = () => {
                   <div>
                     <button
                       onClick={() => toggleDropdown('countries')}
-                      className="flex items-center justify-between w-full px-4 py-3 text-base font-medium hover:bg-gray-900 hover:text-orange-500 rounded-lg transition-all"
+                      className="flex items-center justify-between w-full px-4 py-3 text-base font-medium text-ink-secondary hover:bg-white/5 hover:text-brand-hover rounded-xl transition-all duration-200 cursor-pointer"
                     >
                       <span>Quốc Gia</span>
                       <ChevronDown size={18} className={`transition-transform duration-200 ${activeDropdown === 'countries' ? 'rotate-180' : ''}`} />
                     </button>
                     <div className={`overflow-hidden transition-all duration-300 ${activeDropdown === 'countries' ? 'max-h-64' : 'max-h-0'}`}>
-                      <div className="mt-2 p-2 bg-gray-900 rounded-lg">
+                      <div className="mt-2 p-2 bg-white/5 rounded-xl border border-subtle">
                         <div className="max-h-48 overflow-y-auto scrollbar-hide">
                           <div className="grid grid-cols-2 gap-2">
                             {displayCountries.map(country => (
@@ -518,7 +521,7 @@ const Navbar = () => {
                                 key={country.slug}
                                 to={country.fullPath}
                                 onClick={toggleMenu}
-                                className="block px-2 py-2 text-sm text-gray-300 hover:bg-orange-500 hover:text-white rounded-lg transition-all text-center"
+                                className="block px-2 py-2 text-sm text-ink-secondary hover:bg-brand hover:text-white rounded-lg transition-all duration-200 text-center cursor-pointer"
                               >
                                 {country.name}
                               </Link>
@@ -532,7 +535,7 @@ const Navbar = () => {
                   <div>
                     <button
                       onClick={() => toggleDropdown('years')}
-                      className="flex items-center justify-between w-full px-4 py-3 text-base font-medium hover:bg-gray-900 hover:text-orange-500 rounded-lg transition-all"
+                      className="flex items-center justify-between w-full px-4 py-3 text-base font-medium text-ink-secondary hover:bg-white/5 hover:text-brand-hover rounded-xl transition-all duration-200 cursor-pointer"
                     >
                       <span>Năm Phát Hành</span>
                       <ChevronDown size={18} className={`transition-transform duration-200 ${activeDropdown === 'years' ? 'rotate-180' : ''}`} />
@@ -545,7 +548,7 @@ const Navbar = () => {
                               key={year.slug}
                               to={year.fullPath}
                               onClick={toggleMenu}
-                              className="block px-2 py-2 text-sm text-gray-300 hover:bg-orange-500 hover:text-white rounded-lg transition-all text-center"
+                              className="block px-2 py-2 text-sm text-ink-secondary hover:bg-brand hover:text-white rounded-lg transition-all duration-200 text-center cursor-pointer"
                             >
                               {year.name}
                             </Link>
@@ -561,7 +564,7 @@ const Navbar = () => {
         </div>
       </nav>
 
-      <FilterModal 
+      <FilterModal
         isOpen={showFilterModal}
         onClose={() => setShowFilterModal(false)}
         onApplyFilter={handleApplyFilter}

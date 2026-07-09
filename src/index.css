@@ -8,13 +8,25 @@
     font-family: 'Inter', system-ui, sans-serif;
     /* Smooth scrolling */
     scroll-behavior: smooth;
+    color-scheme: dark;
   }
   body {
-    color: #1a202c; 
-    background-color: #f9fafb;
+    color: #F8FAFC;
+    background-color: #000000;
     /* Hardware acceleration */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background-color: rgba(225, 29, 72, 0.35);
+    color: #F8FAFC;
+  }
+
+  :focus-visible {
+    outline: 2px solid #E11D48;
+    outline-offset: 2px;
+    border-radius: 4px;
   }
   
   /* Optimize video rendering — only when playing, not on load */
@@ -55,7 +67,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  
+
   /* Performance optimization */
   .gpu-accelerated {
     transform: translateZ(0);
@@ -64,6 +76,19 @@
     -webkit-backface-visibility: hidden;
     perspective: 1000px;
     -webkit-perspective: 1000px;
+  }
+
+  /* Cinematic glass surface used by dropdowns, modals, toasts */
+  .glass-panel {
+    background-color: rgba(20, 20, 31, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Bottom-fade legibility scrim for posters/hero images */
+  .poster-scrim {
+    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.55) 35%, rgba(0,0,0,0.05) 70%, transparent 100%);
   }
 }
 

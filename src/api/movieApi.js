@@ -6,12 +6,11 @@ export const movieApi = {
     return data;
   },
 
-  getLatestMovies: (page = 2) =>
-    apiRequest(`/danh-sach/phim-moi-cap-nhat-v3?page=${page}`),
+  getLatestMovies: (page = 2) => apiRequest(`/v1/api/home?page=${page}`),
 
   // Dùng apiRequest để dedup với getLatestMovies page=1
   getFeaturedMovies: async () => {
-    const data = await apiRequest("/danh-sach/phim-moi-cap-nhat-v3?page=1");
+    const data = await apiRequest("/v1/api/home?page=1");
     return {
       ...data,
       data: { ...data.data, items: data.data?.items?.slice(0, 5) ?? [] },
@@ -31,10 +30,10 @@ export const movieApi = {
         endpoint = `/v1/api/nam/${categorySlug}?page=${page}`;
         break;
       case "danh-sach":
-        // phim-moi-cap-nhat dùng endpoint v3 khác
+        // phim-moi-cap-nhat dùng endpoint home riêng
         endpoint =
           categorySlug === "phim-moi-cap-nhat"
-            ? `/danh-sach/phim-moi-cap-nhat-v3?page=${page}`
+            ? `/v1/api/home?page=${page}`
             : `/v1/api/danh-sach/${categorySlug}?page=${page}`;
         break;
       default:
@@ -80,11 +79,15 @@ export const movieApi = {
 
   getAllGenres: async () => {
     const data = await apiRequest("/the-loai");
-    return Array.isArray(data) ? data : [];
+    if (Array.isArray(data)) return data;
+    return data?.data?.items || [];
   },
 
   getAllCountries: async () => {
     const data = await apiRequest("/quoc-gia");
-    return Array.isArray(data) ? data : [];
+    if (Array.isArray(data)) return data;
+    return data?.data?.items || [];
   },
+
+  getMovieImages: (slug) => apiRequest(`/v1/api/phim/${slug}/images`),
 };

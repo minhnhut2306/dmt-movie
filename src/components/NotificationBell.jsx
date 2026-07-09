@@ -72,12 +72,12 @@ const NotificationBell = () => {
       {/* Bell icon */}
       <button
         onClick={handleOpen}
-        className="relative p-1.5 hover:bg-gray-700 rounded-md transition-colors"
+        className="relative p-2 hover:bg-white/10 rounded-full transition-colors duration-200 cursor-pointer"
         aria-label="Thông báo"
       >
-        <Bell size={19} className={open ? "text-orange-400" : "text-gray-300"} />
+        <Bell size={19} className={open ? "text-brand-hover" : "text-ink-secondary"} />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-orange-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 animate-pulse">
+          <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-brand text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 animate-pulse">
             {unreadCount}
           </span>
         )}
@@ -89,17 +89,17 @@ const NotificationBell = () => {
           className="fixed right-2 top-12 sm:top-14 lg:top-[72px] z-[999] animate-slide-up"
           style={{ width: "min(340px, calc(100vw - 16px))" }}
         >
-          <div className="bg-[#12171f] border border-white/10 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="glass-panel rounded-2xl shadow-cinema-lg overflow-hidden">
 
             {/* Header */}
-            <div className="flex items-center justify-between px-3 py-2.5 border-b border-white/5">
+            <div className="flex items-center justify-between px-3 py-2.5 border-b border-subtle">
               <div className="flex items-center gap-1.5">
-                <Bell size={13} className="text-orange-400" />
-                <span className="text-white text-sm font-semibold">Thông báo</span>
+                <Bell size={13} className="text-brand-hover" />
+                <span className="text-ink-primary text-sm font-semibold">Thông báo</span>
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="p-1 hover:bg-white/10 rounded-lg transition-colors text-gray-500 hover:text-white"
+                className="p-1 hover:bg-white/10 rounded-full transition-colors duration-200 text-ink-muted hover:text-ink-primary cursor-pointer"
               >
                 <X size={14} />
               </button>
@@ -109,23 +109,23 @@ const NotificationBell = () => {
             <div className="divide-y divide-white/5">
               {notifications.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-                  <Bell size={28} className="text-gray-600 mb-2" />
-                  <p className="text-gray-500 text-xs">Hiện tại chưa có thông báo nào.</p>
+                  <Bell size={28} className="text-ink-muted mb-2" />
+                  <p className="text-ink-muted text-xs">Hiện tại chưa có thông báo nào.</p>
                 </div>
               )}
 
               {/* 1. Auto skip ads */}
               <div className="p-3">
                 <div className="flex gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-green-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Sparkles size={15} className="text-green-400" />
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Sparkles size={15} className="text-emerald-400" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="text-white font-semibold text-xs">Tự động bỏ qua quảng cáo!</p>
-                      <span className="bg-green-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0">MỚI</span>
+                      <p className="text-ink-primary font-semibold text-xs">Tự động bỏ qua quảng cáo!</p>
+                      <span className="bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0">MỚI</span>
                     </div>
-                    <p className="text-gray-400 text-[11px] leading-relaxed">
+                    <p className="text-ink-muted text-[11px] leading-relaxed">
                       DMT Movie giờ tự động phát hiện và bỏ qua quảng cáo trong video, không cần bấm gì thêm.
                     </p>
                   </div>
@@ -141,16 +141,16 @@ const NotificationBell = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="text-white font-semibold text-xs">Đã có ứng dụng cho điện thoại!</p>
+                        <p className="text-ink-primary font-semibold text-xs">Đã có ứng dụng cho điện thoại!</p>
                       </div>
-                      <p className="text-gray-400 text-[11px] leading-relaxed mb-2">
+                      <p className="text-ink-muted text-[11px] leading-relaxed mb-2">
                         Cài DMT Movie lên điện thoại để xem phim nhanh hơn, không cần mở trình duyệt.
                       </p>
 
                       {/* Nút cài — Android cài thẳng, iOS hiện popup */}
                       <button
                         onClick={isIOS ? () => setShowIOSGuide(true) : handleInstall}
-                        className="w-full flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-500 active:scale-95 text-white text-[11px] font-semibold px-3 py-2 rounded-lg transition-all"
+                        className="w-full flex items-center justify-center gap-1.5 bg-sky-600 hover:bg-sky-500 active:scale-95 text-white text-[11px] font-semibold px-3 py-2 rounded-full transition-all duration-200 cursor-pointer"
                       >
                         <Download size={12} />
                         Ấn vào đây để cài đặt
@@ -158,12 +158,12 @@ const NotificationBell = () => {
 
                       {/* iOS popup hướng dẫn */}
                       {isIOS && showIOSGuide && (
-                        <div className="mt-2 bg-white/5 border border-white/10 rounded-lg p-2.5 flex items-start gap-2">
-                          <Share2 size={13} className="text-blue-400 flex-shrink-0 mt-0.5" />
-                          <p className="text-[11px] text-gray-300 leading-relaxed">
-                            Nhấn <span className="text-blue-400 font-medium">Chia sẻ</span>{" "}
+                        <div className="mt-2 bg-white/5 border border-subtle rounded-xl p-2.5 flex items-start gap-2">
+                          <Share2 size={13} className="text-sky-400 flex-shrink-0 mt-0.5" />
+                          <p className="text-[11px] text-ink-secondary leading-relaxed">
+                            Nhấn <span className="text-sky-400 font-medium">Chia sẻ</span>{" "}
                             ở thanh dưới → chọn{" "}
-                            <span className="text-orange-400 font-medium">"Thêm vào màn hình chính"</span>
+                            <span className="text-brand-hover font-medium">"Thêm vào màn hình chính"</span>
                           </p>
                         </div>
                       )}
@@ -176,21 +176,21 @@ const NotificationBell = () => {
               {/* 2. V2 Release */}
               <div className="p-3">
                 <div className="flex gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-yellow-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Sparkles size={15} className="text-yellow-400" />
+                  <div className="w-8 h-8 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Sparkles size={15} className="text-gold-light" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-semibold text-xs mb-1">
+                    <p className="text-ink-primary font-semibold text-xs mb-1">
                       DMT Movie {LATEST_VERSION.label} đã ra mắt!
                     </p>
-                    <p className="text-gray-400 text-[11px] leading-relaxed mb-2">
+                    <p className="text-ink-muted text-[11px] leading-relaxed mb-2">
                       {LATEST_VERSION.message}
                     </p>
                     <a
                       href={LATEST_VERSION.v2Url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 bg-orange-500 hover:bg-orange-400 active:scale-95 text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg transition-all"
+                      className="inline-flex items-center gap-1.5 bg-brand hover:bg-brand-hover active:scale-95 text-white text-[11px] font-semibold px-3 py-1.5 rounded-full transition-all duration-200 cursor-pointer"
                     >
                       <Sparkles size={11} />
                       Chuyển sang {LATEST_VERSION.label}

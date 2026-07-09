@@ -35,15 +35,14 @@ const FilterPage = () => {
       } else if (year) {
         endpoint = `/v1/api/nam/${year}`;
       } else {
-        // Fix: Dùng endpoint v3 đúng
-        endpoint = '/danh-sach/phim-moi-cap-nhat-v3';
+        endpoint = '/v1/api/home';
       }
 
       const params = new URLSearchParams();
       params.append('page', currentPage);
-      
-      // Chỉ thêm sort params cho endpoint v3
-      if (endpoint.includes('phim-moi-cap-nhat-v3')) {
+
+      // Chỉ thêm sort params cho endpoint home
+      if (endpoint.includes('v1/api/home')) {
         if (sortField) params.append('sort_field', sortField);
         if (sortType) params.append('sort_type', sortType);
       }
@@ -70,7 +69,7 @@ const FilterPage = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 pt-8">
+      <div className="min-h-screen bg-black pt-8">
         <div className="container mx-auto px-4">
           <LoadingState variant="grid" count={24} />
         </div>
@@ -80,9 +79,9 @@ const FilterPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-900 pt-8">
+      <div className="min-h-screen bg-black pt-8">
         <div className="container mx-auto px-4">
-          <ErrorState 
+          <ErrorState
             message="Không thể tải kết quả lọc"
             onRetry={refetch}
           />
@@ -96,13 +95,13 @@ const FilterPage = () => {
 
   if (movies.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-900 pt-8">
+      <div className="min-h-screen bg-black pt-8">
         <div className="container mx-auto px-4">
           <div className="flex items-center gap-3 mb-8">
-            <Filter className="w-8 h-8 text-blue-500" />
-            <h1 className="text-3xl font-bold text-white">{getFilterTitle()}</h1>
+            <Filter className="w-8 h-8 text-brand-hover" />
+            <h1 className="text-3xl font-bold text-ink-primary tracking-tight">{getFilterTitle()}</h1>
           </div>
-          <EmptyState 
+          <EmptyState
             variant="movies"
             message="Không tìm thấy phim nào phù hợp với bộ lọc của bạn"
           />
@@ -112,23 +111,23 @@ const FilterPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 pt-8 pb-12">
+    <div className="min-h-screen bg-black pt-8 pb-12">
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="p-3 bg-blue-600 rounded-lg">
+          <div className="p-3 bg-brand rounded-2xl shadow-cinema">
             <Filter className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-white">{getFilterTitle()}</h1>
-            <p className="text-gray-400 mt-1">
+            <h1 className="text-3xl font-bold text-ink-primary tracking-tight">{getFilterTitle()}</h1>
+            <p className="text-ink-secondary mt-1">
               Tìm thấy {pagination.totalItems || movies.length} phim
             </p>
           </div>
         </div>
 
         {/* Movie Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4 mb-8">
           {movies.map(movie => (
             <UnifiedMovieCard 
               key={movie._id || movie.slug}

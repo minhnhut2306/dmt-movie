@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useQueries } from '@tanstack/react-query';
 import { Play, Star, Calendar, Clock, Loader2 } from 'lucide-react';
 import { useFeaturedMovies } from '../../hooks/useMovies';
-import { getSafeImageUrl } from '../../utils/imageHelper.js';
+import { movieApi } from '../../api';
+import { getSafeImageUrl, getBackdropUrl } from '../../utils/imageHelper.js';
 
 const HeroBanner = ({
   isDragging,
@@ -26,10 +28,11 @@ const HeroBanner = ({
   const { data, isLoading, error: queryError } = useFeaturedMovies();
 
   // Transform data
-  const featuredMovies = React.useMemo(() => {
-    if (!data?.items) return [];
-    
-    return data.items.slice(0, 5).map(movie => ({
+  const baseFeaturedMovies = React.useMemo(() => {
+    const items = data?.data?.items || data?.items;
+    if (!items) return [];
+
+    return items.slice(0, 5).map(movie => ({
       id: movie._id,
       title: movie.name,
       description: movie.origin_name,
@@ -48,6 +51,26 @@ const HeroBanner = ({
       slug: movie.slug
     }));
   }, [data]);
+
+  // Ảnh backdrop rộng (chất lượng cao hơn poster dọc) riêng cho Hero Banner
+  const backdropQueries = useQueries({
+    queries: baseFeaturedMovies.map((movie) => ({
+      queryKey: ['movie-images', movie.slug],
+      queryFn: () => movieApi.getMovieImages(movie.slug),
+      enabled: !!movie.slug,
+      staleTime: 60 * 60 * 1000,
+      gcTime: 24 * 60 * 60 * 1000,
+      retry: 1,
+    })),
+  });
+
+  const featuredMovies = React.useMemo(() => {
+    return baseFeaturedMovies.map((movie, idx) => {
+      const backdropUrl = getBackdropUrl(backdropQueries[idx]?.data);
+      return backdropUrl ? { ...movie, backgroundImage: backdropUrl } : movie;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseFeaturedMovies, backdropQueries]);
 
   // Auto-slide functionality
   useEffect(() => {
@@ -207,10 +230,10 @@ const HeroBanner = ({
 
   if (isLoading) {
     return (
-      <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-gray-800 flex items-center justify-center">
-        <div className="text-white text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-          <p>Đang tải phim...</p>
+      <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-base-elevated flex items-center justify-center">
+        <div className="text-ink-primary text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-brand" />
+          <p className="text-ink-secondary">Đang tải phim...</p>
         </div>
       </div>
     );
@@ -218,13 +241,13 @@ const HeroBanner = ({
 
   if (queryError) {
     return (
-      <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-gray-800 flex items-center justify-center">
-        <div className="text-white text-center">
-          <p className="text-red-400 mb-2">Lỗi tải dữ liệu</p>
-          <p className="text-gray-400 text-sm">{queryError.message}</p>
+      <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-base-elevated flex items-center justify-center">
+        <div className="text-ink-primary text-center">
+          <p className="text-brand-hover mb-2 font-semibold">Lỗi tải dữ liệu</p>
+          <p className="text-ink-muted text-sm">{queryError.message}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm"
+            className="mt-4 bg-brand hover:bg-brand-hover px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer shadow-cinema"
           >
             Thử lại
           </button>
@@ -234,8 +257,8 @@ const HeroBanner = ({
   }
   if (!featuredMovies || featuredMovies.length === 0) {
     return (
-      <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-gray-800 flex items-center justify-center">
-        <div className="text-white text-center">
+      <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-base-elevated flex items-center justify-center">
+        <div className="text-ink-secondary text-center">
           <p>Không có phim nổi bật</p>
         </div>
       </div>
@@ -265,7 +288,7 @@ const HeroBanner = ({
             className={`absolute inset-0 bg-cover bg-center transition-all duration-500 ease-out ${index === currentIndex ? 'opacity-100' : 'opacity-0'
               }`}
             style={{
-              backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('${movie.backgroundImage}')`,
+              backgroundImage: `linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.65) 35%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0.25) 100%), linear-gradient(to right, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 35%, rgba(0,0,0,0.15) 70%, rgba(0,0,0,0) 100%), url('${movie.backgroundImage}')`,
               transform: isDraggingLocal && dragDirection === 'horizontal' ? `translateX(${localDragOffset}px)` :
                 (isDragging && activeSection === 'hero') ? `translateX(${dragOffset}px)` :
                   'translateX(0)'
@@ -279,16 +302,16 @@ const HeroBanner = ({
           <button
             key={index}
             onClick={() => handleManualChange(index)}
-            className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 hover:scale-110 ${index === currentIndex ? 'bg-red-600' : 'bg-white/50 hover:bg-white/70'
+            className={`rounded-full transition-all duration-300 hover:scale-110 cursor-pointer ${index === currentIndex ? 'bg-brand w-6 h-2 sm:w-8 sm:h-2.5' : 'bg-white/40 hover:bg-white/60 w-2 h-2 sm:w-2.5 sm:h-2.5'
               }`}
           />
         ))}
       </div>
 
       {featuredMovies.length > 1 && (
-        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-white/20 rounded z-20">
+        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-white/15 rounded-full z-20 overflow-hidden">
           <div
-            className="h-full bg-red-600 rounded transition-all duration-100"
+            className="h-full bg-brand rounded-full transition-all duration-100"
             style={{
               width: intervalRef.current ? `${((10000 - timeRemaining) / 10000) * 100}%` : '0%'
             }}
@@ -305,59 +328,60 @@ const HeroBanner = ({
                 'translateX(0)',
             opacity: isDraggingLocal && dragDirection === 'horizontal' ? Math.max(0.7, 1 - Math.abs(localDragOffset) / 400) :
               (isDragging && activeSection === 'hero') ? Math.max(0.7, 1 - Math.abs(dragOffset) / 400) :
-                1
+                1,
+            textShadow: '0 2px 12px rgba(0,0,0,0.85), 0 1px 3px rgba(0,0,0,0.9)'
           }}
         >
-          <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4 transition-all duration-500 leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-extrabold mb-3 sm:mb-4 transition-all duration-500 leading-tight tracking-tight drop-shadow-lg">
             {currentFeaturedMovie.title}
           </h1>
 
-          <div className="flex items-center space-x-2 sm:space-x-4 mb-2 sm:mb-4 text-xs sm:text-sm">
+          <div className="flex items-center space-x-3 sm:space-x-4 mb-3 sm:mb-4 text-xs sm:text-sm text-ink-secondary">
             {currentFeaturedMovie.rating && (
-              <div className="flex items-center">
-                <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 mr-1" />
+              <div className="flex items-center text-gold-light">
+                <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 fill-current" />
                 <span className="font-semibold">{currentFeaturedMovie.rating}</span>
               </div>
             )}
             {currentFeaturedMovie.year && (
               <div className="flex items-center">
-                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
                 <span>{currentFeaturedMovie.year}</span>
               </div>
             )}
             {currentFeaturedMovie.duration && (
               <div className="flex items-center">
-                <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1" />
                 <span>{currentFeaturedMovie.duration}</span>
               </div>
             )}
           </div>
 
-          <div className="flex items-center space-x-2 mb-3 sm:mb-4 text-xs flex-wrap gap-1 sm:gap-2">
+          <div className="flex items-center space-x-2 mb-4 sm:mb-5 text-xs flex-wrap gap-1.5 sm:gap-2">
             {currentFeaturedMovie.quality && (
-              <span className="bg-red-600 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-xs font-semibold">
+              <span className="bg-brand px-2 py-1 rounded-full text-xs font-bold text-white">
                 {currentFeaturedMovie.quality}
               </span>
             )}
             {currentFeaturedMovie.language && (
-              <span className="bg-blue-600 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-xs font-semibold">
+              <span className="bg-white/10 border border-subtle px-2 py-1 rounded-full text-xs font-semibold text-ink-primary">
                 {currentFeaturedMovie.language}
               </span>
             )}
             {currentFeaturedMovie.type && (
-              <span className="text-gray-300 text-xs">
+              <span className="text-ink-secondary text-xs">
                 {currentFeaturedMovie.type}
               </span>
             )}
             {currentFeaturedMovie.episode && (
-              <span className="text-yellow-400 text-xs">
+              <span className="text-gold-light text-xs font-medium">
                 {currentFeaturedMovie.episode}
               </span>
             )}
           </div>
 
           {currentFeaturedMovie.description && (
-            <p className="text-xs sm:text-sm md:text-base mb-4 sm:mb-6 text-gray-200 leading-relaxed line-clamp-2 sm:line-clamp-3 transition-all duration-500">
+            <p className="text-xs sm:text-sm md:text-base mb-5 sm:mb-7 text-ink-secondary leading-relaxed line-clamp-2 sm:line-clamp-3 transition-all duration-500 max-w-lg">
               {currentFeaturedMovie.description}
             </p>
           )}
@@ -369,9 +393,9 @@ const HeroBanner = ({
                   window.location.href = `/movie/${currentFeaturedMovie.slug}`;
                 }
               }}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+              className="bg-brand hover:bg-brand-hover text-white px-6 sm:px-7 py-2.5 sm:py-3 rounded-full transition-all duration-200 text-sm font-semibold flex items-center gap-2 cursor-pointer shadow-cinema active:scale-95"
             >
-              <Play className="w-4 h-4" />
+              <Play className="w-4 h-4 fill-white" />
               Chi Tiết
             </button>
           </div>

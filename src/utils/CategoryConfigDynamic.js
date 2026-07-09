@@ -21,7 +21,7 @@ export const CATEGORY_TYPES = {
     title: "Danh Sách",
     apiEndpoint: (slug, page) => {
       if (slug === "phim-moi-cap-nhat") {
-        return `/danh-sach/phim-moi-cap-nhat-v3?page=${page}`;
+        return `/v1/api/home?page=${page}`;
       }
       return `/v1/api/danh-sach/${slug}?page=${page}`;
     },

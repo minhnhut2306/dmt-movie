@@ -139,9 +139,9 @@ const SearchInput = ({
   return (
     <div className={`relative ${className}`}>
       <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
-        <Search className="text-blue-400" size={20} />
+        <Search className="text-brand-hover" size={20} />
       </div>
-      
+
       <input
         ref={inputRef}
         type="text"
@@ -149,35 +149,35 @@ const SearchInput = ({
         onChange={handleInputChange}
         onKeyDown={handleKeyPress}
         placeholder={placeholder}
-        className={`bg-gray-800 text-white rounded-xl pl-11 pr-12 py-3 w-full outline-none transition-all text-sm lg:text-base border ${
-          isBlocked 
-            ? 'border-red-500 ring-2 ring-red-500/50 focus:ring-red-600 focus:border-red-600' 
-            : 'border-gray-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500'
-        } shadow-lg`}
+        className={`bg-white/5 text-ink-primary placeholder:text-ink-muted rounded-full pl-11 pr-12 py-3 w-full outline-none transition-all duration-200 text-sm lg:text-base border ${
+          isBlocked
+            ? 'border-brand ring-2 ring-brand/50 focus:ring-brand/70 focus:border-brand'
+            : 'border-subtle focus:ring-2 focus:ring-brand/40 focus:border-brand'
+        } shadow-cinema`}
       />
-      
+
       {isLoading && (
         <div className="absolute right-10 top-1/2 transform -translate-y-1/2">
-          <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+          <Loader2 className="w-4 h-4 animate-spin text-brand-hover" />
         </div>
       )}
-      
+
       {isBlocked && !isLoading && (
         <div className="absolute right-10 top-1/2 transform -translate-y-1/2">
-          <Ban className="w-4 h-4 text-red-500" />
+          <Ban className="w-4 h-4 text-brand" />
         </div>
       )}
-      
+
       {showClearButton && searchInput && !isLoading && (
         <button
           type="button"
           onClick={handleClear}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 hover:bg-red-600 bg-gray-700 rounded-lg transition-all group"
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 hover:bg-brand bg-white/10 rounded-full transition-all duration-200 group cursor-pointer"
           title={isOnSearchPage ? "Quay lại trang trước" : "Xóa tìm kiếm"}
         >
-          <X 
-            size={18} 
-            className="text-gray-300 group-hover:text-white transition-colors" 
+          <X
+            size={18}
+            className="text-ink-secondary group-hover:text-white transition-colors duration-200"
           />
         </button>
       )}

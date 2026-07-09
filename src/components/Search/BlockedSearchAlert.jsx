@@ -46,8 +46,8 @@ export const isBlockedKeyword = (keyword) => {
 
 const BlockedSearchAlert = () => {
   return (
-    <div className="flex items-center justify-center min-h-[400px] p-4">
-      <div className="max-w-md w-full bg-red-900/50 backdrop-blur-sm rounded-2xl p-8 border">
+    <div className="flex items-center justify-center min-h-[400px] p-4 animate-fade-in">
+      <div className="max-w-md w-full bg-red-900/40 backdrop-blur-md rounded-2xl p-8 border border-red-500/30 shadow-cinema-lg">
         <div className="flex flex-col items-center text-center">
 
           {/* 🇻🇳 Cờ Việt Nam */}
