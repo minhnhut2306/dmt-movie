@@ -3,6 +3,17 @@
  */
 
 const CACHE_TTL = 30;
+const TRACKER_URL = 'https://analytics-tracker.nhutnm2306.workers.dev/collect';
+
+function trackRequest(ctx, path) {
+  ctx.waitUntil(
+    fetch(TRACKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ site: 'dmt-movie-proxy', path }),
+    }).catch(() => {})
+  );
+}
 
 function isAdSegment(path) {
   return (
@@ -94,6 +105,8 @@ export default {
     if (!targetUrl) {
       return new Response('Missing url parameter', { status: 400 });
     }
+
+    trackRequest(ctx, url.pathname);
 
     const decodedUrl = decodeURIComponent(targetUrl);
     const baseUrl = decodedUrl.replace(/[^/]+$/, '');
