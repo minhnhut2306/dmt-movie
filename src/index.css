@@ -88,7 +88,7 @@
 
   /* Bottom-fade legibility scrim for posters/hero images */
   .poster-scrim {
-    background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.55) 35%, rgba(0,0,0,0.05) 70%, transparent 100%);
+    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.45) 35%, rgba(0,0,0,0.1) 60%, transparent 100%);
   }
 }
 
