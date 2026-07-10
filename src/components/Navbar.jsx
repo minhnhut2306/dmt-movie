@@ -135,9 +135,6 @@ const Navbar = () => {
                   <span className="text-gradient-signature">DMT</span>
                   <span className="text-white/90"> Movie</span>
                 </h1>
-                <span className="hidden sm:block text-[9px] font-semibold tracking-[0.22em] text-white/30 uppercase mt-0.5 group-hover:text-iris-300/70 transition-colors duration-200">
-                  Cinematic Streaming
-                </span>
               </div>
             </Link>
 
