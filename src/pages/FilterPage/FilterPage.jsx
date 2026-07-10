@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Filter, Loader2 } from 'lucide-react';
+import { Filter, ArrowLeft } from 'lucide-react';
 import UnifiedMovieCard from '../../components/UnifiedMovieCard';
 import Pagination from '../../components/Pagination';
 import LoadingState from '../../components/states/LoadingState';
 import ErrorState from '../../components/states/ErrorState';
 import EmptyState from '../../components/states/EmptyState';
 import { api } from '../../api/baseApi';
+import { useDynamicGenres, useDynamicCountries, STATIC_SPECIAL_LISTS } from '../../utils/CategoryConfigDynamic';
 
 const FilterPage = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
 
   const type = searchParams.get('type') || '';
@@ -20,6 +22,9 @@ const FilterPage = () => {
   const lang = searchParams.get('lang') || '';
   const sortField = searchParams.get('sort_field') || 'modified.time';
   const sortType = searchParams.get('sort_type') || 'desc';
+
+  const { genres } = useDynamicGenres();
+  const { countries } = useDynamicCountries();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['filter', type, category, country, year, lang, sortField, sortType, currentPage],
@@ -58,19 +63,38 @@ const FilterPage = () => {
 
   const getFilterTitle = () => {
     const filters = [];
-    if (type) filters.push(type.replace('phim-', 'Phim ').replace('-', ' '));
-    if (category) filters.push(category);
-    if (country) filters.push(country);
+    if (type) {
+      const found = STATIC_SPECIAL_LISTS.find(s => s.slug === type);
+      filters.push(found?.name || type);
+    }
+    if (category) {
+      const found = genres.find(g => g.slug === category);
+      filters.push(found?.name || category);
+    }
+    if (country) {
+      const found = countries.find(c => c.slug === country);
+      filters.push(found?.name || country);
+    }
     if (year) filters.push(`Năm ${year}`);
     if (lang) filters.push(lang);
-    
-    return filters.length > 0 ? `Kết quả lọc: ${filters.join(' • ')}` : 'Kết quả lọc';
+    return filters.length > 0 ? filters.join(' • ') : 'Kết quả lọc';
   };
+
+  const BackButton = () => (
+    <button
+      onClick={() => navigate(-1)}
+      className="flex items-center gap-2 text-white/55 hover:text-iris-300 mb-4 transition-colors duration-200 cursor-pointer text-sm font-medium"
+    >
+      <ArrowLeft className="w-4 h-4" />
+      Quay lại
+    </button>
+  );
 
   if (isLoading) {
     return (
       <div className="min-h-screen pt-8">
         <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
+          <BackButton />
           <LoadingState variant="grid" count={24} />
         </div>
       </div>
@@ -97,6 +121,7 @@ const FilterPage = () => {
     return (
       <div className="min-h-screen pt-8">
         <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
+          <BackButton />
           <div className="flex items-center gap-3 mb-8">
             <div className="w-11 h-11 flex items-center justify-center rounded-xl2 bg-gradient-to-br from-iris-400 to-iris-600 shadow-glow">
               <Filter className="w-5 h-5 text-white" />
@@ -115,6 +140,7 @@ const FilterPage = () => {
   return (
     <div className="min-h-screen pt-8 pb-12">
       <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
+        <BackButton />
         {/* Header */}
         <div className="flex items-center gap-3 mb-8">
           <div className="w-12 h-12 flex items-center justify-center rounded-xl2 bg-gradient-to-br from-iris-400 to-iris-600 shadow-glow">
