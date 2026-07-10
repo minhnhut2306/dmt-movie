@@ -298,12 +298,12 @@ const NotificationBell = () => {
           )}
 
           {/* ================= MOBILE: bottom sheet ================= */}
-          <div className={`lg:hidden fixed inset-0 z-[9998] transition-all duration-300 ${open ? 'visible' : 'invisible pointer-events-none'}`}>
+          <div className={`lg:hidden fixed inset-0 z-[999] transition-all duration-300 ${open ? 'visible' : 'invisible pointer-events-none'}`}>
             <div
               className={`absolute inset-0 bg-ink-950/70 backdrop-blur-sm transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`}
               onClick={() => setOpen(false)}
             />
-            <div className={`absolute left-0 right-0 bottom-0 max-h-[80vh] glass-strong rounded-t-sheet shadow-glass-lg transform transition-transform duration-300 ease-out ${open ? 'translate-y-0' : 'translate-y-full'}`}>
+            <div className={`absolute left-0 right-0 bottom-[68px] max-h-[75vh] glass-strong rounded-t-sheet shadow-glass-lg transform transition-transform duration-300 ease-out ${open ? 'translate-y-0' : 'translate-y-full'}`}>
               <div className="w-10 h-1.5 rounded-full bg-white/20 mx-auto mt-3" />
               <div className="flex items-center justify-between px-5 pt-3 pb-2">
                 <div className="flex items-center gap-1.5">
@@ -317,7 +317,7 @@ const NotificationBell = () => {
                   <X size={18} />
                 </button>
               </div>
-              <div className="overflow-y-auto scrollbar-thin-iris" style={{ maxHeight: 'calc(80vh - 60px)' }}>
+              <div className="overflow-y-auto scrollbar-thin-iris" style={{ maxHeight: 'calc(75vh - 60px)' }}>
                 <PanelContent />
               </div>
             </div>
