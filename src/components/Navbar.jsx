@@ -381,11 +381,11 @@ const Navbar = () => {
                 )}
               </div>
 
-              {/* Search Icon - Desktop: nút gradient nổi bật, không lẫn với các icon phẳng khác */}
+              {/* Search Icon - Desktop */}
               <div className="hidden lg:block relative">
                 <button
                   onClick={() => setShowSearchDropdown(!showSearchDropdown)}
-                  className={`w-10 h-10 flex items-center justify-center rounded-full btn-signature text-white transition-all duration-200 cursor-pointer hover:scale-110 hover:shadow-glow active:scale-95 focus-signature ${showSearchDropdown ? 'scale-95' : ''}`}
+                  className="w-10 h-10 flex items-center justify-center text-white/70 hover:text-iris-300 hover:bg-iris-500/10 rounded-xl2 transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 focus-signature"
                   title="Tìm kiếm"
                 >
                   <Search size={19} />
