@@ -1,5 +1,6 @@
 import React from 'react';
-import { Film, Tv, Compass } from 'lucide-react';
+import { Film, Tv } from 'lucide-react';
+import logoDmt from '../assets/logodmt.png';
 import {
   STATIC_SPECIAL_LISTS,
   useDynamicGenres
@@ -18,9 +19,7 @@ const Footer = () => {
 
           <div className="space-y-4 md:pr-6 md:border-r md:border-white/5">
             <div className="flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-iris-400 to-iris-600 flex items-center justify-center">
-                <Compass className="w-4.5 h-4.5 text-white" />
-              </span>
+              <img src={logoDmt} alt="DMT Movie" className="w-8 h-8 rounded-full object-cover" />
               <span className="text-xl font-display font-bold">
                 <span className="text-gradient-signature">DMT</span>
                 <span className="text-white/90"> Movie</span>
