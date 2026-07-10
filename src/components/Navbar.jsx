@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Home, X, Search, ChevronDown, Filter, History, Play, Trash2, Compass } from "lucide-react";
+import logoDmt from "../assets/logodmt.png";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import FilterModal from "./FilterModal";
 import {
@@ -123,20 +124,12 @@ const Navbar = () => {
           <div className="flex items-center justify-between h-[60px]">
 
             {/* Logo */}
-            <Link to="/" className="group flex items-center gap-2.5 shrink-0 focus-signature rounded-lg">
-              <span className="relative w-9 h-9 rounded-xl2 bg-gradient-to-br from-iris-400 via-iris-500 to-iris-600 flex items-center justify-center shadow-glow transition-transform duration-200 ease-out group-hover:scale-105 group-hover:-rotate-3">
-                <Compass className="w-5 h-5 text-white" strokeWidth={2.25} />
-                <span className="absolute inset-0 rounded-xl2 ring-1 ring-white/25" />
-              </span>
-              <div className="flex flex-col leading-none">
-                <h1 className="text-xl font-display font-bold tracking-tight">
-                  <span className="text-gradient-signature">DMT</span>
-                  <span className="text-white/90"> Movie</span>
-                </h1>
-                <span className="hidden sm:block text-[9px] font-semibold tracking-[0.22em] text-white/30 uppercase mt-0.5 group-hover:text-iris-300/70 transition-colors duration-200">
-                  Cinematic Streaming
-                </span>
-              </div>
+            <Link to="/" className="group flex items-center shrink-0 focus-signature rounded-lg">
+              <img
+                src={logoDmt}
+                alt="DMT Movie"
+                className="h-9 w-auto object-contain transition-transform duration-200 ease-out group-hover:scale-105"
+              />
             </Link>
 
             {/* Desktop Menu chính */}
