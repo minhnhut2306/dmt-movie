@@ -185,10 +185,10 @@ const CategoryPage = () => {
       pages.push(i);
     }
 
-    const pageBtnBase = "min-w-[40px] h-10 px-3 flex items-center justify-center text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer";
+    const pageBtnBase = "min-w-[36px] h-9 px-2 sm:min-w-[40px] sm:h-10 sm:px-3 flex items-center justify-center text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer";
 
     return (
-      <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mt-8 px-4">
+      <div className="flex flex-nowrap items-center justify-center gap-1 sm:gap-2 mt-8 px-4">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
