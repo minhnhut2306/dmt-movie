@@ -586,34 +586,41 @@ const Navbar = () => {
 
       {/* ================= BOTTOM NAV (mobile only) — thay thế hoàn toàn hamburger menu ================= */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-[9997] glass-strong shadow-glass-lg pb-[env(safe-area-inset-bottom)]">
-        <div className="grid grid-cols-4 h-[60px]">
+        <div className="grid grid-cols-5 h-[60px]">
           <Link
             to="/"
-            className={`flex flex-col items-center justify-center gap-0.5 min-w-[44px] cursor-pointer transition-colors duration-200 ${location.pathname === '/' ? 'text-iris-300' : 'text-white/55'}`}
+            className={`flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-colors duration-200 ${location.pathname === '/' ? 'text-iris-300' : 'text-white/55'}`}
           >
-            <Home size={20} />
-            <span className="text-[10px] font-medium">Trang Chủ</span>
+            <Home size={19} />
+            <span className="text-[9px] font-medium">Trang Chủ</span>
           </Link>
           <button
             onClick={() => setIsMenuOpen(true)}
-            className={`flex flex-col items-center justify-center gap-0.5 min-w-[44px] transition-colors duration-200 cursor-pointer ${isMenuOpen ? 'text-iris-300' : 'text-white/55 hover:text-iris-300'}`}
+            className={`flex flex-col items-center justify-center gap-0.5 transition-colors duration-200 cursor-pointer ${isMenuOpen ? 'text-iris-300' : 'text-white/55'}`}
           >
-            <Compass size={20} />
-            <span className="text-[10px] font-medium">Khám Phá</span>
+            <Compass size={19} />
+            <span className="text-[9px] font-medium">Khám Phá</span>
           </button>
           <button
             onClick={() => setShowSearchDropdown(true)}
-            className={`flex flex-col items-center justify-center gap-0.5 min-w-[44px] transition-colors duration-200 cursor-pointer ${showSearchDropdown ? 'text-iris-300' : 'text-white/55 hover:text-iris-300'}`}
+            className={`flex flex-col items-center justify-center gap-0.5 transition-colors duration-200 cursor-pointer ${showSearchDropdown ? 'text-iris-300' : 'text-white/55'}`}
           >
-            <Search size={20} />
-            <span className="text-[10px] font-medium">Tìm Kiếm</span>
+            <Search size={19} />
+            <span className="text-[9px] font-medium">Tìm Kiếm</span>
+          </button>
+          <button
+            onClick={() => { setShowFilterModal(true); }}
+            className={`flex flex-col items-center justify-center gap-0.5 transition-colors duration-200 cursor-pointer ${showFilterModal ? 'text-iris-300' : 'text-white/55'}`}
+          >
+            <Filter size={19} />
+            <span className="text-[9px] font-medium">Bộ Lọc</span>
           </button>
           <button
             onClick={openHistory}
-            className={`flex flex-col items-center justify-center gap-0.5 min-w-[44px] transition-colors duration-200 cursor-pointer ${showHistory ? 'text-iris-300' : 'text-white/55 hover:text-iris-300'}`}
+            className={`flex flex-col items-center justify-center gap-0.5 transition-colors duration-200 cursor-pointer ${showHistory ? 'text-iris-300' : 'text-white/55'}`}
           >
-            <History size={20} />
-            <span className="text-[10px] font-medium">Lịch Sử</span>
+            <History size={19} />
+            <span className="text-[9px] font-medium">Lịch Sử</span>
           </button>
         </div>
       </nav>
