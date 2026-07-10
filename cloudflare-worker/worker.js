@@ -3,7 +3,7 @@
  */
 
 const CACHE_TTL = 30;
-const TRACKER_URL = 'https://analytics-tracker.nhutnm2306.workers.dev/collect';
+const TRACKER_URL = 'https://nm-insights.nhutnm2306.workers.dev/ping';
 
 function trackRequest(ctx, path) {
   ctx.waitUntil(
