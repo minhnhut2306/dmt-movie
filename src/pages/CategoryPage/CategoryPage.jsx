@@ -1,23 +1,53 @@
 // pages/Category/CategoryPage.jsx
 import React from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, LayoutGrid, ArrowLeft } from 'lucide-react';
 import UnifiedMovieCard from '../../components/UnifiedMovieCard';
-import { CATEGORY_TYPES } from '../../utils/CategoryConfigDynamic';
+import {
+  CATEGORY_TYPES,
+  STATIC_SPECIAL_LISTS,
+  useDynamicGenres,
+  useDynamicCountries,
+} from '../../utils/CategoryConfigDynamic';
 import { movieApi } from '../../api'; // Import từ api/index.js
 import { getSafeImageUrl } from '../../utils/imageHelper';
+import LoadingState from '../../components/states/LoadingState';
+import ErrorState from '../../components/states/ErrorState';
+import EmptyState from '../../components/states/EmptyState';
 
 const CategoryPage = () => {
   const { categoryType, categorySlug } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const currentPage = parseInt(searchParams.get('page') || '1');
+
+  // Danh sách thể loại/quốc gia động để tra tên hiển thị đúng trên đầu trang
+  const { genres: displayGenres } = useDynamicGenres();
+  const { countries: displayCountries } = useDynamicCountries();
+
+  const getCategoryDisplayName = () => {
+    if (categoryType === 'danh-sach') {
+      return STATIC_SPECIAL_LISTS.find(item => item.slug === categorySlug)?.name || categorySlug;
+    }
+    if (categoryType === 'the-loai') {
+      return displayGenres.find(g => g.slug === categorySlug)?.name || categorySlug;
+    }
+    if (categoryType === 'quoc-gia') {
+      return displayCountries.find(c => c.slug === categorySlug)?.name || categorySlug;
+    }
+    if (categoryType === 'nam') {
+      return `Năm ${categorySlug}`;
+    }
+    return categorySlug;
+  };
 
   // ✅ Đơn giản hóa - chỉ cần check categoryType có tồn tại
   const categoryConfig = CATEGORY_TYPES[categoryType];
   const categoryInfo = categoryConfig ? {
     type: categoryConfig.title,
     slug: categorySlug,
+    name: getCategoryDisplayName(),
   } : null;
 
   const { data, isLoading, error } = useQuery({
@@ -155,14 +185,16 @@ const CategoryPage = () => {
       pages.push(i);
     }
 
+    const pageBtnBase = "min-w-[40px] h-10 px-3 flex items-center justify-center text-sm font-medium rounded-lg transition-all duration-200 cursor-pointer";
+
     return (
-      <div className="flex flex-wrap items-center justify-center gap-2 mt-8 px-4">
+      <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mt-8 px-4">
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-          className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className={`${pageBtnBase} glass text-white/60 hover:text-white hover:bg-iris-500/20 disabled:opacity-30 disabled:cursor-not-allowed`}
         >
-          <ChevronLeft className="w-4 h-4 mr-1" />
+          <ChevronLeft className="w-4 h-4 sm:mr-1" />
           <span className="hidden sm:inline">Trước</span>
         </button>
 
@@ -170,12 +202,12 @@ const CategoryPage = () => {
           <>
             <button
               onClick={() => handlePageChange(1)}
-              className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 hover:text-white transition-colors"
+              className={`${pageBtnBase} glass text-white/60 hover:text-white hover:bg-iris-500/20`}
             >
               1
             </button>
             {startPage > 2 && (
-              <span className="text-gray-500 px-1">...</span>
+              <span className="text-white/30 px-1">...</span>
             )}
           </>
         )}
@@ -184,9 +216,9 @@ const CategoryPage = () => {
           <button
             key={page}
             onClick={() => handlePageChange(page)}
-            className={`px-3 py-2 text-sm font-medium border rounded-lg transition-colors ${currentPage === page
-                ? 'text-white bg-red-600 border-red-600'
-                : 'text-gray-300 bg-gray-800 border-gray-700 hover:bg-gray-700 hover:text-white'
+            className={`${pageBtnBase} ${currentPage === page
+                ? 'btn-signature text-white'
+                : 'glass text-white/60 hover:text-white hover:bg-iris-500/20'
               }`}
           >
             {page}
@@ -196,11 +228,11 @@ const CategoryPage = () => {
         {endPage < totalPages && (
           <>
             {endPage < totalPages - 1 && (
-              <span className="text-gray-500 px-1">...</span>
+              <span className="text-white/30 px-1">...</span>
             )}
             <button
               onClick={() => handlePageChange(totalPages)}
-              className="px-3 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 hover:text-white transition-colors"
+              className={`${pageBtnBase} glass text-white/60 hover:text-white hover:bg-iris-500/20`}
             >
               {totalPages}
             </button>
@@ -210,10 +242,10 @@ const CategoryPage = () => {
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
-          className="flex items-center px-3 py-2 text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 rounded-lg hover:bg-gray-700 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className={`${pageBtnBase} glass text-white/60 hover:text-white hover:bg-iris-500/20 disabled:opacity-30 disabled:cursor-not-allowed`}
         >
           <span className="hidden sm:inline">Sau</span>
-          <ChevronRight className="w-4 h-4 ml-1" />
+          <ChevronRight className="w-4 h-4 sm:ml-1" />
         </button>
       </div>
     );
@@ -221,25 +253,21 @@ const CategoryPage = () => {
 
   if (!categoryInfo) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
-        <div className="text-center text-white">
-          <h1 className="text-2xl font-bold mb-4">Không tìm thấy danh mục</h1>
-          <p className="text-gray-400">Danh mục bạn tìm kiếm không tồn tại.</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <EmptyState
+          variant="generic"
+          title="Không tìm thấy danh mục"
+          message="Danh mục bạn tìm kiếm không tồn tại."
+        />
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-white text-center">
-              <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-              <p className="text-lg">Đang tải...</p>
-            </div>
-          </div>
+      <div className="min-h-screen">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <LoadingState variant="grid" count={18} />
         </div>
       </div>
     );
@@ -247,25 +275,12 @@ const CategoryPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-900">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-white text-center">
-              <p className="text-red-400 mb-2 text-lg">Lỗi tải dữ liệu</p>
-              <p className="text-gray-400 text-sm mb-4">
-                {error.message || 'Không thể tải dữ liệu danh mục'}
-              </p>
-              <p className="text-gray-500 text-xs mb-4">
-                Category: {categoryType}/{categorySlug}
-              </p>
-              <button
-                onClick={() => window.location.reload()}
-                className="bg-red-600 hover:bg-red-700 px-6 py-3 rounded-lg text-sm font-medium transition-colors"
-              >
-                Thử lại
-              </button>
-            </div>
-          </div>
+      <div className="min-h-screen">
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <ErrorState
+            message={error.message || 'Không thể tải dữ liệu danh mục'}
+            onRetry={() => window.location.reload()}
+          />
         </div>
       </div>
     );
@@ -277,25 +292,30 @@ const CategoryPage = () => {
   console.log('Pagination Info:', paginationInfo);
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <div className="container mx-auto px-4 py-6 sm:py-8">
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 max-w-7xl">
         <div className="mb-6 sm:mb-8">
-          <div className="flex flex-wrap items-center gap-3 mb-4">
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-medium text-white ${categoryInfo.color}`}
-            >
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-white/55 hover:text-iris-300 mb-4 transition-colors duration-200 cursor-pointer text-sm font-medium"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Quay lại
+          </button>
+
+          <div className="flex flex-wrap items-center gap-3 mb-3">
+            <span className="px-3 py-1.5 rounded-full text-xs font-semibold text-iris-200 bg-iris-500/20 border border-iris-400/20 flex items-center gap-1.5">
+              <LayoutGrid className="w-3.5 h-3.5" />
               {categoryInfo.type}
             </span>
-            <h1 className="text-white text-xl sm:text-2xl md:text-3xl font-bold">
+            <h1 className="text-white text-xl sm:text-2xl md:text-3xl font-display font-bold">
               {categoryInfo.name}
             </h1>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <p className="text-gray-400 text-sm sm:text-base">
-              Trang {currentPage} / {totalPages} - Tổng cộng {movies.length} phim
-            </p>
-          </div>
+          <p className="text-white/40 text-sm">
+            Trang {currentPage} / {totalPages} · {movies.length} phim
+          </p>
         </div>
 
         {movies.length > 0 ? (
@@ -313,11 +333,7 @@ const CategoryPage = () => {
             {renderPagination()}
           </>
         ) : (
-          <div className="flex items-center justify-center h-64">
-            <div className="text-white text-center">
-              <p className="text-lg">Không có phim nào trong danh mục này.</p>
-            </div>
-          </div>
+          <EmptyState variant="movies" message="Không có phim nào trong danh mục này." />
         )}
       </div>
     </div>

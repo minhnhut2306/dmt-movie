@@ -3,6 +3,7 @@ import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtub
 import { getSafeImageUrl } from '../../utils/imageHelper';
 import { useMovieImages } from '../../hooks/useMovies';
 import TrailerModal from './TrailerModal';
+import MovieCastSection from './MovieCastSection';
 
 const MobileDetailLayout = ({
   movieData,
@@ -126,19 +127,7 @@ const MobileDetailLayout = ({
           </div>
         </div>
 
-        <div className="glass p-4 rounded-xl2 shadow-glass mb-4">
-          <h3 className="text-base font-display font-bold mb-2.5 text-white">Diễn Viên</h3>
-          <div className="grid grid-cols-2 gap-2">
-            {movieData.actor?.length > 0 ? movieData.actor.slice(0, 6).map((actor, index) => (
-              <span
-                key={index}
-                className="bg-white/[0.04] border border-white/10 text-white/70 px-3 py-2 rounded-lg text-xs text-center truncate"
-              >
-                {actor}
-              </span>
-            )) : <span className="text-white/35 text-xs">Không có diễn viên nào.</span>}
-          </div>
-        </div>
+        <MovieCastSection slug={movieData.slug} fallbackActors={movieData.actor} />
       </div>
 
       <TrailerModal

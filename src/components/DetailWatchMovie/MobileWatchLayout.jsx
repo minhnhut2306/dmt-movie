@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Star, Calendar, Eye, Globe, Film } from 'lucide-react';
 import { lazy, Suspense } from 'react';
+import MovieCastSection from './MovieCastSection';
 
 const VideoPlayer = lazy(() => import('./VideoPlayer'));
 const EpisodeList = lazy(() => import('../EpisodeList'));
@@ -135,19 +136,7 @@ const MobileWatchLayout = ({
             </div>
           </div>
 
-          <div className="glass p-4 rounded-xl2 shadow-glass mb-4">
-            <h3 className="text-sm font-display font-bold text-white mb-3">Diễn Viên</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {movieData.actor?.length > 0 ? movieData.actor.slice(0, 6).map((actor, index) => (
-                <div
-                  key={index}
-                  className="bg-white/[0.04] border border-white/10 text-white/70 px-2 py-2 rounded-lg text-xs text-center truncate"
-                >
-                  {actor}
-                </div>
-              )) : <span className="text-white/35 text-xs">Không có diễn viên nào.</span>}
-            </div>
-          </div>
+          <MovieCastSection slug={movieData.slug} fallbackActors={movieData.actor} />
         </div>
       )}
     </div>

@@ -3,6 +3,7 @@ import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtub
 import { getSafeImageUrl } from '../../utils/imageHelper';
 import { useMovieImages } from '../../hooks/useMovies';
 import TrailerModal from './TrailerModal';
+import MovieCastSection from './MovieCastSection';
 
 const DesktopDetailLayout = ({
   movieData,
@@ -136,19 +137,7 @@ const DesktopDetailLayout = ({
               </div>
             </div>
 
-            <div className="glass p-6 rounded-xl2 shadow-glass">
-              <h3 className="text-lg font-display font-bold mb-4 text-white">Diễn Viên</h3>
-              <div className="flex flex-wrap gap-2">
-                {movieData.actor?.length > 0 ? movieData.actor.map((actor, index) => (
-                  <span
-                    key={index}
-                    className="bg-white/[0.04] border border-white/10 text-white/70 px-3 py-2 rounded-lg text-sm hover:bg-white/[0.08] transition-all duration-200 cursor-pointer"
-                  >
-                    {actor}
-                  </span>
-                )) : <span className="text-white/35 text-sm">Không có diễn viên nào.</span>}
-              </div>
-            </div>
+            <MovieCastSection slug={movieData.slug} fallbackActors={movieData.actor} />
           </div>
         </div>
       </div>

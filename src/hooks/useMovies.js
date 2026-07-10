@@ -1,5 +1,5 @@
 // hooks/useMovies.js - OPTIMIZED VERSION
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueries } from "@tanstack/react-query";
 import { movieApi } from "../api";
 
 // Shared query options với cache tối ưu
@@ -42,6 +42,54 @@ export const useMovieDetail = (slug) => {
     enabled: !!slug,
     ...DEFAULT_QUERY_OPTIONS,
     staleTime: 30 * 60 * 1000, // 30 phút cho detail
+  });
+};
+
+// ============================================
+// MOVIE IMAGES HOOK - Ảnh chất lượng cao từ TMDB (poster/backdrop nét hơn)
+// ============================================
+export const useMovieImages = (slug) => {
+  return useQuery({
+    queryKey: ["movie-images", slug],
+    queryFn: () => movieApi.getMovieImages(slug),
+    enabled: !!slug,
+    staleTime: 24 * 60 * 60 * 1000, // 24 giờ - ảnh TMDB gần như không đổi
+    gcTime: 7 * 24 * 60 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+};
+
+// ============================================
+// MOVIE CREDITS HOOK - Diễn viên/đoàn làm phim TMDB theo slug
+// ============================================
+export const useMovieCredits = (slug) => {
+  return useQuery({
+    queryKey: ["movie-credits", slug],
+    queryFn: () => movieApi.getMovieCredits(slug),
+    enabled: !!slug,
+    staleTime: 24 * 60 * 60 * 1000, // 24 giờ - thông tin diễn viên gần như không đổi
+    gcTime: 7 * 24 * 60 * 60 * 1000,
+    retry: 1,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+};
+
+// Fetch ảnh TMDB chất lượng cao cho nhiều phim cùng lúc (vd: hero banner)
+export const useMovieImagesBatch = (slugs = []) => {
+  return useQueries({
+    queries: slugs.map((slug) => ({
+      queryKey: ["movie-images", slug],
+      queryFn: () => movieApi.getMovieImages(slug),
+      enabled: !!slug,
+      staleTime: 24 * 60 * 60 * 1000,
+      gcTime: 7 * 24 * 60 * 60 * 1000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+      refetchOnMount: false,
+    })),
   });
 };
 
