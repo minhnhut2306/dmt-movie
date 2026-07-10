@@ -48,7 +48,7 @@ const NotificationBell = () => {
       iconColor: "text-iris-400",
       badge: "V1",
       badgeBg: "bg-iris-600",
-      title: "DMT Movie V1 chính thức ra mắt!",
+      title: "DMT Movie V1",
       desc: "Trải nghiệm phiên bản V1 tại đây.",
       link: "https://dmt-movie.vercel.app/",
       linkLabel: "Xem ngay →",
