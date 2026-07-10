@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bell, Download, Share2, X, Smartphone, Rocket, History, Shield, Film } from "lucide-react";
+import { Bell, Download, Share2, X, Smartphone, Rocket } from "lucide-react";
 
 const READ_KEY = "dmt-notif-read";
 
@@ -49,34 +49,9 @@ const NotificationBell = () => {
       badge: "V1",
       badgeBg: "bg-iris-600",
       title: "DMT Movie V1 chính thức ra mắt!",
-      desc: "Giao diện mới hoàn toàn, chặn quảng cáo, lịch sử xem, tiếp tục xem dở và nhiều tính năng mới.",
-      time: "Hôm nay",
-    },
-    {
-      id: "v1-history",
-      icon: History,
-      iconBg: "bg-emerald-500/10",
-      iconColor: "text-emerald-400",
-      title: "Lịch sử xem & tiếp tục xem",
-      desc: "Xem lại lịch sử phim đã xem, tự động nhớ vị trí để tiếp tục từ chỗ dừng.",
-      time: "Hôm nay",
-    },
-    {
-      id: "v1-adblock",
-      icon: Shield,
-      iconBg: "bg-amber-500/10",
-      iconColor: "text-amber-400",
-      title: "Chặn quảng cáo tự động",
-      desc: "Quảng cáo bị chặn ngay ở cấp độ manifest & fragment — không bị gián đoạn khi xem phim.",
-      time: "Hôm nay",
-    },
-    {
-      id: "v1-ui",
-      icon: Film,
-      iconBg: "bg-ember-500/10",
-      iconColor: "text-ember-400",
-      title: "Giao diện cinema tối mới",
-      desc: "Thiết kế glassmorphism, bottom nav 5 tab, diễn viên hiển thị ảnh TMDB, bộ lọc nâng cao.",
+      desc: "Trải nghiệm phiên bản V1 tại đây.",
+      link: "https://dmt-movie.vercel.app/",
+      linkLabel: "Xem ngay →",
       time: "Hôm nay",
     },
   ];
@@ -163,6 +138,11 @@ const NotificationBell = () => {
                         )}
                       </div>
                       <p className="text-gray-400 text-[11px] leading-relaxed">{n.desc}</p>
+                      {n.link && (
+                        <a href={n.link} target="_blank" rel="noopener noreferrer" className="inline-block mt-1.5 text-iris-400 hover:text-iris-300 text-[11px] font-semibold transition-colors">
+                          {n.linkLabel}
+                        </a>
+                      )}
                       <p className="text-gray-600 text-[10px] mt-1">{n.time}</p>
                     </div>
                   </div>
