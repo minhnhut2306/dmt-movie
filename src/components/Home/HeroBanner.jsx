@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Star, Calendar, Clock, Loader2 } from 'lucide-react';
-import { useFeaturedMovies } from '../../hooks/useMovies';
+import { Play, Star, Calendar, Clock, Loader2, TriangleAlert } from 'lucide-react';
+import { useFeaturedMovies, useMovieImagesBatch } from '../../hooks/useMovies';
 import { getSafeImageUrl } from '../../utils/imageHelper.js';
 
 const HeroBanner = ({
@@ -22,18 +22,21 @@ const HeroBanner = ({
   const [isDraggingLocal, setIsDraggingLocal] = useState(false);
   const [dragDirection, setDragDirection] = useState(null);
 
-  // ✅ USE REACT QUERY - Tự động cache, không duplicate
+  // USE REACT QUERY - Tự động cache, không duplicate
   const { data, isLoading, error: queryError } = useFeaturedMovies();
 
   // Transform data
+  // /v1/api/home trả về items lồng trong data.data.items (khác endpoint v3 cũ trả items ở top-level)
   const featuredMovies = React.useMemo(() => {
-    if (!data?.items) return [];
-    
-    return data.items.slice(0, 5).map(movie => ({
+    const items = data?.data?.items || data?.items || [];
+    if (items.length === 0) return [];
+
+    return items.slice(0, 5).map(movie => ({
       id: movie._id,
       title: movie.name,
       description: movie.origin_name,
-      backgroundImage: getSafeImageUrl(movie.poster_url, movie.name),
+      // Ảnh nền hero hiển thị full-bleed cỡ lớn — cần độ phân giải cao hơn card thường để không bị mờ/vỡ nét
+      backgroundImage: getSafeImageUrl(movie.poster_url, movie.name, { width: 1280, quality: 88 }),
       rating: movie.tmdb?.vote_average?.toFixed(1),
       year: movie.year,
       duration: movie.time,
@@ -48,6 +51,15 @@ const HeroBanner = ({
       slug: movie.slug
     }));
   }, [data]);
+
+  // Ảnh TMDB chất lượng cao (nét hơn nhiều) cho từng phim trong hero, nếu có
+  const featuredSlugs = React.useMemo(() => featuredMovies.map(m => m.slug), [featuredMovies]);
+  const tmdbImageQueries = useMovieImagesBatch(featuredSlugs);
+
+  const getBackgroundImage = (movie, index) => {
+    const hiRes = tmdbImageQueries[index]?.data?.backdrop;
+    return hiRes || movie.backgroundImage;
+  };
 
   // Auto-slide functionality
   useEffect(() => {
@@ -207,10 +219,10 @@ const HeroBanner = ({
 
   if (isLoading) {
     return (
-      <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-gray-800 flex items-center justify-center">
+      <div className="relative h-[420px] sm:h-[460px] md:h-[560px] lg:h-[640px] bg-ink-900 flex items-center justify-center">
         <div className="text-white text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-          <p>Đang tải phim...</p>
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-iris-400" />
+          <p className="text-white/50 text-sm">Đang tải phim...</p>
         </div>
       </div>
     );
@@ -218,13 +230,14 @@ const HeroBanner = ({
 
   if (queryError) {
     return (
-      <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-gray-800 flex items-center justify-center">
-        <div className="text-white text-center">
-          <p className="text-red-400 mb-2">Lỗi tải dữ liệu</p>
-          <p className="text-gray-400 text-sm">{queryError.message}</p>
+      <div className="relative h-[420px] sm:h-[460px] md:h-[560px] lg:h-[640px] bg-ink-900 flex items-center justify-center">
+        <div className="text-white text-center px-4">
+          <TriangleAlert className="w-8 h-8 mx-auto mb-3 text-ember-400" />
+          <p className="text-white mb-1 font-display font-semibold">Ơ, có gì đó không ổn</p>
+          <p className="text-white/40 text-sm mb-4">{queryError.message}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm"
+            className="btn-signature px-5 py-2.5 rounded-lg text-sm font-semibold text-white cursor-pointer"
           >
             Thử lại
           </button>
@@ -234,8 +247,8 @@ const HeroBanner = ({
   }
   if (!featuredMovies || featuredMovies.length === 0) {
     return (
-      <div className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] bg-gray-800 flex items-center justify-center">
-        <div className="text-white text-center">
+      <div className="relative h-[420px] sm:h-[460px] md:h-[560px] lg:h-[640px] bg-ink-900 flex items-center justify-center">
+        <div className="text-white/40 text-center">
           <p>Không có phim nổi bật</p>
         </div>
       </div>
@@ -248,7 +261,7 @@ const HeroBanner = ({
 
   return (
     <div
-      className="relative h-[300px] sm:h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden cursor-grab active:cursor-grabbing select-none"
+      className="relative h-[420px] sm:h-[460px] md:h-[560px] lg:h-[640px] overflow-hidden cursor-grab active:cursor-grabbing select-none bg-ink-950"
       onMouseDown={handleLocalDragStart}
       onMouseMove={handleLocalDragMove}
       onMouseUp={handleLocalDragEnd}
@@ -258,37 +271,66 @@ const HeroBanner = ({
       onTouchEnd={handleLocalDragEnd}
       style={{ touchAction: 'manipulation' }}
     >
+      {/* Editorial split layout: image mask on the right/full, content column glass panel on the left */}
       <div className="absolute inset-0">
         {featuredMovies.map((movie, index) => (
-          <div
-            key={movie.id || index}
-            className={`absolute inset-0 bg-cover bg-center transition-all duration-500 ease-out ${index === currentIndex ? 'opacity-100' : 'opacity-0'
-              }`}
-            style={{
-              backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('${movie.backgroundImage}')`,
-              transform: isDraggingLocal && dragDirection === 'horizontal' ? `translateX(${localDragOffset}px)` :
-                (isDragging && activeSection === 'hero') ? `translateX(${dragOffset}px)` :
-                  'translateX(0)'
-            }}
-          />
+          <div key={movie.id || index} className={`absolute inset-0 transition-opacity duration-700 ease-out ${index === currentIndex ? 'opacity-100' : 'opacity-0'}`}>
+            <div
+              className="absolute inset-0 bg-cover md:bg-[right_center] bg-[center_top]"
+              style={{
+                backgroundImage: `url('${getBackgroundImage(movie, index)}')`,
+                transform: isDraggingLocal && dragDirection === 'horizontal' ? `translateX(${localDragOffset}px)` :
+                  (isDragging && activeSection === 'hero') ? `translateX(${dragOffset}px)` :
+                    'translateX(0)'
+              }}
+            />
+            {/* Depth-layered scrim: strong left-to-right fade so text always reads, plus bottom fade into page */}
+            <div className="absolute inset-0 bg-gradient-to-r from-ink-950 via-ink-950/75 to-ink-950/20 md:from-ink-950 md:via-ink-950/60 md:to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-transparent to-ink-950/30" />
+          </div>
         ))}
       </div>
 
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-20">
-        {featuredMovies.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => handleManualChange(index)}
-            className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 hover:scale-110 ${index === currentIndex ? 'bg-red-600' : 'bg-white/50 hover:bg-white/70'
-              }`}
-          />
-        ))}
-      </div>
+      {/* Signature ambient glow blobs for cinematic depth */}
+      <div className="absolute -top-24 -left-24 w-96 h-96 bg-iris-500/20 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-80 h-80 bg-ember-500/10 rounded-full blur-[100px] pointer-events-none" />
 
+      {/* Desktop: vertical index rail on the far right (replaces standard dot carousel) */}
       {featuredMovies.length > 1 && (
-        <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 w-32 h-1 bg-white/20 rounded z-20">
+        <div className="hidden lg:flex flex-col gap-3 absolute right-6 top-1/2 -translate-y-1/2 z-20">
+          {featuredMovies.map((movie, index) => (
+            <button
+              key={movie.id || index}
+              onClick={() => handleManualChange(index)}
+              className={`group flex items-center gap-3 cursor-pointer focus-signature rounded-lg ${index === currentIndex ? '' : 'opacity-50 hover:opacity-80'} transition-opacity duration-300`}
+            >
+              <span className={`font-display text-xs font-bold transition-colors ${index === currentIndex ? 'text-iris-300' : 'text-white/40'}`}>
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <span className={`h-0.5 rounded-full transition-all duration-300 ${index === currentIndex ? 'w-10 bg-iris-400' : 'w-5 bg-white/25 group-hover:bg-white/50'}`} />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Mobile/tablet: dot indicators, thumb-reachable near bottom */}
+      {featuredMovies.length > 1 && (
+        <div className="lg:hidden absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+          {featuredMovies.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => handleManualChange(index)}
+              className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${index === currentIndex ? 'w-6 bg-iris-400' : 'w-2 bg-white/30'}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Autoplay progress bar (signature gradient) */}
+      {featuredMovies.length > 1 && (
+        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-white/5 z-20">
           <div
-            className="h-full bg-red-600 rounded transition-all duration-100"
+            className="h-full bg-gradient-to-r from-iris-500 to-ember-400 transition-all duration-100"
             style={{
               width: intervalRef.current ? `${((10000 - timeRemaining) / 10000) * 100}%` : '0%'
             }}
@@ -296,7 +338,7 @@ const HeroBanner = ({
         </div>
       )}
 
-      <div className="relative z-10 container mx-auto px-3 sm:px-4 h-full flex items-center">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-10 h-full flex items-center">
         <div
           className="max-w-xl sm:max-w-2xl text-white transition-all duration-300"
           style={{
@@ -308,56 +350,62 @@ const HeroBanner = ({
                 1
           }}
         >
-          <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-4 transition-all duration-500 leading-tight">
+          {currentFeaturedMovie.quality && (
+            <span className="inline-block mb-3 glass px-3 py-1 rounded-full text-[11px] font-bold tracking-wide text-iris-200 uppercase">
+              Đề xuất hôm nay
+            </span>
+          )}
+
+          <h1 className="font-display text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4 leading-[1.1] tracking-tight">
             {currentFeaturedMovie.title}
           </h1>
 
-          <div className="flex items-center space-x-2 sm:space-x-4 mb-2 sm:mb-4 text-xs sm:text-sm">
+          <div className="flex items-center flex-wrap gap-x-4 gap-y-1.5 mb-3 sm:mb-4 text-xs sm:text-sm text-white/70">
             {currentFeaturedMovie.rating && (
-              <div className="flex items-center">
-                <Star className="w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 mr-1" />
-                <span className="font-semibold">{currentFeaturedMovie.rating}</span>
+              <div className="flex items-center gap-1 text-ember-400 font-semibold">
+                <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-ember-400" />
+                <span>{currentFeaturedMovie.rating}</span>
               </div>
             )}
             {currentFeaturedMovie.year && (
-              <div className="flex items-center">
-                <Calendar className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+              <div className="flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>{currentFeaturedMovie.year}</span>
               </div>
             )}
             {currentFeaturedMovie.duration && (
-              <div className="flex items-center">
-                <Clock className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+              <div className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>{currentFeaturedMovie.duration}</span>
               </div>
             )}
           </div>
 
-          <div className="flex items-center space-x-2 mb-3 sm:mb-4 text-xs flex-wrap gap-1 sm:gap-2">
+          <div className="flex items-center gap-2 mb-4 sm:mb-5 text-xs flex-wrap">
             {currentFeaturedMovie.quality && (
-              <span className="bg-red-600 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-xs font-semibold">
+              <span className="bg-gradient-to-br from-iris-400 to-iris-600 px-2.5 py-1 rounded-md font-bold shadow-glow">
                 {currentFeaturedMovie.quality}
               </span>
             )}
             {currentFeaturedMovie.language && (
-              <span className="bg-blue-600 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded text-xs font-semibold">
+              <span className="glass px-2.5 py-1 rounded-md font-semibold text-white/85">
                 {currentFeaturedMovie.language}
               </span>
             )}
             {currentFeaturedMovie.type && (
-              <span className="text-gray-300 text-xs">
+              <span className="text-white/50">
                 {currentFeaturedMovie.type}
               </span>
             )}
             {currentFeaturedMovie.episode && (
-              <span className="text-yellow-400 text-xs">
+              <span className="text-ember-400 font-medium">
                 {currentFeaturedMovie.episode}
               </span>
             )}
           </div>
 
           {currentFeaturedMovie.description && (
-            <p className="text-xs sm:text-sm md:text-base mb-4 sm:mb-6 text-gray-200 leading-relaxed line-clamp-2 sm:line-clamp-3 transition-all duration-500">
+            <p className="text-xs sm:text-sm md:text-base mb-5 sm:mb-7 text-white/55 leading-relaxed line-clamp-2 sm:line-clamp-3 max-w-lg">
               {currentFeaturedMovie.description}
             </p>
           )}
@@ -369,10 +417,10 @@ const HeroBanner = ({
                   window.location.href = `/movie/${currentFeaturedMovie.slug}`;
                 }
               }}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-lg transition-colors text-sm font-medium flex items-center gap-2"
+              className="min-h-[48px] btn-signature text-white px-6 sm:px-7 py-3 rounded-xl2 transition-all duration-200 text-sm font-semibold flex items-center gap-2 cursor-pointer hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98] focus-signature"
             >
-              <Play className="w-4 h-4" />
-              Chi Tiết
+              <Play className="w-4 h-4 fill-white" />
+              Xem chi tiết
             </button>
           </div>
         </div>

@@ -38,7 +38,6 @@ import {
 export const MOVIE_SECTIONS = [
   {
     title: "Phim Mới Nhất",
-    emoji: "🔥",
     sectionKey: "latest",
     badgeColor: "bg-red-600",
     useDataHook: () => useLatestMovies(1),
@@ -47,7 +46,6 @@ export const MOVIE_SECTIONS = [
   },
   {
     title: "Phim Việt Nam",
-    emoji: "🇻🇳",
     sectionKey: "vietnam",
     badgeColor: "bg-red-600",
     useDataHook: () => useVietnamMovies(1),
@@ -56,7 +54,6 @@ export const MOVIE_SECTIONS = [
   },
   {
     title: "Phim Trung Quốc",
-    emoji: "🇨🇳",
     sectionKey: "china",
     badgeColor: "bg-red-600",
     useDataHook: useChinaMovies,
@@ -65,7 +62,6 @@ export const MOVIE_SECTIONS = [
   },
   {
     title: "Phim Nhật Bản",
-    emoji: "🇯🇵",
     sectionKey: "japan",
     badgeColor: "bg-red-600",
     useDataHook: useJapanMovies,
@@ -74,7 +70,6 @@ export const MOVIE_SECTIONS = [
   },
   {
     title: "Phim Bộ",
-    emoji: "📺",
     sectionKey: "series",
     badgeColor: "bg-blue-600",
     useDataHook: useSeriesMovies,
@@ -83,7 +78,6 @@ export const MOVIE_SECTIONS = [
   },
   {
     title: "Phim Lẻ",
-    emoji: "🎬",
     sectionKey: "single",
     badgeColor: "bg-green-600",
     useDataHook: useSingleMovies,
@@ -92,7 +86,6 @@ export const MOVIE_SECTIONS = [
   },
   {
     title: "Phim Hoạt Hình",
-    emoji: "🎨",
     sectionKey: "animation",
     badgeColor: "bg-pink-600",
     useDataHook: useAnimationMovies,
@@ -101,7 +94,6 @@ export const MOVIE_SECTIONS = [
   },
   {
     title: "Phim Chiếu Rạp",
-    emoji: "🎥",
     sectionKey: "cinema",
     badgeColor: "bg-yellow-600",
     useDataHook: useCinemaMovies,
@@ -110,7 +102,6 @@ export const MOVIE_SECTIONS = [
   },
   {
     title: "Phim Thuyết Minh",
-    emoji: "🎤",
     sectionKey: "dubbed",
     badgeColor: "bg-purple-600",
     useDataHook: useDubbedMovies,
@@ -119,7 +110,6 @@ export const MOVIE_SECTIONS = [
   },
   {
     title: "Phim Lồng Tiếng",
-    emoji: "🗣️",
     sectionKey: "voiceover",
     badgeColor: "bg-indigo-600",
     useDataHook: useVoiceoverMovies,
@@ -128,7 +118,6 @@ export const MOVIE_SECTIONS = [
   },
   {
     title: "Phim Vietsub",
-    emoji: "📝",
     sectionKey: "vietsub",
     badgeColor: "bg-cyan-600",
     useDataHook: useVietsubMovies,
@@ -137,7 +126,6 @@ export const MOVIE_SECTIONS = [
   },
   {
     title: "TV Shows",
-    emoji: "📺",
     sectionKey: "tvshows",
     badgeColor: "bg-orange-600",
     useDataHook: useTVShows,
@@ -146,7 +134,6 @@ export const MOVIE_SECTIONS = [
   },
   {
     title: "Phim Kinh Dị",
-    emoji: "👻",
     sectionKey: "horror",
     badgeColor: "bg-gray-800",
     useDataHook: useHorrorMovies,
@@ -155,7 +142,6 @@ export const MOVIE_SECTIONS = [
   },
   {
     title: "Phim Cổ Trang",
-    emoji: "🏛️",
     sectionKey: "history",
     badgeColor: "bg-amber-600",
     useDataHook: useHistoryMovies,

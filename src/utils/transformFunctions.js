@@ -84,7 +84,8 @@ export const transformMovieDetail = (data) => {
 };
 
 export const transformLatestMovies = (data) => {
-  const items = data?.items || [];
+  // /v1/api/home trả về items lồng trong data.data.items (khác endpoint v3 cũ trả items ở top-level)
+  const items = data?.data?.items || data?.items || [];
 
   return items.map((movie) => ({
     id: movie._id,

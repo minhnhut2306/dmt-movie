@@ -22,7 +22,7 @@ const Home = () => {
   const handleSectionEnd = (movieList, updateFn) => originalHandleSectionEnd(movieList, updateFn);
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen">
       <HeroBanner
         currentHeroIndex={currentHeroIndex}
         setCurrentHeroIndex={setCurrentHeroIndex}
@@ -33,12 +33,11 @@ const Home = () => {
         handleHeroMove={handleHeroMove}
       />
 
-      <div className="container mx-auto px-4 py-8 sm:py-12">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 max-w-7xl">
         {MOVIE_SECTIONS.map((section) => (
           <GenericMoviesSection
             key={section.sectionKey}
             title={section.title}
-            emoji={section.emoji}
             sectionKey={section.sectionKey}
             badgeColor={section.badgeColor}
             countText={section.countText}

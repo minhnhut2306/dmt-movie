@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Search, ChevronDown, Filter, History, Play, Trash2 } from "lucide-react";
-import { useNavigate, Link } from "react-router-dom";
+import { Home, X, Search, ChevronDown, Filter, History, Play, Trash2, Compass } from "lucide-react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import FilterModal from "./FilterModal";
 import {
   useDynamicGenres,
@@ -11,8 +11,19 @@ import NotificationBell from "./NotificationBell";
 import { getAllWatchHistory, removeFromWatchHistory } from "../utils/watchHistory";
 import { getSafeImageUrl } from "../utils/imageHelper";
 
+const NAV_LINKS = [
+  { to: "/category/danh-sach/phim-bo", label: "Phim Bộ" },
+  { to: "/category/danh-sach/phim-le", label: "Phim Lẻ" },
+  { to: "/category/danh-sach/phim-chieu-rap", label: "Chiếu Rạp" },
+  { to: "/category/danh-sach/hoat-hinh", label: "Hoạt Hình" },
+  { to: "/category/danh-sach/phim-vietsub", label: "Vietsub" },
+  { to: "/category/danh-sach/phim-thuyet-minh", label: "Thuyết Minh" },
+  { to: "/category/danh-sach/phim-long-tieng", label: "Lồng Tiếng" },
+];
+
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -20,6 +31,14 @@ const Navbar = () => {
   const [searchInput, setSearchInput] = useState('');
   const [showHistory, setShowHistory] = useState(false);
   const [historyItems, setHistoryItems] = useState([]);
+  const [showMobileSheet, setShowMobileSheet] = useState(false);
+
+  useEffect(() => {
+    setIsMenuOpen(false);
+    setShowSearchDropdown(false);
+    setShowHistory(false);
+    setShowMobileSheet(false);
+  }, [location.pathname]);
 
   const openHistory = () => {
     setHistoryItems(getAllWatchHistory().slice(0, 12));
@@ -48,7 +67,7 @@ const Navbar = () => {
     if (filters.lang) params.append('lang', filters.lang);
     params.append('sort_field', filters.sortField);
     params.append('sort_type', filters.sortType);
-    
+
     navigate(`/filter?${params.toString()}`);
   };
 
@@ -65,11 +84,26 @@ const Navbar = () => {
   const { countries: displayCountries } = useDynamicCountries();
   const displayYears = ALL_YEARS;
 
+  const formatAgo = (timestamp) => {
+    if (!timestamp) return '';
+    const diff = Date.now() - timestamp;
+    const m = Math.floor(diff / 60000);
+    if (m < 1) return 'Vừa xem';
+    if (m < 60) return `${m} phút trước`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h} giờ trước`;
+    return `${Math.floor(h / 24)} ngày trước`;
+  };
+
   return (
     <>
       <style>{`
         body {
-          padding-top: 56px;
+          padding-top: 60px;
+          padding-bottom: 68px;
+        }
+        @media (min-width: 1024px) {
+          body { padding-bottom: 0; }
         }
         .scrollbar-hide {
           -ms-overflow-style: none;
@@ -79,489 +113,512 @@ const Navbar = () => {
           display: none;
         }
       `}</style>
-      
-      <nav className="bg-black text-white shadow-lg fixed top-0 left-0 right-0 z-[9999]">
-        {/* Hàng 1: Logo + Menu chính + Actions */}
-        <div className="border-b border-gray-800">
-          <div className="max-w-full px-2">
-            <div className="flex items-center justify-between h-14">
-              
-              {/* Logo */}
-              <Link to="/" className="flex items-center">
-                <h1 className="text-2xl font-bold">
-                  <span className="text-orange-500">DMT</span>
-                  <span className="text-blue-400">Movie</span>
+
+      {/* ================= TOP BAR ================= */}
+      <nav className="glass-strong text-white fixed top-0 left-0 right-0 z-[9999] shadow-glass">
+        {/* Signature gradient hairline — subtle depth cue at the base of the bar */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-iris-400/50 to-transparent pointer-events-none" />
+
+        <div className="max-w-full px-3 lg:px-6">
+          <div className="flex items-center justify-between h-[60px]">
+
+            {/* Logo */}
+            <Link to="/" className="group flex items-center gap-2.5 shrink-0 focus-signature rounded-lg">
+              <span className="relative w-9 h-9 rounded-xl2 bg-gradient-to-br from-iris-400 via-iris-500 to-iris-600 flex items-center justify-center shadow-glow transition-transform duration-200 ease-out group-hover:scale-105 group-hover:-rotate-3">
+                <Compass className="w-5 h-5 text-white" strokeWidth={2.25} />
+                <span className="absolute inset-0 rounded-xl2 ring-1 ring-white/25" />
+              </span>
+              <div className="flex flex-col leading-none">
+                <h1 className="text-xl font-display font-bold tracking-tight">
+                  <span className="text-gradient-signature">DMT</span>
+                  <span className="text-white/90"> Movie</span>
                 </h1>
-              </Link>
-
-              {/* Desktop Menu chính */}
-              <div className="hidden lg:flex items-center space-x-8">
-                <Link to="/category/danh-sach/phim-bo" className="text-sm font-medium hover:text-orange-500 transition-colors">
-                  Phim Bộ
-                </Link>
-                <Link to="/category/danh-sach/phim-le" className="text-sm font-medium hover:text-orange-500 transition-colors">
-                  Phim Lẻ
-                </Link>
-                <Link to="/category/danh-sach/phim-chieu-rap" className="text-sm font-medium hover:text-orange-500 transition-colors">
-                  Phim Chiếu Rạp
-                </Link>
-                <Link to="/category/danh-sach/hoat-hinh" className="text-sm font-medium hover:text-orange-500 transition-colors">
-                  Hoạt Hình
-                </Link>
-                <Link to="/category/danh-sach/phim-vietsub" className="text-sm font-medium hover:text-orange-500 transition-colors">
-                  Vietsub
-                </Link>
-                <Link to="/category/danh-sach/phim-thuyet-minh" className="text-sm font-medium hover:text-orange-500 transition-colors">
-                  Thuyết Minh
-                </Link>
-                <Link to="/category/danh-sach/phim-long-tieng" className="text-sm font-medium hover:text-orange-500 transition-colors">
-                  Lồng Tiếng
-                </Link>
-
-                {/* Thể loại Dropdown */}
-                <div className="relative">
-                  <button 
-                    onClick={() => setActiveDropdown(activeDropdown === 'genres-desktop' ? null : 'genres-desktop')}
-                    className="flex items-center text-sm font-medium hover:text-orange-500 transition-colors whitespace-nowrap"
-                  >
-                    Thể Loại
-                    <ChevronDown size={14} className="ml-1" />
-                  </button>
-                  {activeDropdown === 'genres-desktop' && (
-                    <>
-                      <div 
-                        className="fixed inset-0 z-[99998]"
-                        onClick={() => setActiveDropdown(null)}
-                      />
-                      <div 
-                        className="fixed bg-gray-900 rounded-lg shadow-2xl w-96 border border-gray-800 z-[99999] right-4"
-                        style={{ top: '64px' }}
-                      >
-                        <div className="p-4 grid grid-cols-3 gap-2 max-h-96 overflow-y-auto scrollbar-hide">
-                          {displayGenres.map(genre => (
-                            <Link
-                              key={genre.slug}
-                              to={genre.fullPath}
-                              onClick={() => setActiveDropdown(null)}
-                              className="px-3 py-2 bg-black hover:bg-orange-500 rounded-lg text-sm transition-all text-center border border-gray-800"
-                            >
-                              {genre.name}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {/* Quốc gia Dropdown */}
-                <div className="relative">
-                  <button 
-                    onClick={() => setActiveDropdown(activeDropdown === 'countries-desktop' ? null : 'countries-desktop')}
-                    className="flex items-center text-sm font-medium hover:text-orange-500 transition-colors whitespace-nowrap"
-                  >
-                    Quốc Gia
-                    <ChevronDown size={14} className="ml-1" />
-                  </button>
-                  {activeDropdown === 'countries-desktop' && (
-                    <>
-                      <div 
-                        className="fixed inset-0 z-[99998]"
-                        onClick={() => setActiveDropdown(null)}
-                      />
-                      <div 
-                        className="fixed bg-gray-900 rounded-lg shadow-2xl w-96 border border-gray-800 z-[99999] right-4"
-                        style={{ top: '64px' }}
-                      >
-                        <div className="p-4 grid grid-cols-3 gap-2 max-h-96 overflow-y-auto scrollbar-hide">
-                          {displayCountries.map(country => (
-                            <Link
-                              key={country.slug}
-                              to={country.fullPath}
-                              onClick={() => setActiveDropdown(null)}
-                              className="px-3 py-2 bg-black hover:bg-orange-500 rounded-lg text-sm transition-all text-center border border-gray-800"
-                            >
-                              {country.name}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {/* Năm Dropdown */}
-                <div className="relative">
-                  <button 
-                    onClick={() => setActiveDropdown(activeDropdown === 'years-desktop' ? null : 'years-desktop')}
-                    className="flex items-center text-sm font-medium hover:text-orange-500 transition-colors whitespace-nowrap"
-                  >
-                    Năm
-                    <ChevronDown size={14} className="ml-1" />
-                  </button>
-                  {activeDropdown === 'years-desktop' && (
-                    <>
-                      <div 
-                        className="fixed inset-0 z-[99998]"
-                        onClick={() => setActiveDropdown(null)}
-                      />
-                      <div 
-                        className="fixed bg-gray-900 rounded-lg shadow-2xl w-80 max-h-96 overflow-y-auto scrollbar-hide border border-gray-800 z-[99999] right-4"
-                        style={{ top: '64px' }}
-                      >
-                        <div className="p-4 grid grid-cols-4 gap-2">
-                          {displayYears.map(year => (
-                            <Link
-                              key={year.slug}
-                              to={year.fullPath}
-                              onClick={() => setActiveDropdown(null)}
-                              className="px-2 py-2 bg-black hover:bg-orange-500 rounded-lg text-sm transition-all text-center border border-gray-800"
-                            >
-                              {year.name}
-                            </Link>
-                          ))}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
+                <span className="hidden sm:block text-[9px] font-semibold tracking-[0.22em] text-white/30 uppercase mt-0.5 group-hover:text-iris-300/70 transition-colors duration-200">
+                  Cinematic Streaming
+                </span>
               </div>
+            </Link>
 
-              <div className="flex items-center space-x-1">
-                <NotificationBell />
-
-                {/* History Dropdown */}
-                <div className="relative">
-                  <button
-                    onClick={() => showHistory ? setShowHistory(false) : openHistory()}
-                    className="p-2 hover:text-orange-500 transition-colors"
-                    title="Lịch sử xem"
+            {/* Desktop Menu chính */}
+            <div className="hidden lg:flex items-center gap-0.5">
+              {NAV_LINKS.map(link => {
+                const isActive = location.pathname.startsWith(link.to);
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    className={`group relative px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-200 focus-signature ${
+                      isActive ? 'text-white bg-white/[0.06]' : 'text-white/65 hover:text-white hover:bg-white/5'
+                    }`}
                   >
-                    <History size={20} />
-                  </button>
+                    {link.label}
+                    <span
+                      className={`absolute left-3.5 right-3.5 -bottom-px h-[2px] rounded-full bg-gradient-to-r from-iris-400 to-ember-400 origin-center transition-transform duration-200 ease-out ${
+                        isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                      }`}
+                    />
+                  </Link>
+                );
+              })}
 
-                  {showHistory && (
-                    <>
-                      <div className="fixed inset-0 z-40" onClick={() => setShowHistory(false)} />
-                      <div className="absolute right-0 mt-2 w-80 bg-gray-900 rounded-xl shadow-2xl z-50 border border-gray-800 overflow-hidden top-full">
-                        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-800">
-                          <span className="text-sm font-semibold text-white">Xem gần đây</span>
+              {/* Thể loại Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setActiveDropdown(activeDropdown === 'genres-desktop' ? null : 'genres-desktop')}
+                  className={`group relative flex items-center gap-1 px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer focus-signature ${
+                    activeDropdown === 'genres-desktop' ? 'text-white bg-white/[0.06]' : 'text-white/65 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  Thể Loại
+                  <ChevronDown size={14} className={`transition-transform duration-200 ${activeDropdown === 'genres-desktop' ? 'rotate-180 text-iris-300' : ''}`} />
+                  <span
+                    className={`absolute left-3.5 right-3.5 -bottom-px h-[2px] rounded-full bg-gradient-to-r from-iris-400 to-ember-400 origin-center transition-transform duration-200 ease-out ${
+                      activeDropdown === 'genres-desktop' ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                    }`}
+                  />
+                </button>
+                {activeDropdown === 'genres-desktop' && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-[99998]"
+                      onClick={() => setActiveDropdown(null)}
+                    />
+                    <div
+                      className="fixed glass-strong rounded-card shadow-glass-lg w-96 z-[99999] right-4 animate-scale-in origin-top-right overflow-hidden"
+                      style={{ top: '68px' }}
+                    >
+                      <div className="h-0.5 bg-gradient-to-r from-iris-400 via-iris-300 to-ember-400" />
+                      <div className="p-4 grid grid-cols-3 gap-2 max-h-96 overflow-y-auto scrollbar-thin-iris">
+                        {displayGenres.map(genre => (
                           <Link
-                            to="/history"
-                            onClick={() => setShowHistory(false)}
-                            className="text-xs text-orange-400 hover:text-orange-300 transition-colors"
+                            key={genre.slug}
+                            to={genre.fullPath}
+                            onClick={() => setActiveDropdown(null)}
+                            className="px-3 py-2 bg-white/[0.03] hover:bg-iris-500/20 hover:text-iris-200 rounded-lg text-sm transition-all duration-200 text-center border border-white/5 cursor-pointer"
                           >
-                            Xem tất cả →
+                            {genre.name}
                           </Link>
-                        </div>
-
-                        {historyItems.length === 0 ? (
-                          <div className="py-10 text-center text-gray-500 text-sm">
-                            Chưa có lịch sử xem
-                          </div>
-                        ) : (
-                          <div className="max-h-96 overflow-y-auto scrollbar-hide">
-                            {historyItems.map(item => (
-                              <div
-                                key={item.slug}
-                                className="group flex items-center gap-3 px-3 py-2.5 hover:bg-gray-800 cursor-pointer transition-colors"
-                                onClick={() => { navigate(`/movie/${item.slug}`); setShowHistory(false); }}
-                              >
-                                <div className="relative flex-shrink-0 w-10 h-14 rounded overflow-hidden bg-gray-800">
-                                  <img
-                                    src={getSafeImageUrl(item.poster, item.title)}
-                                    alt={item.title}
-                                    className="w-full h-full object-cover"
-                                    referrerPolicy="no-referrer"
-                                  />
-                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                    <Play className="w-4 h-4 text-white fill-white" />
-                                  </div>
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-white text-sm font-medium truncate">{item.title}</p>
-                                  {item.lastEpisodeName && (
-                                    <p className="text-orange-400 text-xs truncate">{item.lastEpisodeName}</p>
-                                  )}
-                                  <p className="text-gray-500 text-xs mt-0.5">
-                                    {item.timestamp ? (() => {
-                                      const diff = Date.now() - item.timestamp;
-                                      const m = Math.floor(diff / 60000);
-                                      if (m < 1) return 'Vừa xem';
-                                      if (m < 60) return `${m} phút trước`;
-                                      const h = Math.floor(m / 60);
-                                      if (h < 24) return `${h} giờ trước`;
-                                      return `${Math.floor(h / 24)} ngày trước`;
-                                    })() : ''}
-                                  </p>
-                                </div>
-                                <button
-                                  onClick={(e) => handleRemoveHistory(e, item.slug)}
-                                  className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-600/30 hover:text-red-400 text-gray-600 rounded transition-all flex-shrink-0"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                        ))}
                       </div>
-                    </>
-                  )}
-                </div>
+                    </div>
+                  </>
+                )}
+              </div>
 
-                {/* Search Icon - Mobile */}
-                <div className="lg:hidden relative">
-                  <button
-                    onClick={() => setShowSearchDropdown(!showSearchDropdown)}
-                    className="p-2 hover:text-orange-500 transition-colors"
-                  >
-                    <Search size={20} />
-                  </button>
-
-                  {showSearchDropdown && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setShowSearchDropdown(false)}
-                      />
-                      <div
-                        className="absolute right-0 mt-2 w-72 bg-gray-900 rounded-xl shadow-2xl z-50 border border-gray-800 p-3"
-                      >
-                        <form onSubmit={handleSearch}>
-                          <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={15} />
-                            <input
-                              type="text"
-                              value={searchInput}
-                              onChange={(e) => setSearchInput(e.target.value)}
-                              placeholder="Nhập tên phim..."
-                              className="w-full bg-black text-white pl-9 pr-16 py-2 rounded-lg border border-gray-700 focus:border-orange-500 outline-none text-sm"
-                              autoFocus
-                            />
-                            <button
-                              type="submit"
-                              className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-md text-xs font-medium transition-all"
-                            >
-                              Tìm
-                            </button>
-                          </div>
-                        </form>
-                      </div>
-                    </>
-                  )}
-                </div>
-                
-                {/* Search Icon - Desktop */}
-                <div className="hidden lg:block relative">
-                  <button
-                    onClick={() => setShowSearchDropdown(!showSearchDropdown)}
-                    className="p-2 hover:text-orange-500 transition-colors"
-                    title="Tìm kiếm"
-                  >
-                    <Search size={20} />
-                  </button>
-                  
-                  {showSearchDropdown && (
-                    <>
-                      <div 
-                        className="fixed inset-0 z-40" 
-                        onClick={() => setShowSearchDropdown(false)}
-                      />
-                      <div className="absolute right-0 mt-2 w-80 bg-gray-900 rounded-lg shadow-2xl z-50 border border-gray-800 p-4 top-full">
-                        <form onSubmit={handleSearch}>
-                          <div className="relative">
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-                            <input
-                              type="text"
-                              value={searchInput}
-                              onChange={(e) => setSearchInput(e.target.value)}
-                              placeholder="Nhập tên phim..."
-                              className="w-full bg-black text-white pl-10 pr-4 py-2.5 rounded-lg border border-gray-800 focus:border-orange-500 outline-none transition-all"
-                              autoFocus
-                            />
-                          </div>
-                          <button
-                            type="submit"
-                            className="w-full mt-3 bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-lg font-medium transition-all"
+              {/* Quốc gia Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setActiveDropdown(activeDropdown === 'countries-desktop' ? null : 'countries-desktop')}
+                  className={`group relative flex items-center gap-1 px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer focus-signature ${
+                    activeDropdown === 'countries-desktop' ? 'text-white bg-white/[0.06]' : 'text-white/65 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  Quốc Gia
+                  <ChevronDown size={14} className={`transition-transform duration-200 ${activeDropdown === 'countries-desktop' ? 'rotate-180 text-iris-300' : ''}`} />
+                  <span
+                    className={`absolute left-3.5 right-3.5 -bottom-px h-[2px] rounded-full bg-gradient-to-r from-iris-400 to-ember-400 origin-center transition-transform duration-200 ease-out ${
+                      activeDropdown === 'countries-desktop' ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                    }`}
+                  />
+                </button>
+                {activeDropdown === 'countries-desktop' && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-[99998]"
+                      onClick={() => setActiveDropdown(null)}
+                    />
+                    <div
+                      className="fixed glass-strong rounded-card shadow-glass-lg w-96 z-[99999] right-4 animate-scale-in origin-top-right overflow-hidden"
+                      style={{ top: '68px' }}
+                    >
+                      <div className="h-0.5 bg-gradient-to-r from-iris-400 via-iris-300 to-ember-400" />
+                      <div className="p-4 grid grid-cols-3 gap-2 max-h-96 overflow-y-auto scrollbar-thin-iris">
+                        {displayCountries.map(country => (
+                          <Link
+                            key={country.slug}
+                            to={country.fullPath}
+                            onClick={() => setActiveDropdown(null)}
+                            className="px-3 py-2 bg-white/[0.03] hover:bg-iris-500/20 hover:text-iris-200 rounded-lg text-sm transition-all duration-200 text-center border border-white/5 cursor-pointer"
                           >
-                            Tìm kiếm
-                          </button>
-                        </form>
+                            {country.name}
+                          </Link>
+                        ))}
                       </div>
-                    </>
-                  )}
-                </div>
+                    </div>
+                  </>
+                )}
+              </div>
 
-                {/* Filter Icon - Desktop */}
+              {/* Năm Dropdown */}
+              <div className="relative">
                 <button
-                  onClick={() => setShowFilterModal(true)}
-                  className="hidden lg:block p-2 hover:text-orange-500 transition-colors"
-                  title="Bộ lọc"
+                  onClick={() => setActiveDropdown(activeDropdown === 'years-desktop' ? null : 'years-desktop')}
+                  className={`group relative flex items-center gap-1 px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap cursor-pointer focus-signature ${
+                    activeDropdown === 'years-desktop' ? 'text-white bg-white/[0.06]' : 'text-white/65 hover:text-white hover:bg-white/5'
+                  }`}
                 >
-                  <Filter size={20} />
+                  Năm
+                  <ChevronDown size={14} className={`transition-transform duration-200 ${activeDropdown === 'years-desktop' ? 'rotate-180 text-iris-300' : ''}`} />
+                  <span
+                    className={`absolute left-3.5 right-3.5 -bottom-px h-[2px] rounded-full bg-gradient-to-r from-iris-400 to-ember-400 origin-center transition-transform duration-200 ease-out ${
+                      activeDropdown === 'years-desktop' ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'
+                    }`}
+                  />
                 </button>
-
-                {/* Mobile Menu Button */}
-                <button
-                  onClick={toggleMenu}
-                  className="lg:hidden p-2 hover:text-orange-500 transition-colors"
-                >
-                  {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-                </button>
+                {activeDropdown === 'years-desktop' && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-[99998]"
+                      onClick={() => setActiveDropdown(null)}
+                    />
+                    <div
+                      className="fixed glass-strong rounded-card shadow-glass-lg w-80 max-h-96 overflow-y-auto scrollbar-thin-iris z-[99999] right-4 animate-scale-in origin-top-right overflow-hidden"
+                      style={{ top: '68px' }}
+                    >
+                      <div className="h-0.5 bg-gradient-to-r from-iris-400 via-iris-300 to-ember-400" />
+                      <div className="p-4 grid grid-cols-4 gap-2">
+                        {displayYears.map(year => (
+                          <Link
+                            key={year.slug}
+                            to={year.fullPath}
+                            onClick={() => setActiveDropdown(null)}
+                            className="px-2 py-2 bg-white/[0.03] hover:bg-iris-500/20 hover:text-iris-200 rounded-lg text-sm transition-all duration-200 text-center border border-white/5 cursor-pointer"
+                          >
+                            {year.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
-          </div>
-        </div>
 
+            <div className="flex items-center gap-1">
+              <NotificationBell />
 
-
-        {/* Mobile Menu */}
-        <div className={`lg:hidden fixed inset-0 z-50 transition-all duration-300 ${isMenuOpen ? 'visible' : 'invisible'}`}>
-          <div
-            className={`absolute inset-0 bg-black transition-opacity duration-300 ${isMenuOpen ? 'opacity-70' : 'opacity-0'}`}
-            onClick={toggleMenu}
-          />
-
-          <div className={`absolute left-0 top-0 h-full w-80 bg-black shadow-2xl transform transition-transform duration-300 ${isMenuOpen ? 'translate-x-0' : '-translate-x-full'} border-r border-gray-800`}>
-
-            <div className="flex items-center justify-between p-4 border-b border-gray-800">
-              <h2 className="text-xl font-bold">
-                <span className="text-orange-500">DMT</span>
-                <span className="text-blue-400">Movie</span>
-              </h2>
-              <button onClick={toggleMenu} className="p-2 hover:text-orange-500 transition-colors">
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Mobile Search đã có trên navbar rồi, bỏ ở đây */}
-
-            <div className="p-4 overflow-y-auto h-full pb-32">
-              <div className="space-y-2">
-                {/* Grid 2 cột cho mobile */}
-                <div className="grid grid-cols-2 gap-2">
-                  <Link to="/category/danh-sach/phim-bo" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
-                    Phim Bộ
-                  </Link>
-                  <Link to="/category/danh-sach/phim-le" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
-                    Phim Lẻ
-                  </Link>
-                  <Link to="/category/danh-sach/phim-chieu-rap" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
-                    Phim Chiếu Rạp
-                  </Link>
-                  <Link to="/category/danh-sach/hoat-hinh" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
-                    Hoạt Hình
-                  </Link>
-                  <Link to="/category/danh-sach/phim-vietsub" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
-                    Vietsub
-                  </Link>
-                  <Link to="/category/danh-sach/phim-thuyet-minh" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
-                    Thuyết Minh
-                  </Link>
-                  <Link to="/category/danh-sach/phim-long-tieng" onClick={toggleMenu} className="block px-3 py-2.5 text-sm font-medium bg-gray-900 hover:bg-gray-800 hover:text-orange-500 rounded-lg transition-all text-center border border-gray-800">
-                    Lồng Tiếng
-                  </Link>
-                </div>
-
+              {/* History Dropdown — desktop only (mobile uses bottom nav sheet) */}
+              <div className="relative hidden lg:block">
                 <button
-                  onClick={() => setShowFilterModal(true)}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-all mt-4"
+                  onClick={() => showHistory ? setShowHistory(false) : openHistory()}
+                  className="w-10 h-10 flex items-center justify-center text-white/70 hover:text-iris-300 hover:bg-iris-500/10 rounded-xl2 transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 focus-signature"
+                  title="Lịch sử xem"
                 >
-                  <Filter className="w-4 h-4" />
-                  Bộ lọc nâng cao
+                  <History size={19} />
                 </button>
 
-                <div className="mt-4 space-y-2">
-                  <div>
-                    <button
-                      onClick={() => toggleDropdown('genres')}
-                      className="flex items-center justify-between w-full px-4 py-3 text-base font-medium hover:bg-gray-900 hover:text-orange-500 rounded-lg transition-all"
-                    >
-                      <span>Thể Loại</span>
-                      <ChevronDown size={18} className={`transition-transform duration-200 ${activeDropdown === 'genres' ? 'rotate-180' : ''}`} />
-                    </button>
-                    <div className={`overflow-hidden transition-all duration-300 ${activeDropdown === 'genres' ? 'max-h-64' : 'max-h-0'}`}>
-                      <div className="mt-2 p-2 bg-gray-900 rounded-lg">
-                        <div className="max-h-48 overflow-y-auto scrollbar-hide">
-                          <div className="grid grid-cols-2 gap-2">
-                            {displayGenres.map(genre => (
-                              <Link
-                                key={genre.slug}
-                                to={genre.fullPath}
-                                onClick={toggleMenu}
-                                className="block px-2 py-2 text-sm text-gray-300 hover:bg-orange-500 hover:text-white rounded-lg transition-all text-center"
-                              >
-                                {genre.name}
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
+                {showHistory && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowHistory(false)} />
+                    <div className="absolute right-0 mt-2 w-80 glass-strong rounded-card shadow-glass-lg z-50 overflow-hidden top-full animate-scale-in origin-top-right">
+                      <div className="h-0.5 bg-gradient-to-r from-iris-400 via-iris-300 to-ember-400" />
+                      <div className="flex items-center justify-between px-4 py-3 border-b border-white/5">
+                        <span className="text-sm font-semibold text-white">Xem gần đây</span>
+                        <Link
+                          to="/history"
+                          onClick={() => setShowHistory(false)}
+                          className="text-xs text-iris-300 hover:text-iris-200 transition-colors"
+                        >
+                          Xem tất cả →
+                        </Link>
                       </div>
-                    </div>
-                  </div>
 
-                  <div>
-                    <button
-                      onClick={() => toggleDropdown('countries')}
-                      className="flex items-center justify-between w-full px-4 py-3 text-base font-medium hover:bg-gray-900 hover:text-orange-500 rounded-lg transition-all"
-                    >
-                      <span>Quốc Gia</span>
-                      <ChevronDown size={18} className={`transition-transform duration-200 ${activeDropdown === 'countries' ? 'rotate-180' : ''}`} />
-                    </button>
-                    <div className={`overflow-hidden transition-all duration-300 ${activeDropdown === 'countries' ? 'max-h-64' : 'max-h-0'}`}>
-                      <div className="mt-2 p-2 bg-gray-900 rounded-lg">
-                        <div className="max-h-48 overflow-y-auto scrollbar-hide">
-                          <div className="grid grid-cols-2 gap-2">
-                            {displayCountries.map(country => (
-                              <Link
-                                key={country.slug}
-                                to={country.fullPath}
-                                onClick={toggleMenu}
-                                className="block px-2 py-2 text-sm text-gray-300 hover:bg-orange-500 hover:text-white rounded-lg transition-all text-center"
-                              >
-                                {country.name}
-                              </Link>
-                            ))}
-                          </div>
+                      {historyItems.length === 0 ? (
+                        <div className="py-10 text-center text-white/40 text-sm">
+                          Chưa có lịch sử xem
                         </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <button
-                      onClick={() => toggleDropdown('years')}
-                      className="flex items-center justify-between w-full px-4 py-3 text-base font-medium hover:bg-gray-900 hover:text-orange-500 rounded-lg transition-all"
-                    >
-                      <span>Năm Phát Hành</span>
-                      <ChevronDown size={18} className={`transition-transform duration-200 ${activeDropdown === 'years' ? 'rotate-180' : ''}`} />
-                    </button>
-                    <div className={`overflow-hidden transition-all duration-300 ${activeDropdown === 'years' ? 'max-h-64' : 'max-h-0'}`}>
-                      <div className="mt-2 max-h-48 overflow-y-auto scrollbar-hide">
-                        <div className="grid grid-cols-3 gap-2">
-                          {displayYears.map(year => (
-                            <Link
-                              key={year.slug}
-                              to={year.fullPath}
-                              onClick={toggleMenu}
-                              className="block px-2 py-2 text-sm text-gray-300 hover:bg-orange-500 hover:text-white rounded-lg transition-all text-center"
+                      ) : (
+                        <div className="max-h-96 overflow-y-auto scrollbar-thin-iris">
+                          {historyItems.map(item => (
+                            <div
+                              key={item.slug}
+                              className="group flex items-center gap-3 px-3 py-2.5 hover:bg-white/5 cursor-pointer transition-colors"
+                              onClick={() => { navigate(`/movie/${item.slug}`); setShowHistory(false); }}
                             >
-                              {year.name}
-                            </Link>
+                              <div className="relative flex-shrink-0 w-10 h-14 rounded-lg overflow-hidden bg-ink-700">
+                                <img
+                                  src={getSafeImageUrl(item.poster, item.title)}
+                                  alt={item.title}
+                                  className="w-full h-full object-cover"
+                                  referrerPolicy="no-referrer"
+                                />
+                                <div className="absolute inset-0 bg-ink-950/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <Play className="w-4 h-4 text-white fill-white" />
+                                </div>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-white text-sm font-medium truncate">{item.title}</p>
+                                {item.lastEpisodeName && (
+                                  <p className="text-iris-300 text-xs truncate">{item.lastEpisodeName}</p>
+                                )}
+                                <p className="text-white/35 text-xs mt-0.5">{formatAgo(item.timestamp)}</p>
+                              </div>
+                              <button
+                                onClick={(e) => handleRemoveHistory(e, item.slug)}
+                                className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-500/20 hover:text-red-400 text-white/30 rounded-lg transition-all flex-shrink-0 cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
                           ))}
                         </div>
-                      </div>
+                      )}
                     </div>
-                  </div>
-                </div>
+                  </>
+                )}
               </div>
+
+              {/* Search Icon - Desktop */}
+              <div className="hidden lg:block relative">
+                <button
+                  onClick={() => setShowSearchDropdown(!showSearchDropdown)}
+                  className="w-10 h-10 flex items-center justify-center text-white/70 hover:text-iris-300 hover:bg-iris-500/10 rounded-xl2 transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 focus-signature"
+                  title="Tìm kiếm"
+                >
+                  <Search size={19} />
+                </button>
+
+                {showSearchDropdown && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowSearchDropdown(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-80 glass-strong rounded-card shadow-glass-lg z-50 overflow-hidden top-full animate-scale-in origin-top-right">
+                      <div className="h-0.5 bg-gradient-to-r from-iris-400 via-iris-300 to-ember-400" />
+                      <form onSubmit={handleSearch} className="p-4">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                          <input
+                            type="text"
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
+                            placeholder="Nhập tên phim..."
+                            className="w-full bg-ink-900/80 text-white pl-10 pr-4 py-2.5 rounded-lg border border-white/10 focus:border-iris-400 outline-none transition-all placeholder:text-white/30"
+                            autoFocus
+                          />
+                        </div>
+                        <button
+                          type="submit"
+                          className="w-full mt-3 btn-signature text-white py-2.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer hover:-translate-y-px"
+                        >
+                          Tìm kiếm
+                        </button>
+                      </form>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Filter Icon - Desktop */}
+              <button
+                onClick={() => setShowFilterModal(true)}
+                className="hidden lg:flex w-10 h-10 items-center justify-center text-white/70 hover:text-iris-300 hover:bg-iris-500/10 rounded-xl2 transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 focus-signature"
+                title="Bộ lọc"
+              >
+                <Filter size={19} />
+              </button>
             </div>
           </div>
         </div>
       </nav>
 
-      <FilterModal 
+      {/* ================= MOBILE MENU (bottom sheet) ================= */}
+      <div className={`lg:hidden fixed inset-0 z-[9998] transition-all duration-300 ${isMenuOpen ? 'visible' : 'invisible pointer-events-none'}`}>
+        <div
+          className={`absolute inset-0 bg-ink-950/70 backdrop-blur-sm transition-opacity duration-300 ${isMenuOpen ? 'opacity-100' : 'opacity-0'}`}
+          onClick={toggleMenu}
+        />
+
+        <div className={`absolute left-0 right-0 bottom-0 max-h-[85vh] glass-strong rounded-t-sheet shadow-glass-lg transform transition-transform duration-300 ease-out ${isMenuOpen ? 'translate-y-0' : 'translate-y-full'}`}>
+          <div className="w-10 h-1.5 rounded-full bg-white/20 mx-auto mt-3" />
+
+          <div className="flex items-center justify-between px-5 pt-3 pb-2">
+            <h2 className="text-lg font-display font-bold text-white">Khám phá</h2>
+            <button onClick={toggleMenu} className="w-9 h-9 flex items-center justify-center text-white/60 hover:text-white transition-colors cursor-pointer">
+              <X size={18} />
+            </button>
+          </div>
+
+          <div className="px-5 pb-8 overflow-y-auto scrollbar-thin-iris" style={{ maxHeight: 'calc(85vh - 60px)' }}>
+            <div className="grid grid-cols-2 gap-2">
+              {NAV_LINKS.map(link => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={toggleMenu}
+                  className="min-h-[44px] flex items-center justify-center px-3 py-2.5 text-sm font-medium bg-white/[0.04] hover:bg-iris-500/20 hover:text-iris-200 rounded-lg transition-all duration-200 text-center border border-white/5 cursor-pointer"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+
+            <button
+              onClick={() => { setShowFilterModal(true); setIsMenuOpen(false); }}
+              className="w-full min-h-[48px] flex items-center justify-center gap-2 px-4 py-3 btn-signature text-white rounded-lg font-semibold transition-all duration-200 mt-4 cursor-pointer active:scale-[0.98]"
+            >
+              <Filter className="w-4 h-4" />
+              Bộ lọc nâng cao
+            </button>
+
+            <div className="mt-4 space-y-2">
+              {[
+                { key: 'genres', label: 'Thể Loại', items: displayGenres, colsClass: 'grid-cols-2' },
+                { key: 'countries', label: 'Quốc Gia', items: displayCountries, colsClass: 'grid-cols-2' },
+                { key: 'years', label: 'Năm Phát Hành', items: displayYears, colsClass: 'grid-cols-3' },
+              ].map(section => (
+                <div key={section.key}>
+                  <button
+                    onClick={() => toggleDropdown(section.key)}
+                    className="min-h-[48px] flex items-center justify-between w-full px-4 py-3 text-base font-medium text-white/85 hover:bg-white/5 rounded-lg transition-all duration-200 cursor-pointer"
+                  >
+                    <span>{section.label}</span>
+                    <ChevronDown size={18} className={`transition-transform duration-200 ${activeDropdown === section.key ? 'rotate-180 text-iris-300' : ''}`} />
+                  </button>
+                  <div className={`overflow-hidden transition-all duration-300 ${activeDropdown === section.key ? 'max-h-64' : 'max-h-0'}`}>
+                    <div className="mt-2 p-2 bg-white/[0.03] rounded-lg border border-white/5">
+                      <div className="max-h-48 overflow-y-auto scrollbar-thin-iris">
+                        <div className={`grid ${section.colsClass} gap-2`}>
+                          {section.items.map(entry => (
+                            <Link
+                              key={entry.slug}
+                              to={entry.fullPath}
+                              onClick={toggleMenu}
+                              className="min-h-[40px] flex items-center justify-center px-2 py-2 text-sm text-white/70 hover:bg-iris-500/20 hover:text-iris-200 rounded-lg transition-all duration-200 text-center cursor-pointer"
+                            >
+                              {entry.name}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ================= MOBILE SEARCH SHEET ================= */}
+      <div className={`lg:hidden fixed inset-0 z-[9998] transition-all duration-300 ${showSearchDropdown ? 'visible' : 'invisible pointer-events-none'}`}>
+        <div
+          className={`absolute inset-0 bg-ink-950/70 backdrop-blur-sm transition-opacity duration-300 ${showSearchDropdown ? 'opacity-100' : 'opacity-0'}`}
+          onClick={() => setShowSearchDropdown(false)}
+        />
+        <div className={`absolute left-0 right-0 bottom-0 glass-strong rounded-t-sheet shadow-glass-lg transform transition-transform duration-300 ease-out ${showSearchDropdown ? 'translate-y-0' : 'translate-y-full'}`}>
+          <div className="w-10 h-1.5 rounded-full bg-white/20 mx-auto mt-3" />
+          <form onSubmit={handleSearch} className="px-5 pt-4 pb-8">
+            <h2 className="text-lg font-display font-bold text-white mb-3">Tìm kiếm</h2>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Nhập tên phim..."
+                className="w-full bg-ink-900/80 text-white pl-10 pr-4 py-3.5 rounded-lg border border-white/10 focus:border-iris-400 outline-none text-base placeholder:text-white/30"
+                autoFocus={showSearchDropdown}
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full mt-3 min-h-[48px] btn-signature text-white rounded-lg font-semibold transition-all duration-200 cursor-pointer active:scale-[0.98]"
+            >
+              Tìm kiếm
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* ================= MOBILE HISTORY SHEET ================= */}
+      <div className={`lg:hidden fixed inset-0 z-[9998] transition-all duration-300 ${showHistory ? 'visible' : 'invisible pointer-events-none'}`}>
+        <div
+          className={`absolute inset-0 bg-ink-950/70 backdrop-blur-sm transition-opacity duration-300 ${showHistory ? 'opacity-100' : 'opacity-0'}`}
+          onClick={() => setShowHistory(false)}
+        />
+        <div className={`absolute left-0 right-0 bottom-0 max-h-[75vh] glass-strong rounded-t-sheet shadow-glass-lg transform transition-transform duration-300 ease-out ${showHistory ? 'translate-y-0' : 'translate-y-full'}`}>
+          <div className="w-10 h-1.5 rounded-full bg-white/20 mx-auto mt-3" />
+          <div className="flex items-center justify-between px-5 pt-3 pb-2">
+            <h2 className="text-lg font-display font-bold text-white">Xem gần đây</h2>
+            <Link to="/history" onClick={() => setShowHistory(false)} className="text-xs text-iris-300 hover:text-iris-200 transition-colors">
+              Xem tất cả →
+            </Link>
+          </div>
+          {historyItems.length === 0 ? (
+            <div className="py-12 text-center text-white/40 text-sm">Chưa có lịch sử xem</div>
+          ) : (
+            <div className="px-3 pb-8 overflow-y-auto scrollbar-thin-iris" style={{ maxHeight: 'calc(75vh - 60px)' }}>
+              {historyItems.map(item => (
+                <div
+                  key={item.slug}
+                  className="group flex items-center gap-3 px-2 py-2.5 hover:bg-white/5 rounded-lg cursor-pointer transition-colors active:scale-[0.99]"
+                  onClick={() => { navigate(`/movie/${item.slug}`); setShowHistory(false); }}
+                >
+                  <div className="relative flex-shrink-0 w-12 h-16 rounded-lg overflow-hidden bg-ink-700">
+                    <img
+                      src={getSafeImageUrl(item.poster, item.title)}
+                      alt={item.title}
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-sm font-medium truncate">{item.title}</p>
+                    {item.lastEpisodeName && (
+                      <p className="text-iris-300 text-xs truncate">{item.lastEpisodeName}</p>
+                    )}
+                    <p className="text-white/35 text-xs mt-0.5">{formatAgo(item.timestamp)}</p>
+                  </div>
+                  <button
+                    onClick={(e) => handleRemoveHistory(e, item.slug)}
+                    className="w-9 h-9 flex items-center justify-center text-white/30 hover:bg-red-500/20 hover:text-red-400 rounded-lg transition-all flex-shrink-0 cursor-pointer"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ================= BOTTOM NAV (mobile only) — thay thế hoàn toàn hamburger menu ================= */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-[9997] glass-strong shadow-glass-lg pb-[env(safe-area-inset-bottom)]">
+        <div className="grid grid-cols-4 h-[60px]">
+          <Link
+            to="/"
+            className={`flex flex-col items-center justify-center gap-0.5 min-w-[44px] cursor-pointer transition-colors duration-200 ${location.pathname === '/' ? 'text-iris-300' : 'text-white/55'}`}
+          >
+            <Home size={20} />
+            <span className="text-[10px] font-medium">Trang Chủ</span>
+          </Link>
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            className={`flex flex-col items-center justify-center gap-0.5 min-w-[44px] transition-colors duration-200 cursor-pointer ${isMenuOpen ? 'text-iris-300' : 'text-white/55 hover:text-iris-300'}`}
+          >
+            <Compass size={20} />
+            <span className="text-[10px] font-medium">Khám Phá</span>
+          </button>
+          <button
+            onClick={() => setShowSearchDropdown(true)}
+            className={`flex flex-col items-center justify-center gap-0.5 min-w-[44px] transition-colors duration-200 cursor-pointer ${showSearchDropdown ? 'text-iris-300' : 'text-white/55 hover:text-iris-300'}`}
+          >
+            <Search size={20} />
+            <span className="text-[10px] font-medium">Tìm Kiếm</span>
+          </button>
+          <button
+            onClick={openHistory}
+            className={`flex flex-col items-center justify-center gap-0.5 min-w-[44px] transition-colors duration-200 cursor-pointer ${showHistory ? 'text-iris-300' : 'text-white/55 hover:text-iris-300'}`}
+          >
+            <History size={20} />
+            <span className="text-[10px] font-medium">Lịch Sử</span>
+          </button>
+        </div>
+      </nav>
+
+      <FilterModal
         isOpen={showFilterModal}
         onClose={() => setShowFilterModal(false)}
         onApplyFilter={handleApplyFilter}

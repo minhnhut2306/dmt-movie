@@ -58,33 +58,33 @@ const PWAInstallPrompt = () => {
   if (!showPrompt || dismissed) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 animate-slide-up">
-      <div className="bg-[#1a252f] border border-orange-500/30 rounded-2xl shadow-2xl p-4 flex items-center gap-3">
+    <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] lg:bottom-4 left-4 right-4 z-50 animate-slide-up">
+      <div className="glass-strong rounded-xl2 shadow-glass-lg p-4 flex items-center gap-3 max-w-lg mx-auto">
         <img
           src="/icon-192x192.png"
           alt="DMT Movie"
-          className="w-12 h-12 rounded-xl flex-shrink-0"
+          className="w-12 h-12 rounded-xl2 flex-shrink-0"
         />
 
         <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold text-sm">Cài đặt DMT Movie</p>
+          <p className="text-white font-display font-semibold text-sm">Cài đặt DMT Movie</p>
           {isIOS ? (
-            <p className="text-gray-400 text-xs mt-0.5 leading-relaxed">
+            <p className="text-white/45 text-xs mt-0.5 leading-relaxed">
               Nhấn <Share size={11} className="inline mb-0.5" /> rồi chọn{" "}
-              <strong className="text-orange-400">"Thêm vào màn hình chính"</strong>
+              <strong className="text-iris-300">"Thêm vào màn hình chính"</strong>
             </p>
           ) : (
-            <p className="text-gray-400 text-xs mt-0.5">
+            <p className="text-white/45 text-xs mt-0.5">
               Xem phim nhanh hơn, không cần mạng mạnh
             </p>
           )}
         </div>
 
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-1.5 flex-shrink-0">
           {!isIOS && deferredPrompt && (
             <button
               onClick={handleInstall}
-              className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-400 text-white text-xs font-semibold px-3 py-2 rounded-xl transition-colors"
+              className="flex items-center gap-1.5 min-h-[40px] btn-signature text-white text-xs font-semibold px-3 py-2 rounded-xl2 transition-all duration-200 cursor-pointer active:scale-95"
             >
               <Download size={14} />
               Tải về
@@ -92,7 +92,7 @@ const PWAInstallPrompt = () => {
           )}
           <button
             onClick={handleDismiss}
-            className="p-1.5 hover:bg-gray-700 rounded-lg transition-colors text-gray-400 hover:text-white"
+            className="w-9 h-9 flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors text-white/40 hover:text-white cursor-pointer"
           >
             <X size={16} />
           </button>

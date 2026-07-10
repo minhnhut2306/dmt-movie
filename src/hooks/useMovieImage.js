@@ -1,15 +1,16 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { buildImageCandidates } from '../utils/imageHelper';
 
-export const useMovieImage = (rawUrl, fallbackText = 'No Image') => {
+export const useMovieImage = (rawUrl, fallbackText = 'No Image', opts = {}) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [srcIndex, setSrcIndex] = useState(0);
   const imgRef = useRef(null);
+  const { width, quality } = opts;
 
   const candidates = useMemo(
-    () => buildImageCandidates(rawUrl, fallbackText),
-    [rawUrl, fallbackText]
+    () => buildImageCandidates(rawUrl, fallbackText, { width, quality }),
+    [rawUrl, fallbackText, width, quality]
   );
 
   // Reset khi URL thay đổi (e.g. navigate sang phim khác)

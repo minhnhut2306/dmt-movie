@@ -45,54 +45,55 @@ const HistoryPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
+    <div className="min-h-screen text-white">
+      <div className="container mx-auto px-4 sm:px-6 py-6 max-w-6xl">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between mb-6 gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => navigate(-1)}
-              className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+              className="w-11 h-11 flex items-center justify-center glass hover:bg-iris-500/20 rounded-lg transition-all duration-200 cursor-pointer flex-shrink-0"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-                <Clock className="w-5 h-5 text-orange-400" />
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-2xl font-display font-bold flex items-center gap-2">
+                <Clock className="w-5 h-5 text-iris-300" />
                 Lịch Sử Xem
               </h1>
-              <p className="text-gray-400 text-sm mt-0.5">{history.length} phim đã xem</p>
+              <p className="text-white/40 text-xs sm:text-sm mt-0.5">{history.length} phim đã xem</p>
             </div>
           </div>
 
           {history.length > 0 && (
             <button
               onClick={() => setShowConfirm(true)}
-              className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-300 border border-red-500/40 hover:border-red-400/70 px-3 py-1.5 rounded-lg transition-all"
+              className="flex items-center gap-1.5 text-xs sm:text-sm text-red-400 hover:text-red-300 glass hover:bg-red-500/10 px-3 py-2 rounded-lg transition-all duration-200 cursor-pointer flex-shrink-0"
             >
               <Trash2 className="w-4 h-4" />
-              Xóa tất cả
+              <span className="hidden sm:inline">Xóa tất cả</span>
             </button>
           )}
         </div>
 
-        {/* Confirm Dialog */}
+        {/* Confirm Dialog — bottom sheet on mobile, centered glass modal on desktop */}
         {showConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-            <div className="bg-gray-800 rounded-xl p-6 mx-4 max-w-sm w-full border border-gray-700 shadow-2xl">
-              <h3 className="text-lg font-semibold mb-2">Xóa toàn bộ lịch sử?</h3>
-              <p className="text-gray-400 text-sm mb-5">Hành động này không thể hoàn tác.</p>
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-ink-950/80 backdrop-blur-sm animate-fade-in">
+            <div className="glass-strong rounded-t-sheet sm:rounded-xl2 p-6 w-full sm:mx-4 sm:max-w-sm shadow-glass-lg animate-slide-up sm:animate-scale-in">
+              <div className="w-10 h-1.5 rounded-full bg-white/20 mx-auto mb-4 sm:hidden" />
+              <h3 className="text-lg font-display font-semibold mb-2 text-white">Xóa toàn bộ lịch sử?</h3>
+              <p className="text-white/45 text-sm mb-5">Hành động này không thể hoàn tác.</p>
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowConfirm(false)}
-                  className="flex-1 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm transition-colors"
+                  className="flex-1 min-h-[46px] py-2 rounded-xl2 glass hover:bg-white/10 text-sm font-medium transition-all duration-200 cursor-pointer"
                 >
                   Hủy
                 </button>
                 <button
                   onClick={handleClearAll}
-                  className="flex-1 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-sm font-medium transition-colors"
+                  className="flex-1 min-h-[46px] py-2 rounded-xl2 bg-red-600 hover:bg-red-500 text-sm font-semibold transition-all duration-200 cursor-pointer active:scale-[0.98]"
                 >
                   Xóa hết
                 </button>
@@ -103,13 +104,18 @@ const HistoryPage = () => {
 
         {/* Empty state */}
         {history.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-24 text-center">
-            <Clock className="w-16 h-16 text-gray-700 mb-4" />
-            <p className="text-gray-400 text-lg font-medium">Chưa có lịch sử xem</p>
-            <p className="text-gray-600 text-sm mt-1">Xem phim để lịch sử hiện ở đây</p>
+          <div className="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
+            <div className="relative mb-5">
+              <div className="absolute inset-0 bg-iris-500/20 blur-2xl rounded-full" />
+              <div className="relative w-20 h-20 rounded-full glass-subtle flex items-center justify-center animate-float">
+                <Clock className="w-9 h-9 text-iris-300" strokeWidth={1.5} />
+              </div>
+            </div>
+            <p className="text-white text-lg font-display font-semibold">Chưa có lịch sử xem</p>
+            <p className="text-white/40 text-sm mt-1">Xem phim để lịch sử hiện ở đây</p>
             <button
               onClick={() => navigate('/')}
-              className="mt-6 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-full text-sm font-medium transition-colors"
+              className="mt-6 min-h-[46px] btn-signature text-white px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 cursor-pointer"
             >
               Khám phá phim
             </button>
@@ -117,14 +123,14 @@ const HistoryPage = () => {
         )}
 
         {/* Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 sm:gap-4">
           {history.map(item => (
             <div
               key={item.slug}
-              className="group cursor-pointer"
+              className="group cursor-pointer active:scale-[0.97] transition-transform duration-200"
               onClick={() => navigate(`/movie/${item.slug}`)}
             >
-              <div className="relative overflow-hidden rounded-xl aspect-[2/3] bg-gray-800">
+              <div className="relative overflow-hidden rounded-card aspect-[2/3] bg-ink-800 ring-1 ring-white/5 shadow-glass">
                 <img
                   src={getSafeImageUrl(item.poster, item.title)}
                   alt={item.title}
@@ -134,11 +140,11 @@ const HistoryPage = () => {
                 />
 
                 {/* Gradient */}
-                <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none" />
+                <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-ink-950 via-ink-950/50 to-transparent pointer-events-none" />
 
                 {/* Hover overlay */}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <div className="rounded-full bg-orange-500/90 p-3 scale-90 group-hover:scale-100 transition-transform">
+                <div className="absolute inset-0 bg-ink-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="rounded-full glass-strong p-3 scale-90 group-hover:scale-100 transition-transform">
                     <Play className="w-6 h-6 text-white fill-white" />
                   </div>
                 </div>
@@ -146,7 +152,7 @@ const HistoryPage = () => {
                 {/* Delete button */}
                 <button
                   onClick={(e) => { e.stopPropagation(); handleRemove(item.slug); }}
-                  className="absolute top-2 right-2 bg-black/70 hover:bg-red-600 text-gray-300 hover:text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all z-10"
+                  className="absolute top-2 right-2 w-8 h-8 flex items-center justify-center glass-strong text-white/60 hover:text-red-400 rounded-full opacity-0 group-hover:opacity-100 transition-all z-10 cursor-pointer"
                   title="Xóa khỏi lịch sử"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
@@ -154,7 +160,7 @@ const HistoryPage = () => {
 
                 {/* Type badge */}
                 {item.type && (
-                  <div className="absolute top-2 left-2 bg-black/70 text-xs px-1.5 py-0.5 rounded text-gray-300">
+                  <div className="absolute top-2 left-2 glass-strong text-[10px] px-2 py-0.5 rounded-md text-white/70">
                     {TYPE_LABEL[item.type] || item.type}
                   </div>
                 )}
@@ -162,7 +168,7 @@ const HistoryPage = () => {
                 {/* Episode badge */}
                 {item.lastEpisodeName && (
                   <div className="absolute bottom-2 left-2 right-2">
-                    <span className="bg-orange-500/90 text-white text-xs px-2 py-0.5 rounded truncate block text-center">
+                    <span className="bg-iris-500/80 text-white text-xs px-2 py-0.5 rounded-md truncate block text-center font-medium">
                       {item.lastEpisodeName}
                     </span>
                   </div>
@@ -172,7 +178,7 @@ const HistoryPage = () => {
               <p className="text-white text-xs font-medium mt-2 line-clamp-2 leading-tight">
                 {item.title}
               </p>
-              <p className="text-gray-500 text-xs mt-0.5">
+              <p className="text-white/35 text-xs mt-0.5">
                 {timeAgo(item.timestamp)}
               </p>
             </div>

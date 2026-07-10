@@ -5,7 +5,7 @@ import { useDynamicGenres, useDynamicCountries, ALL_YEARS } from '../utils/Categ
 const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
   const { genres } = useDynamicGenres();
   const { countries } = useDynamicCountries();
-  
+
   const [filters, setFilters] = useState({
     type: '',
     category: '',
@@ -65,43 +65,45 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
 
   if (!isOpen) return null;
 
+  const pillBase = "min-h-[40px] px-2 py-2 rounded-lg text-xs font-medium transition-all duration-200 cursor-pointer";
+  const pillActive = "btn-signature text-white";
+  const pillInactive = "bg-white/[0.04] text-white/60 border border-white/10 hover:bg-white/[0.08]";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={onClose} />
-      
-      <div className="relative bg-black w-full max-w-lg sm:max-w-4xl rounded-2xl shadow-2xl max-h-[85vh] overflow-hidden border border-orange-500/30">
+    <div className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+      <div className="absolute inset-0 bg-ink-950/80 backdrop-blur-sm" onClick={onClose} />
+
+      <div className="relative glass-strong w-full sm:max-w-4xl rounded-t-sheet sm:rounded-xl2 shadow-glass-lg max-h-[88vh] sm:max-h-[85vh] overflow-hidden animate-slide-up sm:animate-scale-in">
+        <div className="w-10 h-1.5 rounded-full bg-white/20 mx-auto mt-3 sm:hidden" />
+
         {/* Header - Compact */}
-        <div className="flex items-center justify-between p-3 sm:p-4 border-b border-gray-800 bg-gray-900">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 bg-orange-500 rounded-lg">
-              <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+        <div className="flex items-center justify-between p-4 border-b border-white/5">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-iris-400 to-iris-600 shadow-glow">
+              <Filter className="w-4 h-4 text-white" />
             </div>
-            <h2 className="text-lg sm:text-xl font-bold text-white">Bộ lọc</h2>
+            <h2 className="text-lg font-display font-bold text-white">Bộ lọc</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-gray-800 rounded-lg transition-colors"
+            className="w-9 h-9 flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
           >
-            <X className="w-5 h-5 text-gray-400" />
+            <X className="w-5 h-5 text-white/50" />
           </button>
         </div>
 
         {/* Content - Scrollable */}
-        <div className="p-3 sm:p-4 overflow-y-auto max-h-[calc(85vh-120px)] scrollbar-hide">
-          <div className="space-y-3">
+        <div className="p-4 overflow-y-auto max-h-[calc(88vh-140px)] sm:max-h-[calc(85vh-120px)] scrollbar-thin-iris">
+          <div className="space-y-3.5">
             {/* Loại phim - Always visible */}
             <div>
-              <label className="block text-xs font-semibold text-orange-400 mb-2">Loại phim</label>
+              <label className="block text-xs font-semibold text-iris-300 mb-2">Loại phim</label>
               <div className="grid grid-cols-2 gap-2">
                 {types.map(type => (
                   <button
                     key={type.value}
                     onClick={() => handleFilterChange('type', filters.type === type.value ? '' : type.value)}
-                    className={`px-2 py-2 rounded text-xs font-medium transition-all ${
-                      filters.type === type.value
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-gray-900 text-gray-300 border border-gray-800'
-                    }`}
+                    className={`${pillBase} ${filters.type === type.value ? pillActive : pillInactive}`}
                   >
                     {type.label}
                   </button>
@@ -111,17 +113,13 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
 
             {/* Ngôn ngữ - Always visible */}
             <div>
-              <label className="block text-xs font-semibold text-blue-400 mb-2">Ngôn ngữ</label>
+              <label className="block text-xs font-semibold text-iris-300 mb-2">Ngôn ngữ</label>
               <div className="grid grid-cols-3 gap-2">
                 {langs.map(lang => (
                   <button
                     key={lang.value}
                     onClick={() => handleFilterChange('lang', filters.lang === lang.value ? '' : lang.value)}
-                    className={`px-2 py-2 rounded text-xs font-medium transition-all ${
-                      filters.lang === lang.value
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-900 text-gray-300 border border-gray-800'
-                    }`}
+                    className={`${pillBase} ${filters.lang === lang.value ? pillActive : pillInactive}`}
                   >
                     {lang.label}
                   </button>
@@ -130,26 +128,26 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
             </div>
 
             {/* Thể loại - Collapsible on mobile */}
-            <div className="border border-gray-800 rounded-lg overflow-hidden">
+            <div className="border border-white/5 rounded-xl2 overflow-hidden">
               <button
                 onClick={() => toggleSection('category')}
-                className="w-full flex items-center justify-between p-3 bg-gray-900/50 hover:bg-gray-800/50 transition-colors"
+                className="w-full min-h-[48px] flex items-center justify-between p-3 hover:bg-white/5 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-purple-400">Thể loại</span>
+                  <span className="text-xs font-semibold text-iris-300">Thể loại</span>
                   {filters.category && (
-                    <span className="text-[10px] bg-purple-500 text-white px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] bg-iris-500/30 text-iris-200 px-2 py-0.5 rounded-full">
                       {genres.find(g => g.slug === filters.category)?.name}
                     </span>
                   )}
                 </div>
-                <ChevronDown 
-                  className={`w-4 h-4 text-gray-400 transition-transform ${expandedSection === 'category' ? 'rotate-180' : ''}`}
+                <ChevronDown
+                  className={`w-4 h-4 text-white/40 transition-transform duration-200 ${expandedSection === 'category' ? 'rotate-180' : ''}`}
                 />
               </button>
               {expandedSection === 'category' && (
-                <div className="p-3 bg-gray-900/30">
-                  <div className="grid grid-cols-3 gap-1.5 max-h-40 overflow-y-auto scrollbar-hide">
+                <div className="p-3 bg-white/[0.02] border-t border-white/5">
+                  <div className="grid grid-cols-3 gap-1.5 max-h-40 overflow-y-auto scrollbar-thin-iris">
                     {genres.map(genre => (
                       <button
                         key={genre.slug}
@@ -157,10 +155,10 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
                           handleFilterChange('category', filters.category === genre.slug ? '' : genre.slug);
                           toggleSection(null);
                         }}
-                        className={`px-2 py-1.5 rounded text-[10px] font-medium transition-all ${
+                        className={`px-2 py-1.5 rounded text-[10px] font-medium transition-all duration-200 cursor-pointer ${
                           filters.category === genre.slug
-                            ? 'bg-purple-500 text-white'
-                            : 'bg-gray-800 text-gray-300 border border-gray-700'
+                            ? 'bg-iris-500 text-white'
+                            : 'bg-white/[0.04] text-white/60 border border-white/10'
                         }`}
                       >
                         {genre.name}
@@ -172,26 +170,26 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
             </div>
 
             {/* Quốc gia - Collapsible on mobile */}
-            <div className="border border-gray-800 rounded-lg overflow-hidden">
+            <div className="border border-white/5 rounded-xl2 overflow-hidden">
               <button
                 onClick={() => toggleSection('country')}
-                className="w-full flex items-center justify-between p-3 bg-gray-900/50 hover:bg-gray-800/50 transition-colors"
+                className="w-full min-h-[48px] flex items-center justify-between p-3 hover:bg-white/5 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-green-400">Quốc gia</span>
+                  <span className="text-xs font-semibold text-emerald-400">Quốc gia</span>
                   {filters.country && (
-                    <span className="text-[10px] bg-green-500 text-white px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] bg-emerald-500/30 text-emerald-300 px-2 py-0.5 rounded-full">
                       {countries.find(c => c.slug === filters.country)?.name}
                     </span>
                   )}
                 </div>
-                <ChevronDown 
-                  className={`w-4 h-4 text-gray-400 transition-transform ${expandedSection === 'country' ? 'rotate-180' : ''}`}
+                <ChevronDown
+                  className={`w-4 h-4 text-white/40 transition-transform duration-200 ${expandedSection === 'country' ? 'rotate-180' : ''}`}
                 />
               </button>
               {expandedSection === 'country' && (
-                <div className="p-3 bg-gray-900/30">
-                  <div className="grid grid-cols-3 gap-1.5 max-h-40 overflow-y-auto scrollbar-hide">
+                <div className="p-3 bg-white/[0.02] border-t border-white/5">
+                  <div className="grid grid-cols-3 gap-1.5 max-h-40 overflow-y-auto scrollbar-thin-iris">
                     {countries.map(country => (
                       <button
                         key={country.slug}
@@ -199,10 +197,10 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
                           handleFilterChange('country', filters.country === country.slug ? '' : country.slug);
                           toggleSection(null);
                         }}
-                        className={`px-2 py-1.5 rounded text-[10px] font-medium transition-all ${
+                        className={`px-2 py-1.5 rounded text-[10px] font-medium transition-all duration-200 cursor-pointer ${
                           filters.country === country.slug
-                            ? 'bg-green-500 text-white'
-                            : 'bg-gray-800 text-gray-300 border border-gray-700'
+                            ? 'bg-emerald-500 text-white'
+                            : 'bg-white/[0.04] text-white/60 border border-white/10'
                         }`}
                       >
                         {country.name}
@@ -214,26 +212,26 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
             </div>
 
             {/* Năm - Collapsible on mobile */}
-            <div className="border border-gray-800 rounded-lg overflow-hidden">
+            <div className="border border-white/5 rounded-xl2 overflow-hidden">
               <button
                 onClick={() => toggleSection('year')}
-                className="w-full flex items-center justify-between p-3 bg-gray-900/50 hover:bg-gray-800/50 transition-colors"
+                className="w-full min-h-[48px] flex items-center justify-between p-3 hover:bg-white/5 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-red-400">Năm phát hành</span>
+                  <span className="text-xs font-semibold text-ember-400">Năm phát hành</span>
                   {filters.year && (
-                    <span className="text-[10px] bg-red-500 text-white px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] bg-ember-500/30 text-ember-300 px-2 py-0.5 rounded-full">
                       {filters.year}
                     </span>
                   )}
                 </div>
-                <ChevronDown 
-                  className={`w-4 h-4 text-gray-400 transition-transform ${expandedSection === 'year' ? 'rotate-180' : ''}`}
+                <ChevronDown
+                  className={`w-4 h-4 text-white/40 transition-transform duration-200 ${expandedSection === 'year' ? 'rotate-180' : ''}`}
                 />
               </button>
               {expandedSection === 'year' && (
-                <div className="p-3 bg-gray-900/30">
-                  <div className="grid grid-cols-5 gap-1.5 max-h-40 overflow-y-auto scrollbar-hide">
+                <div className="p-3 bg-white/[0.02] border-t border-white/5">
+                  <div className="grid grid-cols-5 gap-1.5 max-h-40 overflow-y-auto scrollbar-thin-iris">
                     {ALL_YEARS.map(year => (
                       <button
                         key={year.slug}
@@ -241,10 +239,10 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
                           handleFilterChange('year', filters.year === year.slug ? '' : year.slug);
                           toggleSection(null);
                         }}
-                        className={`px-1.5 py-1.5 rounded text-[10px] font-medium transition-all ${
+                        className={`px-1.5 py-1.5 rounded text-[10px] font-medium transition-all duration-200 cursor-pointer ${
                           filters.year === year.slug
-                            ? 'bg-red-500 text-white'
-                            : 'bg-gray-800 text-gray-300 border border-gray-700'
+                            ? 'bg-ember-500 text-white'
+                            : 'bg-white/[0.04] text-white/60 border border-white/10'
                         }`}
                       >
                         {year.name}
@@ -258,38 +256,30 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
             {/* Sắp xếp - Compact */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-yellow-400 mb-2">Sắp xếp</label>
+                <label className="block text-xs font-semibold text-ember-400 mb-2">Sắp xếp</label>
                 <select
                   value={filters.sortField}
                   onChange={(e) => handleFilterChange('sortField', e.target.value)}
-                  className="w-full px-2 py-2 text-xs bg-gray-900 text-white rounded border border-gray-800 focus:border-orange-500 outline-none"
+                  className="w-full min-h-[40px] px-2 py-2 text-xs bg-white/[0.04] text-white rounded-lg border border-white/10 focus:border-iris-400 outline-none cursor-pointer"
                 >
                   {sortFields.map(field => (
-                    <option key={field.value} value={field.value}>{field.label}</option>
+                    <option key={field.value} value={field.value} className="bg-ink-900">{field.label}</option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-yellow-400 mb-2">Thứ tự</label>
+                <label className="block text-xs font-semibold text-ember-400 mb-2">Thứ tự</label>
                 <div className="grid grid-cols-2 gap-1.5">
                   <button
                     onClick={() => handleFilterChange('sortType', 'desc')}
-                    className={`px-2 py-2 rounded text-xs font-medium transition-all ${
-                      filters.sortType === 'desc'
-                        ? 'bg-yellow-500 text-white'
-                        : 'bg-gray-900 text-gray-300 border border-gray-800'
-                    }`}
+                    className={`${pillBase} ${filters.sortType === 'desc' ? 'bg-ember-500 text-white' : pillInactive}`}
                   >
                     Giảm
                   </button>
                   <button
                     onClick={() => handleFilterChange('sortType', 'asc')}
-                    className={`px-2 py-2 rounded text-xs font-medium transition-all ${
-                      filters.sortType === 'asc'
-                        ? 'bg-yellow-500 text-white'
-                        : 'bg-gray-900 text-gray-300 border border-gray-800'
-                    }`}
+                    className={`${pillBase} ${filters.sortType === 'asc' ? 'bg-ember-500 text-white' : pillInactive}`}
                   >
                     Tăng
                   </button>
@@ -300,16 +290,16 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
         </div>
 
         {/* Footer - Fixed at bottom */}
-        <div className="grid grid-cols-2 gap-2 p-3 sm:p-4 border-t border-gray-800 bg-black">
+        <div className="grid grid-cols-2 gap-2 p-4 border-t border-white/5 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-4">
           <button
             onClick={handleReset}
-            className="px-3 py-2.5 text-sm bg-gray-800 hover:bg-gray-700 text-white rounded-lg font-medium transition-all border border-gray-700"
+            className="min-h-[48px] px-3 py-2.5 text-sm glass hover:bg-white/10 text-white rounded-xl2 font-medium transition-all duration-200 cursor-pointer"
           >
             Đặt lại
           </button>
           <button
             onClick={handleApply}
-            className="px-3 py-2.5 text-sm bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium shadow-lg transition-all"
+            className="min-h-[48px] px-3 py-2.5 text-sm btn-signature text-white rounded-xl2 font-semibold transition-all duration-200 cursor-pointer active:scale-[0.98]"
           >
             Áp dụng
           </button>

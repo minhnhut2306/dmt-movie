@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, ExternalLink } from 'lucide-react';
+import { X, ExternalLink, TriangleAlert } from 'lucide-react';
 
 const TrailerModal = ({ isOpen, onClose, trailerUrl, movieName }) => {
   const [loadError, setLoadError] = useState(false);
@@ -59,49 +59,50 @@ const TrailerModal = ({ isOpen, onClose, trailerUrl, movieName }) => {
   if (!isOpen || !trailerUrl) return null;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    <div
+      className="fixed inset-0 bg-ink-950/85 backdrop-blur-md z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in"
       onClick={onClose}
     >
-      <div 
-        className="relative w-full max-w-5xl bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
+      <div
+        className="relative w-full sm:max-w-5xl glass-strong rounded-t-sheet sm:rounded-xl2 overflow-hidden shadow-glass-lg animate-slide-up sm:animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between p-4 bg-gray-800 border-b border-gray-700">
-          <h3 className="text-white font-bold text-lg flex items-center gap-2">
-            <span className="text-red-500">▶</span>
-            Trailer - {movieName}
+        <div className="w-10 h-1.5 rounded-full bg-white/20 mx-auto mt-3 sm:hidden" />
+        <div className="flex items-center justify-between p-4 border-b border-white/5">
+          <h3 className="text-white font-display font-bold text-base sm:text-lg flex items-center gap-2 truncate">
+            <span className="text-ember-400">▶</span>
+            <span className="truncate">Trailer - {movieName}</span>
           </h3>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 flex-shrink-0">
             <button
               onClick={handleOpenInNewTab}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors duration-200 group"
+              className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors duration-200 group cursor-pointer"
               title="Mở trong tab mới"
             >
-              <ExternalLink className="w-5 h-5 text-gray-300 group-hover:text-white" />
+              <ExternalLink className="w-5 h-5 text-white/60 group-hover:text-white" />
             </button>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors duration-200 group"
+              className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-lg transition-colors duration-200 group cursor-pointer"
             >
-              <X className="w-6 h-6 text-gray-300 group-hover:text-white" />
+              <X className="w-5 h-5 text-white/60 group-hover:text-white" />
             </button>
           </div>
         </div>
-        
+
         <div className="relative bg-black" style={{ paddingTop: '56.25%' }}>
           {loadError ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-8">
-              <div className="text-red-500 text-5xl mb-4">⚠️</div>
-              <h3 className="text-white text-xl font-bold mb-3">
+              <TriangleAlert className="w-12 h-12 text-ember-400 mb-4" strokeWidth={1.5} />
+              <h3 className="text-white text-xl font-display font-bold mb-3">
                 Không thể phát trailer trong trình duyệt
               </h3>
-              <p className="text-gray-400 mb-6 max-w-md">
+              <p className="text-white/45 mb-6 max-w-md text-sm">
                 Video này không cho phép nhúng. Vui lòng mở trực tiếp trên YouTube.
               </p>
               <button
                 onClick={handleOpenInNewTab}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors duration-300"
+                className="btn-signature text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-all duration-200 cursor-pointer"
               >
                 <ExternalLink className="w-5 h-5" />
                 Xem trên YouTube
@@ -134,12 +135,12 @@ const TrailerModal = ({ isOpen, onClose, trailerUrl, movieName }) => {
         </div>
         
         {!loadError && (
-          <div className="p-3 bg-gray-800/50 border-t border-gray-700">
-            <p className="text-gray-400 text-sm text-center">
-              Nếu trailer không hiển thị, 
-              <button 
+          <div className="p-3 border-t border-white/5 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:pb-3">
+            <p className="text-white/40 text-sm text-center">
+              Nếu trailer không hiển thị,
+              <button
                 onClick={handleOpenInNewTab}
-                className="text-blue-400 hover:text-blue-300 ml-1 underline"
+                className="text-iris-300 hover:text-iris-200 ml-1 underline cursor-pointer"
               >
                 nhấn vào đây để xem trên YouTube
               </button>

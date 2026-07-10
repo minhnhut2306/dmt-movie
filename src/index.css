@@ -10,13 +10,24 @@
     scroll-behavior: smooth;
   }
   body {
-    color: #1a202c; 
-    background-color: #f9fafb;
+    color: #F3F1FA;
+    background-color: #07070d;
+    background-image:
+      radial-gradient(circle at 12% 0%, rgba(112, 72, 240, 0.16) 0%, transparent 45%),
+      radial-gradient(circle at 88% 18%, rgba(255, 184, 77, 0.08) 0%, transparent 40%);
+    background-attachment: fixed;
     /* Hardware acceleration */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Sora', system-ui, sans-serif;
+  }
+  ::selection {
+    background: rgba(139, 109, 255, 0.35);
+    color: #fff;
+  }
+
   /* Optimize video rendering — only when playing, not on load */
   video:not([paused]) {
     transform: translateZ(0);
@@ -55,7 +66,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  
+
   /* Performance optimization */
   .gpu-accelerated {
     transform: translateZ(0);
@@ -64,6 +75,78 @@
     -webkit-backface-visibility: hidden;
     perspective: 1000px;
     -webkit-perspective: 1000px;
+  }
+
+  /* --- DMT Movie signature surfaces --- */
+
+  /* Glassmorphism: navbar, cards, modals, bottom sheets, overlays */
+  .glass {
+    background: rgba(23, 23, 40, 0.55);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid rgba(139, 109, 255, 0.12);
+  }
+  .glass-strong {
+    background: rgba(17, 17, 30, 0.78);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(139, 109, 255, 0.16);
+  }
+  .glass-subtle {
+    background: rgba(30, 30, 53, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  /* Signature CTA gradient (iris → ember hint) */
+  .btn-signature {
+    background-image: linear-gradient(135deg, #7048f0 0%, #8b6dff 60%, #a794ff 100%);
+    box-shadow: 0 8px 24px rgba(112, 72, 240, 0.35);
+  }
+  .btn-signature:hover {
+    box-shadow: 0 10px 30px rgba(112, 72, 240, 0.5);
+  }
+
+  .text-gradient-signature {
+    background-image: linear-gradient(90deg, #a794ff, #ffb84d);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Skeleton shimmer (used across all skeleton loading states) */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(90deg, #171728 0%, #1e1e35 50%, #171728 100%);
+  }
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(90deg, transparent, rgba(139, 109, 255, 0.12), transparent);
+    animation: shimmer 1.6s infinite;
+  }
+
+  /* Custom thin scrollbar for panels that must show scroll affordance */
+  .scrollbar-thin-iris::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin-iris::-webkit-scrollbar-thumb {
+    background: rgba(139, 109, 255, 0.35);
+    border-radius: 999px;
+  }
+  .scrollbar-thin-iris::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Focus ring, consistent across the app */
+  .focus-signature:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px #07070d, 0 0 0 4px rgba(139, 109, 255, 0.65);
   }
 }
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ShieldAlert, SearchX } from 'lucide-react';
 import { useMovieDetail } from '../../hooks/useMovies';
 import { transformMovieDetail } from '../../utils/transformFunctions';
 import { formatServerName } from '../../utils/serverUtils';
@@ -13,10 +13,13 @@ const MobileWatchLayout = lazy(() => import('../../components/DetailWatchMovie/M
 const DesktopWatchLayout = lazy(() => import('../../components/DetailWatchMovie/DesktopWatchLayout'));
 
 const LayoutFallback = () => (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+    <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-3"></div>
-            <p className="text-white text-sm">Đang tải...</p>
+            <div className="relative w-12 h-12 mx-auto mb-3">
+                <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+                <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-iris-400 animate-spin" />
+            </div>
+            <p className="text-white/50 text-sm">Đang tải...</p>
         </div>
     </div>
 );
@@ -144,21 +147,26 @@ const MoviePlay = () => {
     // Hiển thị lỗi nếu slug bị chặn
     if (isBlockedSlug) {
         return (
-            <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-                <div className="text-center max-w-md mx-auto px-4">
-                    <div className="text-red-500 text-6xl mb-4">🚫</div>
-                    <h2 className="text-white text-2xl mb-2">Phim này đã bị phong sát</h2>
-                    <p className="text-gray-400 mb-4">Đừng kiếm chi mắc công gở rồi</p>
-                    <div className="space-y-2">
+            <div className="min-h-screen flex items-center justify-center px-4">
+                <div className="text-center max-w-md mx-auto animate-fade-in">
+                    <div className="relative mb-5 inline-block">
+                        <div className="absolute inset-0 bg-ember-500/25 blur-2xl rounded-full" />
+                        <div className="relative w-20 h-20 rounded-full glass-subtle border border-ember-500/20 flex items-center justify-center">
+                            <ShieldAlert className="w-9 h-9 text-ember-400" strokeWidth={1.5} />
+                        </div>
+                    </div>
+                    <h2 className="text-white text-xl font-display font-bold mb-2">Phim này đã bị phong sát</h2>
+                    <p className="text-white/45 mb-6 text-sm">Đừng kiếm chi mắc công gở rồi</p>
+                    <div className="space-y-2.5">
                         <button
                             onClick={() => navigate(-1)}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors duration-300"
+                            className="w-full min-h-[46px] btn-signature text-white px-6 py-2.5 rounded-xl2 font-semibold transition-all duration-200 cursor-pointer"
                         >
                             Quay lại
                         </button>
                         <button
                             onClick={() => navigate('/')}
-                            className="w-full bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors duration-300"
+                            className="w-full min-h-[46px] glass text-white/80 px-6 py-2.5 rounded-xl2 font-semibold transition-all duration-200 hover:bg-white/10 cursor-pointer"
                         >
                             Về trang chủ
                         </button>
@@ -170,11 +178,13 @@ const MoviePlay = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+            <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                    <p className="text-white text-lg">Đang tải thông tin phim...</p>
-                    <p className="text-gray-400 text-sm mt-2">Slug: {slug}</p>
+                    <div className="relative w-16 h-16 mx-auto mb-4">
+                        <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+                        <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-iris-400 animate-spin" />
+                    </div>
+                    <p className="text-white text-base font-medium">Đang tải thông tin phim...</p>
                 </div>
             </div>
         );
@@ -182,27 +192,31 @@ const MoviePlay = () => {
 
     if (isError || error || !movieData) {
         return (
-            <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-                <div className="text-center max-w-md mx-auto px-4">
-                    <div className="text-red-500 text-6xl mb-4">⚠️</div>
-                    <h2 className="text-white text-2xl mb-2">Không tìm thấy phim</h2>
-                    <p className="text-gray-400 mb-2">Phim này có thể đã bị xóa hoặc không tồn tại.</p>
-                    <p className="text-gray-500 text-sm mb-4">Slug: {slug}</p>
+            <div className="min-h-screen flex items-center justify-center px-4">
+                <div className="text-center max-w-md mx-auto animate-fade-in">
+                    <div className="relative mb-5 inline-block">
+                        <div className="absolute inset-0 bg-ember-500/25 blur-2xl rounded-full" />
+                        <div className="relative w-20 h-20 rounded-full glass-subtle border border-ember-500/20 flex items-center justify-center">
+                            <SearchX className="w-9 h-9 text-ember-400" strokeWidth={1.5} />
+                        </div>
+                    </div>
+                    <h2 className="text-white text-xl font-display font-bold mb-2">Không tìm thấy phim</h2>
+                    <p className="text-white/45 mb-4 text-sm">Phim này có thể đã bị xóa hoặc không tồn tại.</p>
                     {error && (
-                        <p className="text-red-400 text-sm mb-4">
+                        <p className="text-ember-400/80 text-xs mb-4">
                             Lỗi: {error.message || 'Không thể tải dữ liệu phim'}
                         </p>
                     )}
-                    <div className="space-y-2">
+                    <div className="space-y-2.5">
                         <button
                             onClick={() => navigate(-1)}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors duration-300"
+                            className="w-full min-h-[46px] btn-signature text-white px-6 py-2.5 rounded-xl2 font-semibold transition-all duration-200 cursor-pointer"
                         >
                             Quay lại
                         </button>
                         <button
                             onClick={() => navigate('/')}
-                            className="w-full bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors duration-300"
+                            className="w-full min-h-[46px] glass text-white/80 px-6 py-2.5 rounded-xl2 font-semibold transition-all duration-200 hover:bg-white/10 cursor-pointer"
                         >
                             Về trang chủ
                         </button>

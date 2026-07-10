@@ -138,10 +138,10 @@ const SearchInput = ({
 
   return (
     <div className={`relative ${className}`}>
-      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
-        <Search className="text-blue-400" size={20} />
+      <div className="absolute left-3.5 top-1/2 transform -translate-y-1/2 z-10">
+        <Search className="text-iris-300" size={20} />
       </div>
-      
+
       <input
         ref={inputRef}
         type="text"
@@ -149,35 +149,35 @@ const SearchInput = ({
         onChange={handleInputChange}
         onKeyDown={handleKeyPress}
         placeholder={placeholder}
-        className={`bg-gray-800 text-white rounded-xl pl-11 pr-12 py-3 w-full outline-none transition-all text-sm lg:text-base border ${
-          isBlocked 
-            ? 'border-red-500 ring-2 ring-red-500/50 focus:ring-red-600 focus:border-red-600' 
-            : 'border-gray-700 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500'
-        } shadow-lg`}
+        className={`glass text-white rounded-xl2 pl-11 pr-12 py-3.5 w-full outline-none transition-all text-sm lg:text-base placeholder:text-white/30 ${
+          isBlocked
+            ? 'ring-2 ring-red-500/50 focus:ring-red-500/70'
+            : 'focus:ring-2 focus:ring-iris-400/50'
+        }`}
       />
-      
+
       {isLoading && (
-        <div className="absolute right-10 top-1/2 transform -translate-y-1/2">
-          <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+        <div className="absolute right-11 top-1/2 transform -translate-y-1/2">
+          <Loader2 className="w-4 h-4 animate-spin text-iris-300" />
         </div>
       )}
-      
+
       {isBlocked && !isLoading && (
-        <div className="absolute right-10 top-1/2 transform -translate-y-1/2">
-          <Ban className="w-4 h-4 text-red-500" />
+        <div className="absolute right-11 top-1/2 transform -translate-y-1/2">
+          <Ban className="w-4 h-4 text-red-400" />
         </div>
       )}
-      
+
       {showClearButton && searchInput && !isLoading && (
         <button
           type="button"
           onClick={handleClear}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 hover:bg-red-600 bg-gray-700 rounded-lg transition-all group"
+          className="absolute right-2.5 top-1/2 transform -translate-y-1/2 w-8 h-8 flex items-center justify-center hover:bg-red-500/20 bg-white/5 rounded-lg transition-all group cursor-pointer"
           title={isOnSearchPage ? "Quay lại trang trước" : "Xóa tìm kiếm"}
         >
-          <X 
-            size={18} 
-            className="text-gray-300 group-hover:text-white transition-colors" 
+          <X
+            size={16}
+            className="text-white/50 group-hover:text-red-400 transition-colors"
           />
         </button>
       )}
