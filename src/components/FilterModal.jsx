@@ -7,8 +7,18 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
   const { countries } = useDynamicCountries();
 
   useEffect(() => {
-    document.body.style.overflow = isOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    const prevent = (e) => e.preventDefault();
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      document.addEventListener('touchmove', prevent, { passive: false });
+    } else {
+      document.body.style.overflow = '';
+      document.removeEventListener('touchmove', prevent);
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('touchmove', prevent);
+    };
   }, [isOpen]);
 
   const [filters, setFilters] = useState({

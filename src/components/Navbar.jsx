@@ -43,8 +43,18 @@ const Navbar = () => {
 
   useEffect(() => {
     const anyOpen = isMenuOpen || showSearchDropdown || showHistory;
-    document.body.style.overflow = anyOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    const prevent = (e) => e.preventDefault();
+    if (anyOpen) {
+      document.body.style.overflow = 'hidden';
+      document.addEventListener('touchmove', prevent, { passive: false });
+    } else {
+      document.body.style.overflow = '';
+      document.removeEventListener('touchmove', prevent);
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('touchmove', prevent);
+    };
   }, [isMenuOpen, showSearchDropdown, showHistory]);
 
   const openHistory = () => {
