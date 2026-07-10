@@ -41,6 +41,12 @@ const Navbar = () => {
     setShowMobileSheet(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    const anyOpen = isMenuOpen || showSearchDropdown || showHistory;
+    document.body.style.overflow = anyOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isMenuOpen, showSearchDropdown, showHistory]);
+
   const openHistory = () => {
     setHistoryItems(getAllWatchHistory().slice(0, 12));
     setShowHistory(true);
