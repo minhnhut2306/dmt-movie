@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Home, X, Search, ChevronDown, Filter, History, Play, Trash2, Compass } from "lucide-react";
-import logoDmt from "../assets/logodmt.png";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import FilterModal from "./FilterModal";
 import {
@@ -124,18 +123,11 @@ const Navbar = () => {
           <div className="flex items-center justify-between h-[60px]">
 
             {/* Logo */}
-            <Link to="/" className="group flex items-center gap-2.5 shrink-0 focus-signature rounded-lg">
-              <img
-                src={logoDmt}
-                alt="DMT Movie"
-                className="h-9 w-9 object-cover rounded-full transition-transform duration-200 ease-out group-hover:scale-105"
-              />
-              <div className="flex flex-col leading-none">
-                <h1 className="text-xl font-display font-bold tracking-tight">
-                  <span className="text-gradient-signature">DMT</span>
-                  <span className="text-white/90"> Movie</span>
-                </h1>
-              </div>
+            <Link to="/" className="group flex items-center shrink-0 focus-signature rounded-lg">
+              <h1 className="text-xl font-display font-bold tracking-tight">
+                <span className="text-gradient-signature">DMT</span>
+                <span className="text-white/90"> Movie</span>
+              </h1>
             </Link>
 
             {/* Desktop Menu chính */}
