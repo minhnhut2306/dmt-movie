@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Bell, Download, Share2, X, Smartphone } from "lucide-react";
+import { Bell, Download, Share2, X, Smartphone, Rocket, History, Shield, Film } from "lucide-react";
 
 const READ_KEY = "dmt-notif-read";
 
@@ -40,7 +40,51 @@ const NotificationBell = () => {
     return () => document.removeEventListener("mousedown", handle);
   }, [open]);
 
-  const notifications = [...(!isStandalone ? [{ id: "pwa-install" }] : [])];
+  const STATIC_NOTIFS = [
+    {
+      id: "v1-release",
+      icon: Rocket,
+      iconBg: "bg-iris-500/10",
+      iconColor: "text-iris-400",
+      badge: "V1",
+      badgeBg: "bg-iris-600",
+      title: "DMT Movie V1 chính thức ra mắt!",
+      desc: "Giao diện mới hoàn toàn, chặn quảng cáo, lịch sử xem, tiếp tục xem dở và nhiều tính năng mới.",
+      time: "Hôm nay",
+    },
+    {
+      id: "v1-history",
+      icon: History,
+      iconBg: "bg-emerald-500/10",
+      iconColor: "text-emerald-400",
+      title: "Lịch sử xem & tiếp tục xem",
+      desc: "Xem lại lịch sử phim đã xem, tự động nhớ vị trí để tiếp tục từ chỗ dừng.",
+      time: "Hôm nay",
+    },
+    {
+      id: "v1-adblock",
+      icon: Shield,
+      iconBg: "bg-amber-500/10",
+      iconColor: "text-amber-400",
+      title: "Chặn quảng cáo tự động",
+      desc: "Quảng cáo bị chặn ngay ở cấp độ manifest & fragment — không bị gián đoạn khi xem phim.",
+      time: "Hôm nay",
+    },
+    {
+      id: "v1-ui",
+      icon: Film,
+      iconBg: "bg-ember-500/10",
+      iconColor: "text-ember-400",
+      title: "Giao diện cinema tối mới",
+      desc: "Thiết kế glassmorphism, bottom nav 5 tab, diễn viên hiển thị ảnh TMDB, bộ lọc nâng cao.",
+      time: "Hôm nay",
+    },
+  ];
+
+  const notifications = [
+    ...STATIC_NOTIFS,
+    ...(!isStandalone ? [{ id: "pwa-install" }] : []),
+  ];
   const unreadCount = notifications.filter((n) => !readSet.has(n.id)).length;
 
   const handleOpen = () => {
@@ -101,6 +145,30 @@ const NotificationBell = () => {
                   <p className="text-gray-500 text-xs">Hiện tại chưa có thông báo nào.</p>
                 </div>
               )}
+
+            {STATIC_NOTIFS.map((n) => {
+              const Icon = n.icon;
+              const isUnread = !readSet.has(n.id);
+              return (
+                <div key={n.id} className={`p-3 border-b border-white/5 ${isUnread ? 'bg-white/[0.02]' : ''}`}>
+                  <div className="flex gap-2.5">
+                    <div className={`w-8 h-8 rounded-xl ${n.iconBg} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                      <Icon size={15} className={n.iconColor} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <p className="text-white font-semibold text-xs leading-tight">{n.title}</p>
+                        {n.badge && (
+                          <span className={`${n.badgeBg || 'bg-iris-600'} text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full flex-shrink-0`}>{n.badge}</span>
+                        )}
+                      </div>
+                      <p className="text-gray-400 text-[11px] leading-relaxed">{n.desc}</p>
+                      <p className="text-gray-600 text-[10px] mt-1">{n.time}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
 
             {!isStandalone && (
               <div className="p-3">
