@@ -365,11 +365,11 @@ const Navbar = () => {
                 )}
               </div>
 
-              {/* Search Icon - Desktop */}
+              {/* Search Icon - Desktop: nút gradient nổi bật, không lẫn với các icon phẳng khác */}
               <div className="hidden lg:block relative">
                 <button
                   onClick={() => setShowSearchDropdown(!showSearchDropdown)}
-                  className="w-10 h-10 flex items-center justify-center text-white/70 hover:text-iris-300 hover:bg-iris-500/10 rounded-xl2 transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 focus-signature"
+                  className={`w-10 h-10 flex items-center justify-center rounded-full btn-signature text-white transition-all duration-200 cursor-pointer hover:scale-110 hover:shadow-glow active:scale-95 focus-signature ${showSearchDropdown ? 'scale-95' : ''}`}
                   title="Tìm kiếm"
                 >
                   <Search size={19} />
@@ -381,23 +381,23 @@ const Navbar = () => {
                       className="fixed inset-0 z-40"
                       onClick={() => setShowSearchDropdown(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-80 glass-strong rounded-card shadow-glass-lg z-50 overflow-hidden top-full animate-scale-in origin-top-right">
+                    <div className="absolute right-0 mt-2 w-80 glass-strong rounded-xl2 shadow-glass-lg z-50 overflow-hidden top-full animate-scale-in origin-top-right">
                       <div className="h-0.5 bg-gradient-to-r from-iris-400 via-iris-300 to-ember-400" />
                       <form onSubmit={handleSearch} className="p-4">
                         <div className="relative">
-                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+                          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
                           <input
                             type="text"
                             value={searchInput}
                             onChange={(e) => setSearchInput(e.target.value)}
                             placeholder="Nhập tên phim..."
-                            className="w-full bg-ink-900/80 text-white pl-10 pr-4 py-2.5 rounded-lg border border-white/10 focus:border-iris-400 outline-none transition-all placeholder:text-white/30"
+                            className="w-full bg-white/[0.04] text-white pl-11 pr-4 py-2.5 rounded-full border border-white/10 focus:border-iris-400/60 focus:bg-white/[0.06] outline-none transition-all duration-200 placeholder:text-white/30 focus:ring-2 focus:ring-iris-400/20"
                             autoFocus
                           />
                         </div>
                         <button
                           type="submit"
-                          className="w-full mt-3 btn-signature text-white py-2.5 rounded-lg font-semibold transition-all duration-200 cursor-pointer hover:-translate-y-px"
+                          className="w-full mt-3 btn-signature text-white py-2.5 rounded-full font-semibold transition-all duration-200 cursor-pointer hover:-translate-y-px active:scale-[0.98]"
                         >
                           Tìm kiếm
                         </button>
@@ -509,19 +509,19 @@ const Navbar = () => {
           <form onSubmit={handleSearch} className="px-5 pt-4 pb-8">
             <h2 className="text-lg font-display font-bold text-white mb-3">Tìm kiếm</h2>
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={18} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
               <input
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Nhập tên phim..."
-                className="w-full bg-ink-900/80 text-white pl-10 pr-4 py-3.5 rounded-lg border border-white/10 focus:border-iris-400 outline-none text-base placeholder:text-white/30"
+                className="w-full bg-white/[0.04] text-white pl-11 pr-4 py-3.5 rounded-full border border-white/10 focus:border-iris-400/60 focus:bg-white/[0.06] outline-none transition-all duration-200 text-base placeholder:text-white/30 focus:ring-2 focus:ring-iris-400/20"
                 autoFocus={showSearchDropdown}
               />
             </div>
             <button
               type="submit"
-              className="w-full mt-3 min-h-[48px] btn-signature text-white rounded-lg font-semibold transition-all duration-200 cursor-pointer active:scale-[0.98]"
+              className="w-full mt-3 min-h-[48px] btn-signature text-white rounded-full font-semibold transition-all duration-200 cursor-pointer active:scale-[0.98]"
             >
               Tìm kiếm
             </button>
@@ -546,7 +546,7 @@ const Navbar = () => {
           {historyItems.length === 0 ? (
             <div className="py-12 text-center text-white/40 text-sm">Chưa có lịch sử xem</div>
           ) : (
-            <div className="px-3 pb-8 overflow-y-auto scrollbar-thin-iris" style={{ maxHeight: 'calc(75vh - 60px)' }}>
+            <div className="px-3 overflow-y-auto scrollbar-thin-iris" style={{ maxHeight: 'calc(75vh - 60px)', paddingBottom: 'calc(68px + env(safe-area-inset-bottom))' }}>
               {historyItems.map(item => (
                 <div
                   key={item.slug}
@@ -600,10 +600,12 @@ const Navbar = () => {
           </button>
           <button
             onClick={() => setShowSearchDropdown(true)}
-            className={`flex flex-col items-center justify-center gap-0.5 transition-colors duration-200 cursor-pointer ${showSearchDropdown ? 'text-iris-300' : 'text-white/55'}`}
+            className="relative flex flex-col items-center justify-center cursor-pointer"
           >
-            <Search size={19} />
-            <span className="text-[9px] font-medium">Tìm Kiếm</span>
+            <span className={`absolute -top-5 w-12 h-12 rounded-full btn-signature flex items-center justify-center shadow-glow transition-transform duration-200 ${showSearchDropdown ? 'scale-95' : ''}`}>
+              <Search size={20} className="text-white" />
+            </span>
+            <span className={`text-[9px] font-medium mt-7 transition-colors duration-200 ${showSearchDropdown ? 'text-iris-300' : 'text-white/55'}`}>Tìm Kiếm</span>
           </button>
           <button
             onClick={() => { setShowFilterModal(true); }}
