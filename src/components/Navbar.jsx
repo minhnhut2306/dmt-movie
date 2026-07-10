@@ -124,12 +124,21 @@ const Navbar = () => {
           <div className="flex items-center justify-between h-[60px]">
 
             {/* Logo */}
-            <Link to="/" className="group flex items-center shrink-0 focus-signature rounded-lg">
+            <Link to="/" className="group flex items-center gap-2.5 shrink-0 focus-signature rounded-lg">
               <img
                 src={logoDmt}
                 alt="DMT Movie"
-                className="h-9 w-auto object-contain transition-transform duration-200 ease-out group-hover:scale-105"
+                className="h-9 w-9 object-cover rounded-full transition-transform duration-200 ease-out group-hover:scale-105"
               />
+              <div className="flex flex-col leading-none">
+                <h1 className="text-xl font-display font-bold tracking-tight">
+                  <span className="text-gradient-signature">DMT</span>
+                  <span className="text-white/90"> Movie</span>
+                </h1>
+                <span className="hidden sm:block text-[9px] font-semibold tracking-[0.22em] text-white/30 uppercase mt-0.5 group-hover:text-iris-300/70 transition-colors duration-200">
+                  Cinematic Streaming
+                </span>
+              </div>
             </Link>
 
             {/* Desktop Menu chính */}
