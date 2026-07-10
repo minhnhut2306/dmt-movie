@@ -42,7 +42,7 @@ const CategoryPage = () => {
     return categorySlug;
   };
 
-  // ✅ Đơn giản hóa - chỉ cần check categoryType có tồn tại
+  // Đơn giản hóa - chỉ cần check categoryType có tồn tại
   const categoryConfig = CATEGORY_TYPES[categoryType];
   const categoryInfo = categoryConfig ? {
     type: categoryConfig.title,
@@ -172,7 +172,7 @@ const CategoryPage = () => {
   const renderPagination = () => {
     if (totalPages <= 1) return null;
 
-    const maxVisiblePages = 5;
+    const maxVisiblePages = typeof window !== 'undefined' && window.innerWidth < 640 ? 3 : 5;
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
