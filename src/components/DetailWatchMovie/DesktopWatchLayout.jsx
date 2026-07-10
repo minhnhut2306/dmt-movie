@@ -20,26 +20,26 @@ const DesktopWatchLayout = ({
   const currentEpisodeName = movieData.episodes?.[currentServer]?.server_data?.[currentEpisode]?.name;
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4 lg:px-6 py-6 max-w-7xl">
         <div className="mb-6">
           <button
             onClick={() => setActiveLayout('detail')}
-            className="text-blue-400 hover:text-blue-300 mb-2 transition-colors duration-300"
+            className="text-white/60 hover:text-iris-300 mb-2 transition-colors duration-200 cursor-pointer text-sm font-medium flex items-center gap-1.5"
           >
             ← Quay lại chi tiết
           </button>
-          <h1 className="text-3xl font-bold text-white">{movieData.name}</h1>
-          <p className="text-gray-300">{movieData.origin_name}</p>
-          <p className="text-sm text-gray-400 mt-1">
+          <h1 className="text-3xl font-display font-bold text-white">{movieData.name}</h1>
+          <p className="text-white/50">{movieData.origin_name}</p>
+          <p className="text-sm text-white/35 mt-1">
             Đang xem: {currentEpisodeName} - {movieData.episodes?.[currentServer]?.server_name}
           </p>
         </div>
 
-      
+
         <div className="mb-6">
-          <div className="bg-black rounded-2xl overflow-hidden shadow-2xl">
-            <Suspense fallback={<div className="aspect-video bg-gray-900 flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" /></div>}>
+          <div className="bg-black rounded-xl2 overflow-hidden shadow-glass-lg ring-1 ring-white/5">
+            <Suspense fallback={<div className="aspect-video bg-ink-900 flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-2 border-white/10 border-t-iris-400" /></div>}>
               <VideoPlayer
                 currentVideoUrl={currentVideoUrl}
                 currentEmbedUrl={currentEmbedUrl}
@@ -54,18 +54,18 @@ const DesktopWatchLayout = ({
 
 
           {currentVideoUrl && (
-            <div className="mt-4 p-4 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-600/30">
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
+            <div className="mt-4 p-4 glass rounded-xl2">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-white/60">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
                   <span>Đang phát: {currentEpisodeName}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Globe className="w-4 h-4 text-blue-400" />
+                  <Globe className="w-4 h-4 text-iris-300" />
                   <span>{movieData.episodes?.[currentServer]?.server_name}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Eye className="w-4 h-4 text-purple-400" />
+                  <Eye className="w-4 h-4 text-ember-400" />
                   <span>{movieData.quality}</span>
                 </div>
               </div>
@@ -74,7 +74,7 @@ const DesktopWatchLayout = ({
         </div>
 
 
-        <Suspense fallback={<div className="h-20 bg-gray-800/50 rounded-2xl animate-pulse mb-6" />}>
+        <Suspense fallback={<div className="h-20 skeleton rounded-xl2 mb-6" />}>
           <EpisodeList
             episodes={movieData.episodes}
             currentServer={currentServer}
@@ -86,56 +86,56 @@ const DesktopWatchLayout = ({
         </Suspense>
 
 
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
-            <h3 className="text-lg font-bold text-white mb-4">Thông Tin Phim</h3>
+        <div className="grid md:grid-cols-3 gap-5 mb-8">
+          <div className="glass p-6 rounded-xl2 shadow-glass">
+            <h3 className="text-base font-display font-bold text-white mb-4">Thông Tin Phim</h3>
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-2">
-                <Star className="w-4 h-4 text-yellow-400" fill="currentColor" />
-                <span className="text-gray-400">Đánh giá:</span>
+                <Star className="w-4 h-4 text-ember-400" fill="currentColor" />
+                <span className="text-white/45">Đánh giá:</span>
                 <span className="text-white font-medium">{movieData.vote_average}/10</span>
               </div>
               <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-blue-400" />
-                <span className="text-gray-400">Năm:</span>
+                <Calendar className="w-4 h-4 text-iris-300" />
+                <span className="text-white/45">Năm:</span>
                 <span className="text-white font-medium">{movieData.year}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-green-400" />
-                <span className="text-gray-400">Thời lượng:</span>
+                <Clock className="w-4 h-4 text-iris-300" />
+                <span className="text-white/45">Thời lượng:</span>
                 <span className="text-white font-medium">{movieData.time}</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
-            <h3 className="text-lg font-bold text-white mb-4">Chi Tiết</h3>
+          <div className="glass p-6 rounded-xl2 shadow-glass">
+            <h3 className="text-base font-display font-bold text-white mb-4">Chi Tiết</h3>
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4 text-purple-400" />
-                <span className="text-gray-400">Chất lượng:</span>
+                <Eye className="w-4 h-4 text-ember-400" />
+                <span className="text-white/45">Chất lượng:</span>
                 <span className="text-white font-medium">{movieData.quality}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-yellow-400" />
-                <span className="text-gray-400">Ngôn ngữ:</span>
+                <Globe className="w-4 h-4 text-ember-400" />
+                <span className="text-white/45">Ngôn ngữ:</span>
                 <span className="text-white font-medium">{movieData.lang}</span>
               </div>
               <div className="flex items-center gap-2">
-                <Film className="w-4 h-4 text-green-400" />
-                <span className="text-gray-400">Số tập:</span>
+                <Film className="w-4 h-4 text-iris-300" />
+                <span className="text-white/45">Số tập:</span>
                 <span className="text-white font-medium">{movieData.episode_current}</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
-            <h3 className="text-lg font-bold text-white mb-4">Thể Loại</h3>
+          <div className="glass p-6 rounded-xl2 shadow-glass">
+            <h3 className="text-base font-display font-bold text-white mb-4">Thể Loại</h3>
             <div className="flex flex-wrap gap-2">
               {movieData.category?.slice(0, 4).map((cat, index) => (
                 <span
                   key={index}
-                  className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-medium"
+                  className="bg-iris-500/20 text-iris-200 border border-iris-400/20 px-3 py-1 rounded-full text-xs font-medium"
                 >
                   {cat.name}
                 </span>
@@ -144,24 +144,24 @@ const DesktopWatchLayout = ({
           </div>
         </div>
 
- 
-        <div className="bg-gray-800 p-6 rounded-2xl shadow-xl mb-8">
-          <h3 className="text-lg font-bold text-white mb-4">Nội Dung Phim</h3>
-          <p className="text-gray-300 leading-relaxed">{movieData.content}</p>
+
+        <div className="glass p-6 rounded-xl2 shadow-glass mb-8">
+          <h3 className="text-base font-display font-bold text-white mb-4">Nội Dung Phim</h3>
+          <p className="text-white/60 leading-relaxed text-sm" dangerouslySetInnerHTML={{ __html: movieData.content }} />
         </div>
 
 
-        <div className="bg-gray-800 p-6 rounded-2xl shadow-xl mb-8">
-          <h3 className="text-lg font-bold text-white mb-4">Diễn Viên</h3>
+        <div className="glass p-6 rounded-xl2 shadow-glass mb-8">
+          <h3 className="text-base font-display font-bold text-white mb-4">Diễn Viên</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {movieData.actor?.length > 0 ? movieData.actor.map((actor, index) => (
               <div
                 key={index}
-                className="bg-gray-700 border border-gray-600/60 text-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gray-600 transition-all duration-300 cursor-pointer text-center"
+                className="bg-white/[0.04] border border-white/10 text-white/70 px-3 py-2 rounded-lg text-sm hover:bg-white/[0.08] transition-all duration-200 cursor-pointer text-center"
               >
                 {actor}
               </div>
-            )) : <span className="text-gray-400 text-sm">Không có diễn viên nào.</span>}
+            )) : <span className="text-white/35 text-sm">Không có diễn viên nào.</span>}
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
 import { getSafeImageUrl } from '../../utils/imageHelper';
+import { useMovieImages } from '../../hooks/useMovies';
 import TrailerModal from './TrailerModal';
 
 const MobileDetailLayout = ({
@@ -10,37 +11,42 @@ const MobileDetailLayout = ({
 }) => {
   const [showTrailer, setShowTrailer] = useState(false);
 
+  // Ảnh TMDB chất lượng cao (nét hơn nhiều) — fallback về ảnh mặc định nếu phim không có tmdb id
+  const { data: hiResImages } = useMovieImages(movieData.slug);
+  const backdropSrc = hiResImages?.backdrop || getSafeImageUrl(movieData.thumb_url, movieData.name, { width: 900, quality: 88 });
+  const posterSrc = hiResImages?.poster || getSafeImageUrl(movieData.poster_url, movieData.name, { width: 500, quality: 90 });
+
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen">
       <div className="px-3 py-4">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-4 transition-colors duration-300"
+          className="flex items-center gap-2 text-white/60 hover:text-iris-300 mb-4 transition-colors duration-200 cursor-pointer min-h-[44px] -ml-2 px-2"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Quay lại</span>
+          <span className="text-sm font-medium">Quay lại</span>
         </button>
 
-        <div className="relative mb-6">
+        <div className="relative mb-5">
           <div
-            className="h-64 sm:h-80 bg-cover bg-center rounded-xl relative overflow-hidden"
-            style={{ backgroundImage: `url(${getSafeImageUrl(movieData.thumb_url, movieData.name)})` }}
+            className="h-64 sm:h-80 bg-cover bg-center rounded-xl2 relative overflow-hidden shadow-glass-lg"
+            style={{ backgroundImage: `url(${backdropSrc})` }}
           >
-            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-black/60"></div>
+            <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/45 to-transparent" />
             <div className="absolute bottom-4 left-4 right-4 z-10">
-              <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-white">{movieData.name}</h1>
-              <p className="text-lg text-gray-200 mb-3">{movieData.origin_name}</p>
-              <div className="flex items-center gap-3 text-sm text-gray-300 flex-wrap">
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-400" fill="currentColor" />
+              <h1 className="text-2xl sm:text-3xl font-display font-bold mb-1.5 text-white leading-tight">{movieData.name}</h1>
+              <p className="text-sm text-white/55 mb-3">{movieData.origin_name}</p>
+              <div className="flex items-center gap-3 text-xs text-white/70 flex-wrap">
+                <div className="flex items-center gap-1 text-ember-400 font-semibold">
+                  <Star className="w-3.5 h-3.5" fill="currentColor" />
                   <span>{movieData.vote_average}/10</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Users className="w-4 h-4" />
+                  <Users className="w-3.5 h-3.5" />
                   <span>{movieData.vote_count}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
+                  <Calendar className="w-3.5 h-3.5" />
                   <span>{movieData.year}</span>
                 </div>
               </div>
@@ -48,71 +54,71 @@ const MobileDetailLayout = ({
           </div>
         </div>
 
-        <div className="flex gap-4 mb-6">
-          <div className="w-28 sm:w-32 flex-shrink-0">
+        <div className="flex gap-3.5 mb-5">
+          <div className="w-24 sm:w-32 flex-shrink-0">
             <img
-              src={getSafeImageUrl(movieData.poster_url, movieData.name)}
+              src={posterSrc}
               alt={movieData.name}
-              className="w-full rounded-xl shadow-xl"
+              className="w-full rounded-card shadow-glass ring-1 ring-white/5"
               referrerPolicy="no-referrer"
             />
           </div>
-          <div className="flex-1 space-y-3">
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-blue-400" />
-                <span className="text-gray-400">Thời lượng:</span>
-                <span className="text-white font-medium">{movieData.time}</span>
+          <div className="flex-1 space-y-2.5 min-w-0">
+            <div className="space-y-1.5 text-xs">
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-iris-300 flex-shrink-0" />
+                <span className="text-white/45">Thời lượng:</span>
+                <span className="text-white font-medium truncate">{movieData.time}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Film className="w-4 h-4 text-green-400" />
-                <span className="text-gray-400">Số tập:</span>
-                <span className="text-white font-medium">{movieData.episode_current}</span>
+              <div className="flex items-center gap-1.5">
+                <Film className="w-3.5 h-3.5 text-iris-300 flex-shrink-0" />
+                <span className="text-white/45">Số tập:</span>
+                <span className="text-white font-medium truncate">{movieData.episode_current}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Eye className="w-4 h-4 text-purple-400" />
-                <span className="text-gray-400">Chất lượng:</span>
-                <span className="text-white font-medium">{movieData.quality}</span>
+              <div className="flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5 text-iris-300 flex-shrink-0" />
+                <span className="text-white/45">Chất lượng:</span>
+                <span className="text-white font-medium truncate">{movieData.quality}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Globe className="w-4 h-4 text-yellow-400" />
-                <span className="text-gray-400">Ngôn ngữ:</span>
-                <span className="text-white font-medium">{movieData.lang}</span>
+              <div className="flex items-center gap-1.5">
+                <Globe className="w-3.5 h-3.5 text-ember-400 flex-shrink-0" />
+                <span className="text-white/45">Ngôn ngữ:</span>
+                <span className="text-white font-medium truncate">{movieData.lang}</span>
               </div>
             </div>
 
             <button
               onClick={() => setActiveLayout('watch')}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+              className="w-full min-h-[46px] btn-signature text-white font-bold py-3 px-4 rounded-xl2 transition-all duration-200 active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Play className="w-5 h-5" fill="currentColor" />
+              <Play className="w-4.5 h-4.5" fill="currentColor" />
               Xem Phim
             </button>
 
             {movieData.trailer_url && (
               <button
                 onClick={() => setShowTrailer(true)}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                className="w-full min-h-[44px] glass text-white font-semibold py-2.5 px-4 rounded-xl2 transition-all duration-200 active:scale-[0.97] flex items-center justify-center gap-2 cursor-pointer"
               >
-                <Youtube className="w-4 h-4" />
+                <Youtube className="w-4 h-4 text-ember-400" />
                 Xem Trailer
               </button>
             )}
           </div>
         </div>
 
-        <div className="bg-gray-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
-          <h2 className="text-lg font-bold mb-3 text-white">Nội Dung Phim</h2>
-          <p className="text-gray-300 leading-relaxed text-sm">{movieData.content}</p>
+        <div className="glass p-4 rounded-xl2 shadow-glass mb-4">
+          <h2 className="text-base font-display font-bold mb-2.5 text-white">Nội Dung Phim</h2>
+          <p className="text-white/55 leading-relaxed text-sm" dangerouslySetInnerHTML={{ __html: movieData.content }} />
         </div>
 
-        <div className="bg-gray-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
-          <h3 className="text-lg font-bold mb-3 text-white">Thể Loại</h3>
+        <div className="glass p-4 rounded-xl2 shadow-glass mb-4">
+          <h3 className="text-base font-display font-bold mb-2.5 text-white">Thể Loại</h3>
           <div className="flex flex-wrap gap-2">
             {movieData.category?.map((cat, index) => (
               <span
                 key={index}
-                className="bg-blue-600 text-white px-3 py-2 rounded-full text-xs font-medium shadow-lg"
+                className="bg-iris-500/20 text-iris-200 border border-iris-400/20 px-3 py-1.5 rounded-full text-xs font-medium"
               >
                 {cat.name}
               </span>
@@ -120,17 +126,17 @@ const MobileDetailLayout = ({
           </div>
         </div>
 
-        <div className="bg-gray-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
-          <h3 className="text-lg font-bold mb-3 text-white">Diễn Viên</h3>
+        <div className="glass p-4 rounded-xl2 shadow-glass mb-4">
+          <h3 className="text-base font-display font-bold mb-2.5 text-white">Diễn Viên</h3>
           <div className="grid grid-cols-2 gap-2">
             {movieData.actor?.length > 0 ? movieData.actor.slice(0, 6).map((actor, index) => (
               <span
                 key={index}
-                className="bg-gray-700 border border-gray-600/60 text-gray-200 px-3 py-2 rounded-lg text-xs text-center"
+                className="bg-white/[0.04] border border-white/10 text-white/70 px-3 py-2 rounded-lg text-xs text-center truncate"
               >
                 {actor}
               </span>
-            )) : <span className="text-gray-400 text-xs">Không có diễn viên nào.</span>}
+            )) : <span className="text-white/35 text-xs">Không có diễn viên nào.</span>}
           </div>
         </div>
       </div>

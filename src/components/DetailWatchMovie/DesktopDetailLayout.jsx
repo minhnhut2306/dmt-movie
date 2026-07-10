@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
 import { getSafeImageUrl } from '../../utils/imageHelper';
+import { useMovieImages } from '../../hooks/useMovies';
 import TrailerModal from './TrailerModal';
 
 const DesktopDetailLayout = ({
@@ -10,36 +11,42 @@ const DesktopDetailLayout = ({
 }) => {
   const [showTrailer, setShowTrailer] = useState(false);
 
+  // Ảnh TMDB chất lượng cao (nét hơn nhiều) — fallback về ảnh mặc định nếu phim không có tmdb id
+  const { data: hiResImages } = useMovieImages(movieData.slug);
+  const backdropSrc = hiResImages?.backdrop || getSafeImageUrl(movieData.thumb_url, movieData.name, { width: 1280, quality: 88 });
+  const posterSrc = hiResImages?.poster || getSafeImageUrl(movieData.poster_url, movieData.name, { width: 600, quality: 90 });
+
   return (
-    <div className="min-h-screen bg-gray-900">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen">
+      <div className="container mx-auto px-4 lg:px-6 py-8 max-w-7xl">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-blue-400 hover:text-blue-300 mb-6 transition-colors duration-300"
+          className="flex items-center gap-2 text-white/60 hover:text-iris-300 mb-6 transition-colors duration-200 cursor-pointer focus-signature rounded-lg"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span>Quay lại</span>
+          <span className="text-sm font-medium">Quay lại</span>
         </button>
 
-        <div className="relative mb-12">
+        <div className="relative mb-10">
           <div
-            className="h-96 bg-cover bg-center rounded-2xl relative overflow-hidden"
-            style={{ backgroundImage: `url(${getSafeImageUrl(movieData.thumb_url, movieData.name)})` }}
+            className="h-[420px] bg-cover bg-center rounded-xl2 relative overflow-hidden shadow-glass-lg"
+            style={{ backgroundImage: `url(${backdropSrc})` }}
           >
-            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-black/60"></div>
-            <div className="absolute bottom-6 left-6 z-10">
-              <h1 className="text-4xl font-bold mb-2 text-white">{movieData.name}</h1>
-              <p className="text-xl text-gray-200 mb-4">{movieData.origin_name}</p>
-              <div className="flex items-center gap-4 text-sm text-gray-300">
-                <div className="flex items-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-400" fill="currentColor" />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/50 to-transparent" />
+            <div className="absolute -bottom-16 -left-16 w-72 h-72 bg-iris-500/25 rounded-full blur-[100px] pointer-events-none" />
+            <div className="absolute bottom-8 left-8 right-8 z-10">
+              <h1 className="font-display text-4xl font-bold mb-2 text-white tracking-tight">{movieData.name}</h1>
+              <p className="text-lg text-white/55 mb-4">{movieData.origin_name}</p>
+              <div className="flex items-center gap-5 text-sm text-white/70">
+                <div className="flex items-center gap-1.5 text-ember-400 font-semibold">
+                  <Star className="w-4 h-4" fill="currentColor" />
                   <span>{movieData.vote_average}/10</span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <Users className="w-4 h-4" />
                   <span>{movieData.vote_count} đánh giá</span>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1.5">
                   <Calendar className="w-4 h-4" />
                   <span>{movieData.year}</span>
                 </div>
@@ -50,76 +57,78 @@ const DesktopDetailLayout = ({
 
         <div className="grid lg:grid-cols-4 gap-8 mb-12">
           <div className="lg:col-span-1">
-            <img
-              src={getSafeImageUrl(movieData.poster_url, movieData.name)}
-              alt={movieData.name}
-              className="w-full rounded-2xl shadow-2xl transition-transform duration-300 hover:scale-105"
-              referrerPolicy="no-referrer"
-            />
+            <div className="rounded-xl2 overflow-hidden shadow-glass-lg ring-1 ring-white/5 transition-transform duration-300 hover:-translate-y-1">
+              <img
+                src={posterSrc}
+                alt={movieData.name}
+                className="w-full"
+                referrerPolicy="no-referrer"
+              />
+            </div>
             <button
               onClick={() => setActiveLayout('watch')}
-              className="w-full mt-6 bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+              className="w-full mt-5 min-h-[52px] btn-signature text-white font-bold py-3.5 px-6 rounded-xl2 transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 cursor-pointer focus-signature"
             >
               <Play className="w-5 h-5" fill="currentColor" />
               Xem Phim
             </button>
-            
+
             {movieData.trailer_url && (
               <button
                 onClick={() => setShowTrailer(true)}
-                className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                className="w-full mt-3 min-h-[52px] glass text-white font-semibold py-3.5 px-6 rounded-xl2 transition-all duration-200 hover:bg-white/10 flex items-center justify-center gap-2 cursor-pointer focus-signature"
               >
-                <Youtube className="w-5 h-5" />
+                <Youtube className="w-5 h-5 text-ember-400" />
                 Xem Trailer
               </button>
             )}
           </div>
 
-          <div className="lg:col-span-3 space-y-6">
-            <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
-              <h2 className="text-2xl font-bold mb-4 text-white">Thông Tin Phim</h2>
-              <p className="text-gray-300 mb-6 leading-relaxed">{movieData.content}</p>
+          <div className="lg:col-span-3 space-y-5">
+            <div className="glass p-6 rounded-xl2 shadow-glass">
+              <h2 className="text-xl font-display font-bold mb-4 text-white">Thông Tin Phim</h2>
+              <p className="text-white/60 mb-6 leading-relaxed text-sm" dangerouslySetInnerHTML={{ __html: movieData.content }} />
 
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-blue-400" />
-                    <span className="text-gray-400">Thời lượng:</span>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="w-4.5 h-4.5 text-iris-300" />
+                    <span className="text-white/45">Thời lượng:</span>
                     <span className="text-white font-medium">{movieData.time}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Film className="w-5 h-5 text-green-400" />
-                    <span className="text-gray-400">Tập phim:</span>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Film className="w-4.5 h-4.5 text-iris-300" />
+                    <span className="text-white/45">Tập phim:</span>
                     <span className="text-white font-medium">{movieData.episode_current}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Eye className="w-5 h-5 text-purple-400" />
-                    <span className="text-gray-400">Chất lượng:</span>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Eye className="w-4.5 h-4.5 text-iris-300" />
+                    <span className="text-white/45">Chất lượng:</span>
                     <span className="text-white font-medium">{movieData.quality}</span>
                   </div>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Globe className="w-5 h-5 text-yellow-400" />
-                    <span className="text-gray-400">Ngôn ngữ:</span>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Globe className="w-4.5 h-4.5 text-ember-400" />
+                    <span className="text-white/45">Ngôn ngữ:</span>
                     <span className="text-white font-medium">{movieData.lang}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Globe className="w-5 h-5 text-red-400" />
-                    <span className="text-gray-400">Quốc gia:</span>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Globe className="w-4.5 h-4.5 text-ember-400" />
+                    <span className="text-white/45">Quốc gia:</span>
                     <span className="text-white font-medium">{movieData.country?.[0]?.name}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
-              <h3 className="text-xl font-bold mb-4 text-white">Thể Loại</h3>
+            <div className="glass p-6 rounded-xl2 shadow-glass">
+              <h3 className="text-lg font-display font-bold mb-4 text-white">Thể Loại</h3>
               <div className="flex flex-wrap gap-2">
                 {movieData.category?.map((cat, index) => (
                   <span
                     key={index}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer hover:scale-105"
+                    className="bg-iris-500/20 text-iris-200 border border-iris-400/20 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer hover:bg-iris-500/30 hover:-translate-y-0.5"
                   >
                     {cat.name}
                   </span>
@@ -127,17 +136,17 @@ const DesktopDetailLayout = ({
               </div>
             </div>
 
-            <div className="bg-gray-800 p-6 rounded-2xl shadow-xl">
-              <h3 className="text-xl font-bold mb-4 text-white">Diễn Viên</h3>
+            <div className="glass p-6 rounded-xl2 shadow-glass">
+              <h3 className="text-lg font-display font-bold mb-4 text-white">Diễn Viên</h3>
               <div className="flex flex-wrap gap-2">
                 {movieData.actor?.length > 0 ? movieData.actor.map((actor, index) => (
                   <span
                     key={index}
-                    className="bg-gray-700 border border-gray-600/60 text-gray-200 px-3 py-2 rounded-lg text-sm hover:bg-gray-600 transition-all duration-300 cursor-pointer"
+                    className="bg-white/[0.04] border border-white/10 text-white/70 px-3 py-2 rounded-lg text-sm hover:bg-white/[0.08] transition-all duration-200 cursor-pointer"
                   >
                     {actor}
                   </span>
-                )) : <span className="text-gray-400 text-sm">Không có diễn viên nào.</span>}
+                )) : <span className="text-white/35 text-sm">Không có diễn viên nào.</span>}
               </div>
             </div>
           </div>

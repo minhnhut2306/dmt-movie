@@ -20,26 +20,26 @@ const MobileWatchLayout = ({
   const currentEpisodeName = movieData.episodes?.[currentServer]?.server_data?.[currentEpisode]?.name;
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <div className="px-3 py-3 border-b border-gray-700/50">
+    <div className="min-h-screen">
+      <div className="px-3 py-3 border-b border-white/5 glass">
         <div className="flex items-center gap-3 mb-2">
           <button
             onClick={() => setActiveLayout('detail')}
-            className="text-blue-400 hover:text-blue-300 transition-colors duration-300 p-2 rounded-lg hover:bg-gray-800/50"
+            className="text-white/70 hover:text-iris-300 transition-colors duration-200 w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/5 cursor-pointer flex-shrink-0"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold text-white truncate">{movieData.name}</h1>
-            <p className="text-sm text-gray-300 truncate">{movieData.origin_name}</p>
+            <h1 className="text-base font-display font-bold text-white truncate">{movieData.name}</h1>
+            <p className="text-xs text-white/45 truncate">{movieData.origin_name}</p>
           </div>
         </div>
-        <p className="text-xs text-gray-400 px-2">
+        <p className="text-xs text-white/35 px-1">
           Đang xem: {currentEpisodeName} - {movieData.episodes?.[currentServer]?.server_name}
         </p>
       </div>
 
-      <Suspense fallback={<div className="aspect-video bg-gray-900 flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500" /></div>}>
+      <Suspense fallback={<div className="aspect-video bg-ink-900 flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-2 border-white/10 border-t-iris-400" /></div>}>
         <VideoPlayer
           currentVideoUrl={currentVideoUrl}
           currentEmbedUrl={currentEmbedUrl}
@@ -52,18 +52,18 @@ const MobileWatchLayout = ({
       </Suspense>
 
       {!isFullscreen && currentVideoUrl && (
-        <div className="px-3 py-3 bg-gray-800/50 backdrop-blur-sm border-b border-gray-600/30">
-          <div className="flex flex-wrap items-center gap-3 text-xs text-gray-300">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        <div className="px-3 py-3 glass border-b border-white/5">
+          <div className="flex flex-wrap items-center gap-3 text-xs text-white/60">
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
               <span>Đang phát: {currentEpisodeName}</span>
             </div>
             <div className="flex items-center gap-1">
-              <Globe className="w-4 h-4 text-blue-400" />
+              <Globe className="w-3.5 h-3.5 text-iris-300" />
               <span>{movieData.episodes?.[currentServer]?.server_name}</span>
             </div>
             <div className="flex items-center gap-1">
-              <Eye className="w-4 h-4 text-purple-400" />
+              <Eye className="w-3.5 h-3.5 text-ember-400" />
               <span>{movieData.quality}</span>
             </div>
           </div>
@@ -72,7 +72,7 @@ const MobileWatchLayout = ({
 
       {!isFullscreen && (
         <div className="px-3 py-4">
-          <Suspense fallback={<div className="h-20 bg-gray-800/50 rounded-xl animate-pulse mb-4" />}>
+          <Suspense fallback={<div className="h-20 skeleton rounded-xl2 mb-4" />}>
             <EpisodeList
               episodes={movieData.episodes}
               currentServer={currentServer}
@@ -83,51 +83,51 @@ const MobileWatchLayout = ({
             />
           </Suspense>
           <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="bg-gray-800/80 backdrop-blur-sm p-3 rounded-xl shadow-xl">
-              <h3 className="text-sm font-bold text-white mb-2">Thông Tin</h3>
-              <div className="space-y-2 text-xs">
+            <div className="glass p-3 rounded-xl2 shadow-glass">
+              <h3 className="text-xs font-display font-bold text-white mb-2">Thông Tin</h3>
+              <div className="space-y-1.5 text-xs">
                 <div className="flex items-center gap-1">
-                  <Star className="w-3 h-3 text-yellow-400" fill="currentColor" />
-                  <span className="text-gray-400">Đánh giá:</span>
+                  <Star className="w-3 h-3 text-ember-400" fill="currentColor" />
+                  <span className="text-white/45">Đánh giá:</span>
                   <span className="text-white font-medium">{movieData.vote_average}/10</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3 text-blue-400" />
-                  <span className="text-gray-400">Năm:</span>
+                  <Calendar className="w-3 h-3 text-iris-300" />
+                  <span className="text-white/45">Năm:</span>
                   <span className="text-white font-medium">{movieData.year}</span>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gray-800/80 backdrop-blur-sm p-3 rounded-xl shadow-xl">
-              <h3 className="text-sm font-bold text-white mb-2">Chi Tiết</h3>
-              <div className="space-y-2 text-xs">
+            <div className="glass p-3 rounded-xl2 shadow-glass">
+              <h3 className="text-xs font-display font-bold text-white mb-2">Chi Tiết</h3>
+              <div className="space-y-1.5 text-xs">
                 <div className="flex items-center gap-1">
-                  <Eye className="w-3 h-3 text-purple-400" />
-                  <span className="text-gray-400">Chất lượng:</span>
+                  <Eye className="w-3 h-3 text-ember-400" />
+                  <span className="text-white/45">Chất lượng:</span>
                   <span className="text-white font-medium">{movieData.quality}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Film className="w-3 h-3 text-green-400" />
-                  <span className="text-gray-400">Số tập:</span>
+                  <Film className="w-3 h-3 text-iris-300" />
+                  <span className="text-white/45">Số tập:</span>
                   <span className="text-white font-medium">{movieData.episode_current}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-gray-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
-            <h3 className="text-sm font-bold text-white mb-2">Nội Dung Phim</h3>
-            <p className="text-gray-300 leading-relaxed text-xs">{movieData.content}</p>
+          <div className="glass p-4 rounded-xl2 shadow-glass mb-4">
+            <h3 className="text-sm font-display font-bold text-white mb-2">Nội Dung Phim</h3>
+            <p className="text-white/55 leading-relaxed text-xs" dangerouslySetInnerHTML={{ __html: movieData.content }} />
           </div>
 
-          <div className="bg-gray-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
-            <h3 className="text-sm font-bold text-white mb-2">Thể Loại</h3>
-            <div className="flex flex-wrap gap-1">
+          <div className="glass p-4 rounded-xl2 shadow-glass mb-4">
+            <h3 className="text-sm font-display font-bold text-white mb-2">Thể Loại</h3>
+            <div className="flex flex-wrap gap-1.5">
               {movieData.category?.map((cat, index) => (
                 <span
                   key={index}
-                  className="bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-medium"
+                  className="bg-iris-500/20 text-iris-200 border border-iris-400/20 px-2.5 py-1 rounded-full text-xs font-medium"
                 >
                   {cat.name}
                 </span>
@@ -135,17 +135,17 @@ const MobileWatchLayout = ({
             </div>
           </div>
 
-          <div className="bg-gray-800/80 backdrop-blur-sm p-4 rounded-xl shadow-xl mb-4">
-            <h3 className="text-sm font-bold text-white mb-3">Diễn Viên</h3>
+          <div className="glass p-4 rounded-xl2 shadow-glass mb-4">
+            <h3 className="text-sm font-display font-bold text-white mb-3">Diễn Viên</h3>
             <div className="grid grid-cols-2 gap-2">
               {movieData.actor?.length > 0 ? movieData.actor.slice(0, 6).map((actor, index) => (
                 <div
                   key={index}
-                  className="bg-gray-700 border border-gray-600/60 text-gray-200 px-2 py-2 rounded-lg text-xs text-center"
+                  className="bg-white/[0.04] border border-white/10 text-white/70 px-2 py-2 rounded-lg text-xs text-center truncate"
                 >
                   {actor}
                 </div>
-              )) : <span className="text-gray-400 text-xs">Không có diễn viên nào.</span>}
+              )) : <span className="text-white/35 text-xs">Không có diễn viên nào.</span>}
             </div>
           </div>
         </div>
