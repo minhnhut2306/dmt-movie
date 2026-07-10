@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
 import { getSafeImageUrl } from '../../utils/imageHelper';
-import { useMovieImages } from '../../hooks/useMovies';
 import TrailerModal from './TrailerModal';
 import MovieCastSection from './MovieCastSection';
 
@@ -13,9 +12,8 @@ const DesktopDetailLayout = ({
   const [showTrailer, setShowTrailer] = useState(false);
 
   // Ảnh TMDB chất lượng cao (nét hơn nhiều) — fallback về ảnh mặc định nếu phim không có tmdb id
-  const { data: hiResImages } = useMovieImages(movieData.slug);
-  const backdropSrc = hiResImages?.backdrop || getSafeImageUrl(movieData.thumb_url, movieData.name, { width: 1280, quality: 88 });
-  const posterSrc = hiResImages?.poster || getSafeImageUrl(movieData.poster_url, movieData.name, { width: 600, quality: 90 });
+  const backdropSrc = getSafeImageUrl(movieData.thumb_url, movieData.name, { width: 1280, quality: 88 });
+  const posterSrc = getSafeImageUrl(movieData.poster_url, movieData.name, { width: 600, quality: 90 });
 
   return (
     <div className="min-h-screen">

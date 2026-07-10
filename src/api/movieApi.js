@@ -49,24 +49,22 @@ export const movieApi = {
   getMovieCredits: async (slug) => {
     if (!slug) return null;
     try {
-      const body = await apiRequest(`/v1/api/phim/${slug}/credits`);
+      const body = await apiRequest(`/v1/api/phim/${slug}/peoples`);
       const payload = body?.data;
-      const people = payload?.people || payload?.cast || payload?.credits;
+      const people = payload?.peoples;
       if (!Array.isArray(people) || people.length === 0) return null;
 
-      const fallbackBase = payload?.image_sizes?.profile?.w185 || "https://image.tmdb.org/t/p/w185";
+      // profile_sizes nằm ở cấp data (dùng chung cho mọi người), không phải trong từng item
+      const profileBase = payload?.profile_sizes?.w185 || "https://image.tmdb.org/t/p/w185";
 
-      return people.map((p) => {
-        const profileBase = p.profile_sizes?.w185 || fallbackBase;
-        return {
-          id: p.tmdb_people_id ?? p.id ?? p.name,
-          name: p.name,
-          character: p.character || "",
-          department: p.known_for_department || p.department || "",
-          gender: p.gender_name || "",
-          profileUrl: p.profile_path ? `${profileBase}${p.profile_path}` : null,
-        };
-      });
+      return people.map((p) => ({
+        id: p.tmdb_people_id ?? p.name,
+        name: p.name,
+        character: p.character || "",
+        department: p.known_for_department || "",
+        gender: p.gender_name || "",
+        profileUrl: p.profile_path ? `${profileBase}${p.profile_path}` : null,
+      }));
     } catch {
       return null;
     }

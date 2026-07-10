@@ -1,7 +1,11 @@
-import React, { useState, useMemo } from 'react';
-import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Check, ArrowRight } from 'lucide-react';
 import { isEpisodeWatched } from '../utils/watchHistory';
 import { useParams } from 'react-router-dom';
+
+// Phim dài (vd 3000 tập) không thể chỉ cuộn tuần tự — chia theo block + cho nhảy thẳng tới số tập
+const CHUNK_SIZE = 100;
+const CHUNK_THRESHOLD = 40;
 
 const EpisodeList = ({
   episodes,
@@ -12,7 +16,27 @@ const EpisodeList = ({
   isMobile
 }) => {
   const { slug } = useParams();
-  const [expandedGroups, setExpandedGroups] = useState({});
+  const [activeChunk, setActiveChunk] = useState(0);
+  const [jumpValue, setJumpValue] = useState('');
+
+  const serverData = episodes?.[currentServer]?.server_data;
+
+  const chunks = useMemo(() => {
+    if (!serverData || serverData.length <= CHUNK_THRESHOLD) return null;
+    const result = [];
+    for (let i = 0; i < serverData.length; i += CHUNK_SIZE) {
+      result.push({ start: i, end: Math.min(i + CHUNK_SIZE, serverData.length) - 1 });
+    }
+    return result;
+  }, [serverData]);
+
+  // Tự động nhảy sang block chứa tập đang xem (vd khi player tự chuyển tập kế tiếp)
+  useEffect(() => {
+    if (!chunks) return;
+    const idx = chunks.findIndex((c) => currentEpisode >= c.start && currentEpisode <= c.end);
+    if (idx !== -1 && idx !== activeChunk) setActiveChunk(idx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentEpisode, chunks]);
 
   const handleEpisodeClick = (episodeIndex) => {
     setCurrentEpisode(episodeIndex);
@@ -21,48 +45,18 @@ const EpisodeList = ({
   const handleServerChange = (serverIndex) => {
     setCurrentServer(serverIndex);
     setCurrentEpisode(0);
-    setExpandedGroups({});
+    setActiveChunk(0);
+    setJumpValue('');
   };
 
-  const toggleGroup = (groupIndex) => {
-    setExpandedGroups(prev => ({
-      ...prev,
-      [groupIndex]: !prev[groupIndex]
-    }));
+  const handleJumpSubmit = (e) => {
+    e.preventDefault();
+    if (!serverData) return;
+    const target = parseInt(jumpValue, 10);
+    if (Number.isNaN(target) || target < 1 || target > serverData.length) return;
+    handleEpisodeClick(target - 1);
+    setJumpValue('');
   };
-
-  // Tạo nhóm tập cho phim > 100 tập
-  const episodeGroups = useMemo(() => {
-    const serverData = episodes?.[currentServer]?.server_data;
-    if (!serverData || serverData.length <= 100) {
-      return null;
-    }
-
-    const groupSize = 20;
-    const groups = [];
-
-    for (let i = 0; i < serverData.length; i += groupSize) {
-      const groupEpisodes = serverData.slice(i, i + groupSize);
-      const startEp = i;
-      const endEp = Math.min(i + groupSize - 1, serverData.length - 1);
-
-      const hasWatched = groupEpisodes.some((_, idx) =>
-        isEpisodeWatched(slug, currentServer, i + idx)
-      );
-      const hasCurrent = currentEpisode >= startEp && currentEpisode <= endEp;
-
-      groups.push({
-        startEp,
-        endEp,
-        episodes: groupEpisodes,
-        hasWatched,
-        hasCurrent,
-        label: `Tập ${startEp + 1} - ${endEp + 1}`
-      });
-    }
-
-    return groups;
-  }, [episodes, currentServer, slug, currentEpisode]);
 
   if (!episodes || episodes.length === 0) {
     return (
@@ -72,171 +66,131 @@ const EpisodeList = ({
     );
   }
 
-  const renderGroupedEpisodes = () => {
-    return (
-      <div className="space-y-3">
-        {episodeGroups.map((group, groupIndex) => {
-          const isExpanded = expandedGroups[groupIndex];
+  // Danh sách thực sự render ra — nếu có chunk thì chỉ render block đang chọn, không bao giờ render cả nghìn nút cùng lúc
+  const displayedEpisodes = chunks
+    ? serverData.slice(chunks[activeChunk].start, chunks[activeChunk].end + 1)
+    : (serverData || []);
+  const displayedOffset = chunks ? chunks[activeChunk].start : 0;
 
-          return (
-            <div
-              key={groupIndex}
-              className="glass-subtle rounded-xl2 overflow-hidden transition-all duration-300"
-            >
-              {/* Header của nhóm */}
-              <button
-                onClick={() => toggleGroup(groupIndex)}
-                className={`w-full px-5 py-3.5 flex items-center justify-between transition-colors duration-200 cursor-pointer ${
-                  group.hasCurrent
-                    ? 'bg-emerald-500/15 hover:bg-emerald-500/20'
-                    : 'hover:bg-white/5'
-                }`}
-              >
-                <div className="flex items-center gap-3.5">
-                  <div className={`w-1 h-8 rounded-full ${
-                    group.hasCurrent ? 'bg-emerald-400' : group.hasWatched ? 'bg-ember-400' : 'bg-white/15'
-                  }`}></div>
-                  <div className="text-left">
-                    <div className="font-display font-bold text-white text-base">{group.label}</div>
-                    <div className="text-xs text-white/40 mt-0.5">
-                      {group.episodes.length} tập phim
-                    </div>
-                  </div>
-                </div>
+  const renderEpisodeButton = (episode, realIndex) => {
+    const watched = isEpisodeWatched(slug, currentServer, realIndex);
+    const isActive = currentEpisode === realIndex;
 
-                <div className="flex items-center gap-2.5">
-                  {group.hasCurrent && (
-                    <span className="px-2.5 py-1 bg-emerald-500 text-white text-[10px] font-bold rounded-full">
-                      ĐANG XEM
-                    </span>
-                  )}
-                  <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5">
-                    {isExpanded ?
-                      <ChevronUp className="w-4 h-4 text-white/60" /> :
-                      <ChevronDown className="w-4 h-4 text-white/60" />
-                    }
-                  </div>
-                </div>
-              </button>
-
-              {/* Danh sách tập */}
-              {isExpanded && (
-                <div className="border-t border-white/5">
-                  <div className={`p-4 grid gap-2 ${
-                    isMobile
-                      ? 'grid-cols-4 sm:grid-cols-5'
-                      : 'grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-14'
-                  }`}>
-                    {group.episodes.map((episode, idx) => {
-                      const episodeIndex = group.startEp + idx;
-                      const watched = isEpisodeWatched(slug, currentServer, episodeIndex);
-                      const isActive = currentEpisode === episodeIndex;
-
-                      return (
-                        <button
-                          key={episodeIndex}
-                          onClick={() => handleEpisodeClick(episodeIndex)}
-                          className={`relative min-h-[44px] py-2.5 px-2 rounded-lg font-bold transition-all duration-200 text-sm cursor-pointer active:scale-95 ${
-                            isActive
-                              ? 'bg-emerald-500 text-white shadow-glow scale-105 z-10'
-                              : watched
-                              ? 'bg-ember-500/70 text-white hover:bg-ember-500'
-                              : 'bg-white/[0.05] text-white/60 hover:bg-white/10 hover:text-white'
-                          }`}
-                        >
-                          <span className="block">{episode.name}</span>
-                          {watched && !isActive && (
-                            <Check className="absolute top-1 right-1 w-3.5 h-3.5 text-white drop-shadow" />
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
-  };
-
-  const renderNormalEpisodes = () => {
-    const serverData = episodes[currentServer]?.server_data;
-    if (!serverData) return null;
+    if (isActive) {
+      return (
+        <button
+          key={realIndex}
+          onClick={() => handleEpisodeClick(realIndex)}
+          className="relative w-full rounded-lg p-[1.5px] bg-gradient-to-r from-iris-400 to-ember-400 shadow-glow transition-transform duration-200 cursor-pointer active:scale-95"
+        >
+          <span className="flex items-center justify-center w-full h-full min-h-[38px] rounded-[7px] bg-ink-900 text-white text-sm font-semibold px-2 py-2 truncate">
+            {episode.name}
+          </span>
+        </button>
+      );
+    }
 
     return (
-      <div className={`grid gap-2 ${
-        isMobile
-          ? 'grid-cols-4 sm:grid-cols-5'
-          : 'grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12'
-      }`}>
-        {serverData.map((episode, episodeIndex) => {
-          const watched = isEpisodeWatched(slug, currentServer, episodeIndex);
-          const isActive = currentEpisode === episodeIndex;
-
-          return (
-            <button
-              key={episodeIndex}
-              onClick={() => handleEpisodeClick(episodeIndex)}
-              className={`relative min-h-[44px] py-2 px-3 rounded-lg font-medium transition-all duration-200 text-sm cursor-pointer active:scale-95 ${
-                isActive
-                  ? 'bg-emerald-500 text-white shadow-glow scale-105 ring-1 ring-emerald-300/50'
-                  : watched
-                  ? 'bg-ember-500/70 text-white hover:bg-ember-500'
-                  : 'bg-white/[0.05] text-white/60 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              {episode.name}
-              {watched && !isActive && (
-                <Check className="absolute top-0 right-0 w-3 h-3 text-white" />
-              )}
-            </button>
-          );
-        })}
-      </div>
+      <button
+        key={realIndex}
+        onClick={() => handleEpisodeClick(realIndex)}
+        className={`relative w-full min-h-[38px] rounded-lg font-medium text-sm px-2 py-2 truncate transition-all duration-200 cursor-pointer active:scale-95 hover:-translate-y-0.5 ${
+          watched
+            ? 'bg-ember-500/15 text-ember-300 border border-ember-400/20 hover:bg-ember-500/25'
+            : 'bg-white/[0.04] text-white/50 border border-white/10 hover:bg-white/10 hover:text-white/80'
+        }`}
+      >
+        <span className="truncate block">{episode.name}</span>
+        {watched && (
+          <Check className="absolute top-1 right-1 w-3 h-3 text-ember-300/80" />
+        )}
+      </button>
     );
   };
 
   return (
     <div className="glass p-4 md:p-6 rounded-xl2 shadow-glass mb-6 md:mb-8">
-      <h3 className="text-base md:text-lg font-display font-bold text-white mb-4">Danh Sách Tập</h3>
+      <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
+        <h3 className="text-base md:text-lg font-display font-bold text-white">Danh Sách Tập</h3>
 
-      {/* Server Selection */}
+        {/* Nhảy thẳng tới số tập — cứu cánh cho phim vài nghìn tập, khỏi cuộn mỏi tay */}
+        {serverData && serverData.length > CHUNK_THRESHOLD && (
+          <form onSubmit={handleJumpSubmit} className="flex items-center gap-1.5">
+            <input
+              type="number"
+              min={1}
+              max={serverData.length}
+              value={jumpValue}
+              onChange={(e) => setJumpValue(e.target.value)}
+              placeholder={`1-${serverData.length}`}
+              className="w-24 min-h-[36px] px-3 rounded-full bg-white/[0.04] border border-white/10 text-white text-sm placeholder:text-white/30 focus:border-iris-400/60 focus:bg-white/[0.06] outline-none transition-all duration-200"
+            />
+            <button
+              type="submit"
+              className="min-h-[36px] w-9 flex items-center justify-center rounded-full bg-gradient-to-r from-iris-500 to-ember-500 text-white transition-all duration-200 cursor-pointer hover:shadow-glow active:scale-95"
+              title="Đến tập"
+            >
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </form>
+        )}
+      </div>
+
+      {/* Server selector — pill tabs, active dùng gradient iris-to-ember */}
       {episodes.length > 1 && (
-        <div className="mb-4">
-          <div className="flex flex-wrap gap-2">
-            {episodes.map((server, serverIndex) => (
-              <button
-                key={serverIndex}
-                onClick={() => handleServerChange(serverIndex)}
-                className={`min-h-[40px] px-4 py-2 rounded-lg font-medium transition-all duration-200 text-sm cursor-pointer ${
-                  currentServer === serverIndex
-                    ? 'btn-signature text-white'
-                    : 'bg-white/[0.05] text-white/60 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                {server.server_name}
-              </button>
-            ))}
-          </div>
+        <div className="mb-4 flex flex-wrap gap-2">
+          {episodes.map((server, serverIndex) => (
+            <button
+              key={serverIndex}
+              onClick={() => handleServerChange(serverIndex)}
+              className={`min-h-[38px] px-4 py-2 rounded-full font-medium text-sm transition-all duration-200 cursor-pointer ${
+                currentServer === serverIndex
+                  ? 'bg-gradient-to-r from-iris-500 to-ember-500 text-white shadow-glow'
+                  : 'bg-white/[0.04] text-white/60 border border-white/10 hover:bg-white/10 hover:text-white'
+              }`}
+            >
+              {server.server_name}
+            </button>
+          ))}
         </div>
       )}
 
-      {/* Episode List - Grouped or Normal */}
-      {episodeGroups ? renderGroupedEpisodes() : renderNormalEpisodes()}
-      {episodes[currentServer]?.server_data?.length > 0 && (
+      {/* Chọn block tập — chỉ hiện khi phim quá dài (>100 tập), tránh render hàng nghìn nút cùng lúc */}
+      {chunks && chunks.length > 1 && (
+        <div className="mb-3 flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+          {chunks.map((c, idx) => (
+            <button
+              key={idx}
+              onClick={() => setActiveChunk(idx)}
+              className={`flex-shrink-0 min-h-[32px] px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 cursor-pointer whitespace-nowrap ${
+                activeChunk === idx
+                  ? 'bg-iris-500/25 text-iris-200 border border-iris-400/40'
+                  : 'bg-white/[0.03] text-white/45 border border-white/10 hover:bg-white/[0.07] hover:text-white/70'
+              }`}
+            >
+              {c.start + 1}–{c.end + 1}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Episode list: wrap-grid cuộn dọc theo trang, cả mobile lẫn desktop */}
+      <div className={`grid gap-2 ${isMobile ? 'grid-cols-4 sm:grid-cols-5' : 'grid-cols-6 md:grid-cols-8 lg:grid-cols-10'}`}>
+        {displayedEpisodes.map((episode, idx) => renderEpisodeButton(episode, displayedOffset + idx))}
+      </div>
+
+      {serverData?.length > 0 && (
         <div className="mt-4 text-xs text-white/40 flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 bg-emerald-500 rounded"></div>
+            <div className="w-3 h-3 rounded bg-gradient-to-r from-iris-400 to-ember-400"></div>
             <span>Đang xem</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 bg-ember-500/70 rounded"></div>
+            <div className="w-3 h-3 bg-ember-500/25 border border-ember-400/30 rounded"></div>
             <span>Đã xem</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 bg-white/10 rounded"></div>
+            <div className="w-3 h-3 bg-white/[0.06] border border-white/10 rounded"></div>
             <span>Chưa xem</span>
           </div>
         </div>
