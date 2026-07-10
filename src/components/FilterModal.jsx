@@ -1,10 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Filter, ChevronDown } from 'lucide-react';
 import { useDynamicGenres, useDynamicCountries, ALL_YEARS } from '../utils/CategoryConfigDynamic';
 
 const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
   const { genres } = useDynamicGenres();
   const { countries } = useDynamicCountries();
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
 
   const [filters, setFilters] = useState({
     type: '',
@@ -73,11 +78,11 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
     <div className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
       <div className="absolute inset-0 bg-ink-950/80 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative glass-strong w-full sm:max-w-4xl rounded-t-sheet sm:rounded-xl2 shadow-glass-lg max-h-[88vh] sm:max-h-[85vh] overflow-hidden animate-slide-up sm:animate-scale-in">
-        <div className="w-10 h-1.5 rounded-full bg-white/20 mx-auto mt-3 sm:hidden" />
+      <div className="relative glass-strong w-full sm:max-w-4xl rounded-t-sheet sm:rounded-xl2 shadow-glass-lg max-h-[88vh] sm:max-h-[85vh] overflow-hidden flex flex-col animate-slide-up sm:animate-scale-in">
+        <div className="w-10 h-1.5 rounded-full bg-white/20 mx-auto mt-3 sm:hidden flex-shrink-0" />
 
         {/* Header - Compact */}
-        <div className="flex items-center justify-between p-4 border-b border-white/5">
+        <div className="flex items-center justify-between p-4 border-b border-white/5 flex-shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 flex items-center justify-center rounded-lg bg-gradient-to-br from-iris-400 to-iris-600 shadow-glow">
               <Filter className="w-4 h-4 text-white" />
@@ -92,8 +97,8 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
           </button>
         </div>
 
-        {/* Content - Scrollable */}
-        <div className="p-4 overflow-y-auto max-h-[calc(88vh-140px)] sm:max-h-[calc(85vh-120px)] scrollbar-thin-iris">
+        {/* Content - Scrollable, chiếm hết phần không gian còn lại giữa header/footer */}
+        <div className="p-4 overflow-y-auto flex-1 min-h-0 scrollbar-thin-iris">
           <div className="space-y-3.5">
             {/* Loại phim - Always visible */}
             <div>
@@ -289,8 +294,8 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
           </div>
         </div>
 
-        {/* Footer - Fixed at bottom */}
-        <div className="grid grid-cols-2 gap-2 p-4 border-t border-white/5 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-4">
+        {/* Footer - luôn giữ nguyên chiều cao, không bị content phía trên đẩy che mất */}
+        <div className="grid grid-cols-2 gap-2 p-4 border-t border-white/5 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-4 flex-shrink-0">
           <button
             onClick={handleReset}
             className="min-h-[48px] px-3 py-2.5 text-sm glass hover:bg-white/10 text-white rounded-xl2 font-medium transition-all duration-200 cursor-pointer"

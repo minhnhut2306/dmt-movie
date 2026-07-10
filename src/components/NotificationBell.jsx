@@ -121,6 +121,11 @@ const NotificationBell = () => {
     return () => document.removeEventListener("mousedown", handle);
   }, [open]);
 
+  useEffect(() => {
+    document.body.style.overflow = open ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
+
   const notifications = [
     ...CHANGELOG.map((item) => ({ id: item.id })),
     ...(!isStandalone ? [{ id: "pwa-install" }] : []),
