@@ -69,6 +69,7 @@ export default async function handler(req, res) {
 
     // Nếu là media playlist → lọc QC và rewrite segment URLs thành absolute
     const lines = text.split('\n');
+    const dropSet = buildAdDropSet(lines);
     const filtered = [];
     let skipNextSegment = false;
 
@@ -77,7 +78,7 @@ export default async function handler(req, res) {
 
       if (line === '#EXT-X-DISCONTINUITY') {
         const nextSeg = lines.slice(i + 1, i + 6).find(l => l.trim().endsWith('.ts'));
-        if (nextSeg && isAdSegment(nextSeg.trim())) {
+        if (nextSeg && dropSet.has(nextSeg.trim())) {
           skipNextSegment = true;
           continue;
         }
@@ -93,7 +94,7 @@ export default async function handler(req, res) {
 
       if (line.startsWith('#EXTINF')) {
         const nextLine = lines[i + 1]?.trim();
-        if (nextLine && isAdSegment(nextLine)) {
+        if (nextLine && dropSet.has(nextLine)) {
           skipNextSegment = true;
           continue;
         }
@@ -102,7 +103,7 @@ export default async function handler(req, res) {
       }
 
       if (line.endsWith('.ts')) {
-        if (isAdSegment(line)) {
+        if (dropSet.has(line)) {
           skipNextSegment = false;
           continue;
         }
@@ -125,9 +126,91 @@ export default async function handler(req, res) {
   }
 }
 
-function isAdSegment(path) {
-  return /\/v\d+\//.test(path) ||
+// Dấu hiệu server QC rõ ràng — luôn cắt, không cần xác nhận thêm
+function isSpecificAdUrl(path) {
+  return path.includes('/adjump/') ||
     path.includes('convertv7/') ||
     path.includes('convertv8/') ||
-    /segment_\d+\.ts/.test(path);
+    path.includes('/ads/') ||
+    path.includes('/ad/') ||
+    /\/commercial\//.test(path);
+}
+
+// Pattern chung chung — nhiều nguồn phim thật cũng đặt tên segment kiểu này
+// (vd /v2/segment_5.ts là url thật), nên chỉ cắt khi VỪA khớp tên VỪA nằm
+// trong 1 khoảng có cấu trúc giống block QC thật (xem findRoundDurationRanges)
+function isGenericAdUrl(path) {
+  return /\/v\d+\//.test(path) || /segment_\d+\.ts/.test(path);
+}
+
+function isRoundDuration(d) {
+  return Number.isInteger(d) || Math.abs(d - Math.round(d)) < 0.05;
+}
+
+// Tìm các khoảng [start, end] trên timeline mà 1 chuỗi ≥6 segment liên tiếp
+// có thời lượng tròn số, tổng 15-120s — đặc trưng của 1 block QC được chèn,
+// khác với các segment phim gốc thường có thời lượng lẻ
+function findRoundDurationRanges(segments) {
+  const ranges = [];
+  let accumulated = 0;
+  let roundStart = null;
+  let roundCount = 0;
+
+  const flush = (endAccumulated) => {
+    if (roundCount >= 6) {
+      const duration = endAccumulated - roundStart;
+      if (duration >= 15 && duration <= 120) {
+        ranges.push({ start: roundStart, end: endAccumulated });
+      }
+    }
+    roundStart = null;
+    roundCount = 0;
+  };
+
+  for (const seg of segments) {
+    if (isRoundDuration(seg.duration)) {
+      if (roundStart === null) roundStart = accumulated;
+      roundCount++;
+    } else {
+      flush(accumulated);
+    }
+    accumulated += seg.duration;
+  }
+  flush(accumulated);
+
+  return ranges;
+}
+
+// Duyệt toàn bộ playlist 1 lượt để biết segment nào thực sự nên bị cắt,
+// trước khi ghép lại output ở vòng lặp chính bên dưới
+function buildAdDropSet(lines) {
+  const segments = [];
+  let pendingDuration = null;
+  let accumulated = 0;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (line.startsWith('#EXTINF')) {
+      const match = line.match(/^#EXTINF:([\d.]+)/);
+      pendingDuration = match ? parseFloat(match[1]) : null;
+      continue;
+    }
+    if (line.endsWith('.ts')) {
+      const duration = pendingDuration ?? 0;
+      segments.push({ url: line, duration, start: accumulated });
+      accumulated += duration;
+      pendingDuration = null;
+    }
+  }
+
+  const ranges = findRoundDurationRanges(segments);
+  const dropSet = new Set();
+  for (const seg of segments) {
+    if (isSpecificAdUrl(seg.url)) {
+      dropSet.add(seg.url);
+    } else if (isGenericAdUrl(seg.url) && ranges.some(r => seg.start >= r.start && seg.start < r.end)) {
+      dropSet.add(seg.url);
+    }
+  }
+  return dropSet;
 }

@@ -5,56 +5,58 @@ import { saveWatchPosition, getWatchPosition } from '../../utils/watchHistory';
 
 const isRoundDuration = (d) => Number.isInteger(d) || Math.abs(d - Math.round(d)) < 0.05;
 
-const findAdRanges = (fragments) => {
-  const adRanges = [];
+// Dấu hiệu server QC rõ ràng — luôn chặn, không cần xác nhận thêm
+const isSpecificAdUrl = (url) => !!url && (
+  url.includes('/adjump/') ||
+  url.includes('convertv7/') ||
+  url.includes('convertv8/') ||
+  url.includes('/ads/') ||
+  url.includes('/ad/') ||
+  /\/commercial\//.test(url)
+);
+
+// Pattern chung chung — nhiều nguồn phim thật cũng đặt tên segment kiểu này,
+// nên chỉ chặn khi VỪA khớp tên VỪA khớp đặc trưng cấu trúc của 1 block QC thật
+// (chuỗi ≥6 segment liên tiếp có thời lượng tròn số, tổng 15-120s)
+const isGenericAdUrl = (url) => !!url && (
+  /\/v\d+\//.test(url) ||
+  /segment_\d+\.ts/.test(url)
+);
+
+// Tìm các khoảng [start, end] trên timeline mà 1 chuỗi segment liên tiếp có
+// thời lượng tròn số (đặc trưng của block QC được chèn, khác biệt với phim gốc)
+const findRoundDurationRanges = (fragments) => {
+  const ranges = [];
   let accumulated = 0;
-  let adStart = null;
+  let roundStart = null;
+  let roundCount = 0;
+
+  const flush = (endAccumulated) => {
+    if (roundCount >= 6) {
+      const duration = endAccumulated - roundStart;
+      if (duration >= 15 && duration <= 120) {
+        ranges.push({ start: roundStart, end: endAccumulated });
+      }
+    }
+    roundStart = null;
+    roundCount = 0;
+  };
 
   for (const frag of fragments) {
-    const isAd = frag.relurl && (
-      /\/v\d+\//.test(frag.relurl) ||
-      frag.relurl.includes('convertv7/')
-    );
-    if (isAd && adStart === null) adStart = accumulated;
-    else if (!isAd && adStart !== null) {
-      adRanges.push({ start: adStart, end: accumulated });
-      adStart = null;
+    if (isRoundDuration(frag.duration)) {
+      if (roundStart === null) roundStart = accumulated;
+      roundCount++;
+    } else {
+      flush(accumulated);
     }
     accumulated += frag.duration;
   }
-  if (adStart !== null) adRanges.push({ start: adStart, end: accumulated });
+  flush(accumulated);
 
-  if (adRanges.length === 0) {
-    accumulated = 0;
-    let roundStart = null;
-    let roundCount = 0;
-
-    for (const frag of fragments) {
-      if (isRoundDuration(frag.duration)) {
-        if (roundStart === null) roundStart = accumulated;
-        roundCount++;
-      } else {
-        if (roundCount >= 6) {
-          const duration = accumulated - roundStart;
-          if (duration >= 15 && duration <= 120) {
-            adRanges.push({ start: roundStart, end: accumulated });
-          }
-        }
-        roundStart = null;
-        roundCount = 0;
-      }
-      accumulated += frag.duration;
-    }
-    if (roundCount >= 6) {
-      const duration = accumulated - roundStart;
-      if (duration >= 15 && duration <= 120) {
-        adRanges.push({ start: roundStart, end: accumulated });
-      }
-    }
-  }
-
-  return adRanges;
+  return ranges;
 };
+
+const isWithinRanges = (time, ranges) => ranges.some(r => time >= r.start && time < r.end);
 
 const formatTime = (s) => {
   const m = Math.floor(s / 60);
@@ -82,6 +84,7 @@ const VideoPlayer = ({
   const [retryKey, setRetryKey] = useState(0);
   const [resumePrompt, setResumePrompt] = useState(null); // { time: number }
   const savePositionTimerRef = useRef(null);
+  const adRangesCacheRef = useRef({ details: null, ranges: [] });
 
   useEffect(() => {
     setVideoError(null);
@@ -163,18 +166,21 @@ const VideoPlayer = ({
       return;
     }
 
-    const isAdUrl = (url) => {
-      if (!url) return false;
-      return (
-        url.includes('/adjump/') ||
-        url.includes('convertv7/') ||
-        url.includes('convertv8/') ||
-        /\/v\d+\//.test(url) ||
-        /segment_\d+\.ts/.test(url) ||
-        url.includes('/ads/') ||
-        url.includes('/ad/') ||
-        /\/commercial\//.test(url)
-      );
+    // Chặn hẳn segment khớp pattern QC rõ ràng, hoặc khớp pattern chung chung
+    // NHƯNG chỉ khi nó thực sự nằm trong 1 block có cấu trúc giống QC (xem findRoundDurationRanges)
+    const isAdFragment = (frag) => {
+      const url = frag?.url || '';
+      if (isSpecificAdUrl(url)) return true;
+      if (!isGenericAdUrl(url)) return false;
+
+      const level = hlsInstance?.levels?.[hlsInstance.currentLevel];
+      const details = level?.details;
+      if (!details?.fragments) return false;
+
+      if (adRangesCacheRef.current.details !== details) {
+        adRangesCacheRef.current = { details, ranges: findRoundDurationRanges(details.fragments) };
+      }
+      return isWithinRanges(frag.start, adRangesCacheRef.current.ranges);
     };
 
     let hlsInstance = null;
@@ -235,7 +241,7 @@ const VideoPlayer = ({
       hls.on(Hls.Events.FRAG_LOADING, (event, data) => {
         const fragUrl = data.frag?.url || '';
         console.log('[FRAG]', fragUrl.substring(0, 80));
-        if (isAdUrl(fragUrl)) {
+        if (isAdFragment(data.frag)) {
           console.log('[AD BLOCKED]', fragUrl);
           try {
             hls.stopLoad();
@@ -243,7 +249,7 @@ const VideoPlayer = ({
             if (level?.details?.fragments) {
               const frags = level.details.fragments;
               const currentSn = data.frag.sn;
-              const nextFrag = frags.find(f => f.sn > currentSn && !isAdUrl(f.url));
+              const nextFrag = frags.find(f => f.sn > currentSn && !isAdFragment(f));
               if (nextFrag) {
                 video.currentTime = nextFrag.start + 0.1;
               }
