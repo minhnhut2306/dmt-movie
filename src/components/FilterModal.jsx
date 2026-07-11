@@ -6,18 +6,22 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
   const { genres } = useDynamicGenres();
   const { countries } = useDynamicCountries();
 
+  // Khoá scroll nền khi mở modal — dùng position:fixed thay vì chặn touchmove bằng JS,
+  // vì chặn touchmove trên document làm nghẽn main thread và chặn luôn cả scroll bên trong modal
   useEffect(() => {
-    const prevent = (e) => e.preventDefault();
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      document.addEventListener('touchmove', prevent, { passive: false });
-    } else {
-      document.body.style.overflow = '';
-      document.removeEventListener('touchmove', prevent);
-    }
+    if (!isOpen) return;
+    const scrollY = window.scrollY;
+    const body = document.body;
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
     return () => {
-      document.body.style.overflow = '';
-      document.removeEventListener('touchmove', prevent);
+      body.style.position = '';
+      body.style.top = '';
+      body.style.left = '';
+      body.style.right = '';
+      window.scrollTo(0, scrollY);
     };
   }, [isOpen]);
 
@@ -108,7 +112,7 @@ const FilterModal = ({ isOpen, onClose, onApplyFilter }) => {
         </div>
 
         {/* Content - Scrollable, chiếm hết phần không gian còn lại giữa header/footer */}
-        <div className="p-4 overflow-y-auto flex-1 min-h-0 scrollbar-thin-iris">
+        <div className="p-4 overflow-y-auto overscroll-contain flex-1 min-h-0 scrollbar-thin-iris">
           <div className="space-y-3.5">
             {/* Loại phim - Always visible */}
             <div>

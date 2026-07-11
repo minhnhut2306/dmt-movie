@@ -41,19 +41,23 @@ const Navbar = () => {
     setShowMobileSheet(false);
   }, [location.pathname]);
 
+  // Khoá scroll nền khi mở sheet — dùng position:fixed thay vì chặn touchmove bằng JS,
+  // vì chặn touchmove trên document làm nghẽn main thread và chặn luôn cả scroll bên trong sheet
   useEffect(() => {
     const anyOpen = isMenuOpen || showSearchDropdown || showHistory;
-    const prevent = (e) => e.preventDefault();
-    if (anyOpen) {
-      document.body.style.overflow = 'hidden';
-      document.addEventListener('touchmove', prevent, { passive: false });
-    } else {
-      document.body.style.overflow = '';
-      document.removeEventListener('touchmove', prevent);
-    }
+    if (!anyOpen) return;
+    const scrollY = window.scrollY;
+    const body = document.body;
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
     return () => {
-      document.body.style.overflow = '';
-      document.removeEventListener('touchmove', prevent);
+      body.style.position = '';
+      body.style.top = '';
+      body.style.left = '';
+      body.style.right = '';
+      window.scrollTo(0, scrollY);
     };
   }, [isMenuOpen, showSearchDropdown, showHistory]);
 
@@ -453,7 +457,7 @@ const Navbar = () => {
             </button>
           </div>
 
-          <div className="px-5 pb-8 overflow-y-auto scrollbar-thin-iris" style={{ maxHeight: 'calc(85vh - 60px)' }}>
+          <div className="px-5 pb-8 overflow-y-auto overscroll-contain scrollbar-thin-iris" style={{ maxHeight: 'calc(85vh - 60px)' }}>
             <div className="grid grid-cols-2 gap-2">
               {NAV_LINKS.map(link => (
                 <Link
@@ -562,7 +566,7 @@ const Navbar = () => {
           {historyItems.length === 0 ? (
             <div className="py-12 text-center text-white/40 text-sm">Chưa có lịch sử xem</div>
           ) : (
-            <div className="px-3 overflow-y-auto scrollbar-thin-iris" style={{ maxHeight: 'calc(75vh - 60px)', paddingBottom: 'calc(68px + env(safe-area-inset-bottom))' }}>
+            <div className="px-3 overflow-y-auto overscroll-contain scrollbar-thin-iris" style={{ maxHeight: 'calc(75vh - 60px)', paddingBottom: 'calc(68px + env(safe-area-inset-bottom))' }}>
               {historyItems.map(item => (
                 <div
                   key={item.slug}

@@ -84,18 +84,22 @@ const NotificationBell = () => {
     return () => document.removeEventListener("mousedown", handle);
   }, [open]);
 
+  // Khoá scroll nền khi mở sheet — dùng position:fixed thay vì chặn touchmove bằng JS,
+  // vì chặn touchmove trên document làm nghẽn main thread và chặn luôn cả scroll bên trong sheet
   useEffect(() => {
-    const prevent = (e) => e.preventDefault();
-    if (open) {
-      document.body.style.overflow = 'hidden';
-      document.addEventListener('touchmove', prevent, { passive: false });
-    } else {
-      document.body.style.overflow = '';
-      document.removeEventListener('touchmove', prevent);
-    }
+    if (!open) return;
+    const scrollY = window.scrollY;
+    const body = document.body;
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.left = '0';
+    body.style.right = '0';
     return () => {
-      document.body.style.overflow = '';
-      document.removeEventListener('touchmove', prevent);
+      body.style.position = '';
+      body.style.top = '';
+      body.style.left = '';
+      body.style.right = '';
+      window.scrollTo(0, scrollY);
     };
   }, [open]);
 
@@ -295,7 +299,7 @@ const NotificationBell = () => {
                   <X size={18} />
                 </button>
               </div>
-              <div className="overflow-y-auto scrollbar-thin-iris" style={{ maxHeight: 'calc(80vh - 60px)', paddingBottom: 'calc(68px + env(safe-area-inset-bottom))' }}>
+              <div className="overflow-y-auto overscroll-contain scrollbar-thin-iris" style={{ maxHeight: 'calc(80vh - 60px)', paddingBottom: 'calc(68px + env(safe-area-inset-bottom))' }}>
                 <PanelContent />
               </div>
             </div>
