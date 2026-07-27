@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
-import { getSafeImageUrl } from '../../utils/imageHelper';
+import { useMovieImage } from '../../hooks/useMovieImage';
 import TrailerModal from './TrailerModal';
 import MovieCastSection from './MovieCastSection';
 
@@ -11,8 +11,9 @@ const MobileDetailLayout = ({
 }) => {
   const [showTrailer, setShowTrailer] = useState(false);
 
-  const backdropSrc = getSafeImageUrl(movieData.thumb_url, movieData.name, { width: 900, quality: 88 });
-  const posterSrc = getSafeImageUrl(movieData.poster_url, movieData.name, { width: 500, quality: 90 });
+  // Dùng useMovieImage để có fallback chain đầy đủ: weserv → wsrv → ảnh gốc → /404.jpg
+  const { currentSrc: backdropSrc } = useMovieImage(movieData.thumb_url, movieData.name, { width: 900, quality: 88 });
+  const { currentSrc: posterSrc, handleLoad: posterHandleLoad, handleError: posterHandleError, setImgRef: posterSetImgRef } = useMovieImage(movieData.poster_url, movieData.name, { width: 500, quality: 90 });
 
   return (
     <div className="min-h-screen">
@@ -55,10 +56,13 @@ const MobileDetailLayout = ({
         <div className="flex gap-3.5 mb-5">
           <div className="w-24 sm:w-32 flex-shrink-0">
             <img
+              ref={posterSetImgRef}
               src={posterSrc}
               alt={movieData.name}
               className="w-full rounded-card shadow-glass ring-1 ring-white/5"
               referrerPolicy="no-referrer"
+              onLoad={posterHandleLoad}
+              onError={posterHandleError}
             />
           </div>
           <div className="flex-1 space-y-2.5 min-w-0">

@@ -6,6 +6,9 @@ const CACHE_TTL = 30;
 const TRACKER_URL = 'https://nm-insights.nhutnm2306.workers.dev/ping';
 
 function trackRequest(ctx, path) {
+  // Skip tracking trong dev environment để tránh CORS error
+  if (path.includes('localhost')) return;
+  
   ctx.waitUntil(
     fetch(TRACKER_URL, {
       method: 'POST',

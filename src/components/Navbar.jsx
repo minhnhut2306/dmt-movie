@@ -358,6 +358,7 @@ const Navbar = () => {
                                   alt={item.title}
                                   className="w-full h-full object-cover"
                                   referrerPolicy="no-referrer"
+                                  onError={(e) => { e.currentTarget.src = '/404.jpg'; }}
                                 />
                                 <div className="absolute inset-0 bg-ink-950/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                   <Play className="w-4 h-4 text-white fill-white" />
@@ -579,6 +580,7 @@ const Navbar = () => {
                       alt={item.title}
                       className="w-full h-full object-cover"
                       referrerPolicy="no-referrer"
+                      onError={(e) => { e.currentTarget.src = '/404.jpg'; }}
                     />
                   </div>
                   <div className="flex-1 min-w-0">

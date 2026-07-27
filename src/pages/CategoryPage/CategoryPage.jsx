@@ -11,7 +11,6 @@ import {
   useDynamicCountries,
 } from '../../utils/CategoryConfigDynamic';
 import { movieApi } from '../../api'; // Import từ api/index.js
-import { getSafeImageUrl } from '../../utils/imageHelper';
 import LoadingState from '../../components/states/LoadingState';
 import ErrorState from '../../components/states/ErrorState';
 import EmptyState from '../../components/states/EmptyState';
@@ -105,16 +104,13 @@ const CategoryPage = () => {
     }
 
     return items.map((movie) => {
-      // Xử lý poster URL
-      const posterUrl = getSafeImageUrl(movie.poster_url || movie.poster || movie.thumb_url || movie.thumbnail, movie.name || movie.title);
-      const thumbnailUrl = getSafeImageUrl(movie.thumb_url || movie.thumbnail || movie.poster_url || movie.poster, movie.name || movie.title);
-
       return {
         id: movie._id || movie.id,
         title: movie.name || movie.title,
         originalTitle: movie.origin_name || movie.original_title || movie.originalTitle,
-        poster: posterUrl,
-        thumbnail: thumbnailUrl,
+        poster: movie.poster_url || movie.poster || movie.thumb_url || movie.thumbnail || '',
+        poster_url: movie.poster_url || movie.poster || '',
+        thumbnail: movie.thumb_url || movie.thumbnail || movie.poster_url || movie.poster || '',
         rating: movie.tmdb?.vote_average > 0
           ? movie.tmdb.vote_average.toFixed(1)
           : movie.rating || movie.vote_average || "N/A",

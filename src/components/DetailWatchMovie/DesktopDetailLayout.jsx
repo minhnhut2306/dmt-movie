@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
-import { getSafeImageUrl } from '../../utils/imageHelper';
+import { useMovieImage } from '../../hooks/useMovieImage';
 import TrailerModal from './TrailerModal';
 import MovieCastSection from './MovieCastSection';
 
@@ -11,9 +11,9 @@ const DesktopDetailLayout = ({
 }) => {
   const [showTrailer, setShowTrailer] = useState(false);
 
-  // Ảnh TMDB chất lượng cao (nét hơn nhiều) — fallback về ảnh mặc định nếu phim không có tmdb id
-  const backdropSrc = getSafeImageUrl(movieData.thumb_url, movieData.name, { width: 1280, quality: 88 });
-  const posterSrc = getSafeImageUrl(movieData.poster_url, movieData.name, { width: 600, quality: 90 });
+  // Dùng useMovieImage để có fallback chain đầy đủ: weserv → wsrv → ảnh gốc → /404.jpg
+  const { currentSrc: backdropSrc } = useMovieImage(movieData.thumb_url, movieData.name, { width: 1280, quality: 88 });
+  const { currentSrc: posterSrc, isLoaded: posterLoaded, handleLoad: posterHandleLoad, handleError: posterHandleError, setImgRef: posterSetImgRef } = useMovieImage(movieData.poster_url, movieData.name, { width: 600, quality: 90 });
 
   return (
     <div className="min-h-screen">
@@ -58,10 +58,13 @@ const DesktopDetailLayout = ({
           <div className="lg:col-span-1">
             <div className="rounded-xl2 overflow-hidden shadow-glass-lg ring-1 ring-white/5 transition-transform duration-300 hover:-translate-y-1">
               <img
+                ref={posterSetImgRef}
                 src={posterSrc}
                 alt={movieData.name}
                 className="w-full"
                 referrerPolicy="no-referrer"
+                onLoad={posterHandleLoad}
+                onError={posterHandleError}
               />
             </div>
             <button

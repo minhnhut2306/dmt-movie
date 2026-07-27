@@ -1,7 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Star, Calendar, Clock, Loader2, TriangleAlert } from 'lucide-react';
 import { useFeaturedMovies, useMovieImagesBatch } from '../../hooks/useMovies';
-import { getSafeImageUrl } from '../../utils/imageHelper.js';
+
+// Tạo fallback chain cho background-image CSS (không dùng được onError)
+function buildBgFallbackChain(rawUrl, opts = {}) {
+  const { width = 1280, quality = 88 } = opts;
+  if (!rawUrl) return '/404.jpg';
+  const fullUrl = rawUrl.startsWith('http') ? rawUrl : `https://phimimg.com/${rawUrl}`;
+  try {
+    const u = new URL(fullUrl);
+    const hostPath = `${u.hostname}${u.pathname}${u.search}`;
+    const params = `&w=${width}&output=webp&q=${quality}&af&il`;
+    const weserv = `https://images.weserv.nl/?url=${encodeURIComponent(hostPath)}${params}`;
+    // CSS url() fallback chain: weserv trước, nếu fail browser dùng ảnh gốc
+    return `url('${weserv}'), url('${fullUrl}'), url('/404.jpg')`;
+  } catch {
+    return `url('${fullUrl}'), url('/404.jpg')`;
+  }
+}
 
 const HeroBanner = ({
   isDragging,
@@ -36,7 +52,7 @@ const HeroBanner = ({
       title: movie.name,
       description: movie.origin_name,
       // Ảnh nền hero hiển thị full-bleed cỡ lớn — cần độ phân giải cao hơn card thường để không bị mờ/vỡ nét
-      backgroundImage: getSafeImageUrl(movie.poster_url, movie.name, { width: 1280, quality: 88 }),
+      backgroundImage: buildBgFallbackChain(movie.poster_url, { width: 1280, quality: 88 }),
       rating: movie.tmdb?.vote_average?.toFixed(1),
       year: movie.year,
       duration: movie.time,
@@ -58,7 +74,8 @@ const HeroBanner = ({
 
   const getBackgroundImage = (movie, index) => {
     const hiRes = tmdbImageQueries[index]?.data?.backdrop;
-    return hiRes || movie.backgroundImage;
+    const rawUrl = hiRes || (movie.poster_url || '');
+    return buildBgFallbackChain(rawUrl, { width: 1280, quality: 88 });
   };
 
   // Auto-slide functionality
@@ -278,7 +295,7 @@ const HeroBanner = ({
             <div
               className="absolute inset-0 bg-cover md:bg-[right_center] bg-[center_top]"
               style={{
-                backgroundImage: `url('${getBackgroundImage(movie, index)}')`,
+                backgroundImage: getBackgroundImage(movie, index),
                 transform: isDraggingLocal && dragDirection === 'horizontal' ? `translateX(${localDragOffset}px)` :
                   (isDragging && activeSection === 'hero') ? `translateX(${dragOffset}px)` :
                     'translateX(0)'

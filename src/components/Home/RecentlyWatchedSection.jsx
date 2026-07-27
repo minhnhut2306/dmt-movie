@@ -63,6 +63,7 @@ const RecentlyWatchedSection = () => {
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 loading="lazy"
                 referrerPolicy="no-referrer"
+                onError={(e) => { e.currentTarget.src = '/404.jpg'; }}
               />
 
               {/* Overlay khi hover */}
