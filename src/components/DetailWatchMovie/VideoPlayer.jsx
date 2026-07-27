@@ -193,24 +193,22 @@ const VideoPlayer = ({
         debug: false,
         enableWorker: true,
         lowLatencyMode: false,
-        // [FIX] tăng buffer để giảm stall khi mạng không ổn
-        backBufferLength: 60,
-        maxBufferLength: 60,
+        backBufferLength: 90,
+        maxBufferLength: 30,
         maxMaxBufferLength: 120,
-        maxBufferSize: 40 * 1000 * 1000,
+        maxBufferSize: 60 * 1000 * 1000,
         maxBufferHole: 0.5,
-        highBufferWatchdogPeriod: 2,
-        nudgeMaxRetry: 5,
-        manifestLoadingTimeOut: 6000,
-        manifestLoadingMaxRetry: 1,
-        levelLoadingTimeOut: 8000,
-        levelLoadingMaxRetry: 1,
-        fragLoadingTimeOut: 15000,
-        fragLoadingMaxRetry: 2,
-        // Bắt đầu quality thấp → video start nhanh → ABR tự scale lên
+        highBufferWatchdogPeriod: 3,
+        nudgeMaxRetry: 6,
+        manifestLoadingTimeOut: 10000,
+        manifestLoadingMaxRetry: 2,
+        levelLoadingTimeOut: 10000,
+        levelLoadingMaxRetry: 2,
+        fragLoadingTimeOut: 20000,
+        fragLoadingMaxRetry: 3,
         abrEwmaDefaultEstimate: 500000,
-        abrBandWidthFactor: 0.85,
-        abrBandWidthUpFactor: 0.6,
+        abrBandWidthFactor: 0.95,
+        abrBandWidthUpFactor: 0.7,
         capLevelToPlayerSize: true,
         startLevel: -1,
         maxLoadingDelay: 4,
@@ -218,6 +216,7 @@ const VideoPlayer = ({
         liveMaxLatencyDurationCount: 10,
         startFragPrefetch: true,
         testBandwidth: true,
+        progressive: true,
       });
 
       hlsInstance = hls;
@@ -228,7 +227,6 @@ const VideoPlayer = ({
         if (autoPlay) {
           video.play().catch(err => console.log('Autoplay prevented:', err));
         }
-        // Kiểm tra vị trí xem trước đó
         if (slug) {
           const savedTime = getWatchPosition(slug, episodeIndex, serverIndex);
           if (savedTime && savedTime > 30) {
@@ -309,7 +307,6 @@ const VideoPlayer = ({
     let lastSavedTime = 0;
     const handleTimeUpdate = () => {
       const currentTime = video.currentTime;
-      // Lưu vị trí mỗi 5 giây
       if (slug && currentTime > 10 && currentTime - lastSavedTime >= 5) {
         lastSavedTime = currentTime;
         saveWatchPosition(slug, episodeIndex, serverIndex, currentTime);
@@ -408,7 +405,56 @@ const VideoPlayer = ({
           Trình duyệt của bạn không hỗ trợ video này.
         </video>
 
-        <div className="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity hidden lg:block">
+        {/* Quality selector - đặt bên ngoài video để không bị native controls che */}
+        {availableLevels.length > 1 && (
+          <div className="absolute bottom-2 left-2 z-20">
+            <div className="relative">
+              <button
+                onClick={() => setShowQualityMenu(!showQualityMenu)}
+                className="bg-black/80 text-white px-3 py-2 rounded-lg hover:bg-black/90 transition-all backdrop-blur-sm flex items-center gap-2 text-sm"
+                title="Chất lượng video"
+              >
+                <Settings className="w-4 h-4" />
+                <span>{currentQuality === -1 ? 'Auto' : getQualityLabel(availableLevels[currentQuality])}</span>
+              </button>
+              
+              {showQualityMenu && (
+                <div className="absolute left-0 bottom-full mb-2 bg-black/95 backdrop-blur-sm rounded-lg overflow-hidden shadow-2xl min-w-[140px]">
+                  <div className="py-1">
+                    <button
+                      onClick={() => handleQualityChange(-1)}
+                      className={`w-full px-4 py-2.5 text-left text-sm transition-colors flex items-center justify-between ${
+                        currentQuality === -1 
+                          ? 'bg-iris-600 text-white' 
+                          : 'text-white/80 hover:bg-white/10'
+                      }`}
+                    >
+                      <span>Auto</span>
+                      {currentQuality === -1 && <span className="text-xs">✓</span>}
+                    </button>
+                    {availableLevels.map((level, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleQualityChange(index)}
+                        className={`w-full px-4 py-2.5 text-left text-sm transition-colors flex items-center justify-between ${
+                          currentQuality === index 
+                            ? 'bg-iris-600 text-white' 
+                            : 'text-white/80 hover:bg-white/10'
+                        }`}
+                      >
+                        <span>{getQualityLabel(level)}</span>
+                        {currentQuality === index && <span className="text-xs">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Fullscreen button desktop */}
+        <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity hidden lg:block">
           <button
             onClick={toggleNativeFullscreen}
             className="bg-black/70 text-white p-2 rounded-lg hover:bg-black/90 transition-all backdrop-blur-sm"
