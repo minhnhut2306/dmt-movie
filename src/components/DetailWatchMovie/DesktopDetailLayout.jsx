@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
 import { useMovieImage } from '../../hooks/useMovieImage';
-import { buildBgFallbackChain } from '../../utils/imageHelper';
+import { useBackgroundImage } from '../../hooks/useBackgroundImage';
 import TrailerModal from './TrailerModal';
 import MovieCastSection from './MovieCastSection';
 
@@ -12,9 +12,9 @@ const DesktopDetailLayout = ({
 }) => {
   const [showTrailer, setShowTrailer] = useState(false);
 
-  // Backdrop dùng CSS background-image nên phải fallback bằng chuỗi url() đa nguồn
-  // (onError của <img> không áp dụng được cho background-image).
-  const backdropChain = buildBgFallbackChain(movieData.thumb_url, { width: 1280, quality: 88 });
+  // Preload backdrop qua JS (không dùng CSS multi-url) để có loading state thật —
+  // tránh flash ảnh /404.jpg trong lúc ảnh thật còn đang tải mạng.
+  const { src: backdropSrc, isLoaded: backdropLoaded } = useBackgroundImage(movieData.thumb_url, { width: 1280, quality: 88 });
   const { currentSrc: posterSrc, isLoaded: posterLoaded, handleLoad: posterHandleLoad, handleError: posterHandleError, setImgRef: posterSetImgRef } = useMovieImage(movieData.poster_url, movieData.name, { width: 600, quality: 90 });
 
   return (
@@ -30,8 +30,8 @@ const DesktopDetailLayout = ({
 
         <div className="relative mb-10">
           <div
-            className="h-[420px] bg-cover bg-center rounded-xl2 relative overflow-hidden shadow-glass-lg"
-            style={{ backgroundImage: backdropChain }}
+            className={`h-[420px] bg-cover bg-center rounded-xl2 relative overflow-hidden shadow-glass-lg transition-[background-image] duration-300 ${!backdropLoaded ? 'skeleton' : ''}`}
+            style={backdropLoaded ? { backgroundImage: `url(${backdropSrc})` } : undefined}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/50 to-transparent" />
             <div className="absolute -bottom-16 -left-16 w-72 h-72 bg-iris-500/25 rounded-full blur-[100px] pointer-events-none" />

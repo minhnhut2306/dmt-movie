@@ -25,17 +25,15 @@ const MobileWatchLayout = ({
   return (
     <div className="min-h-screen">
       <div className="px-3 py-3 border-b border-white/5 glass">
-        <div className="flex items-center gap-3 mb-2">
-          <button
-            onClick={() => setActiveLayout('detail')}
-            className="text-white/70 hover:text-iris-300 transition-colors duration-200 w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/5 cursor-pointer flex-shrink-0"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-base font-display font-bold text-white truncate">{movieData.name}</h1>
-            <p className="text-xs text-white/45 truncate">{movieData.origin_name}</p>
-          </div>
+        <button
+          onClick={() => setActiveLayout('detail')}
+          className="text-white/70 hover:text-iris-300 transition-colors duration-200 w-10 h-10 flex items-center justify-center rounded-lg hover:bg-white/5 cursor-pointer -ml-2 mb-1"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div className="min-w-0 mb-2">
+          <h1 className="text-base font-display font-bold text-white truncate">{movieData.name}</h1>
+          <p className="text-xs text-white/45 truncate">{movieData.origin_name}</p>
         </div>
         <p className="text-xs text-white/35 px-1">
           Đang xem: {currentEpisodeName} - {movieData.episodes?.[currentServer]?.server_name}
