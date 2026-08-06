@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
 import { useMovieImage } from '../../hooks/useMovieImage';
+import { buildBgFallbackChain } from '../../utils/imageHelper';
 import TrailerModal from './TrailerModal';
 import MovieCastSection from './MovieCastSection';
 
@@ -11,8 +12,9 @@ const DesktopDetailLayout = ({
 }) => {
   const [showTrailer, setShowTrailer] = useState(false);
 
-  // Dùng useMovieImage để có fallback chain đầy đủ: weserv → wsrv → ảnh gốc → /404.jpg
-  const { currentSrc: backdropSrc } = useMovieImage(movieData.thumb_url, movieData.name, { width: 1280, quality: 88 });
+  // Backdrop dùng CSS background-image nên phải fallback bằng chuỗi url() đa nguồn
+  // (onError của <img> không áp dụng được cho background-image).
+  const backdropChain = buildBgFallbackChain(movieData.thumb_url, { width: 1280, quality: 88 });
   const { currentSrc: posterSrc, isLoaded: posterLoaded, handleLoad: posterHandleLoad, handleError: posterHandleError, setImgRef: posterSetImgRef } = useMovieImage(movieData.poster_url, movieData.name, { width: 600, quality: 90 });
 
   return (
@@ -29,7 +31,7 @@ const DesktopDetailLayout = ({
         <div className="relative mb-10">
           <div
             className="h-[420px] bg-cover bg-center rounded-xl2 relative overflow-hidden shadow-glass-lg"
-            style={{ backgroundImage: `url(${backdropSrc})` }}
+            style={{ backgroundImage: backdropChain }}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/50 to-transparent" />
             <div className="absolute -bottom-16 -left-16 w-72 h-72 bg-iris-500/25 rounded-full blur-[100px] pointer-events-none" />

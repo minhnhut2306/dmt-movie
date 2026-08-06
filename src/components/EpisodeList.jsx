@@ -42,13 +42,6 @@ const EpisodeList = ({
     setCurrentEpisode(episodeIndex);
   };
 
-  const handleServerChange = (serverIndex) => {
-    setCurrentServer(serverIndex);
-    setCurrentEpisode(0);
-    setActiveChunk(0);
-    setJumpValue('');
-  };
-
   const handleJumpSubmit = (e) => {
     e.preventDefault();
     if (!serverData) return;
@@ -135,25 +128,6 @@ const EpisodeList = ({
           </form>
         )}
       </div>
-
-      {/* Server selector — pill tabs, active dùng gradient iris-to-ember */}
-      {episodes.length > 1 && (
-        <div className="mb-4 flex flex-wrap gap-2">
-          {episodes.map((server, serverIndex) => (
-            <button
-              key={serverIndex}
-              onClick={() => handleServerChange(serverIndex)}
-              className={`min-h-[38px] px-4 py-2 rounded-full font-medium text-sm transition-all duration-200 cursor-pointer ${
-                currentServer === serverIndex
-                  ? 'bg-gradient-to-r from-iris-500 to-ember-500 text-white shadow-glow'
-                  : 'bg-white/[0.04] text-white/60 border border-white/10 hover:bg-white/10 hover:text-white'
-              }`}
-            >
-              {server.server_name}
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* Chọn block tập — chỉ hiện khi phim quá dài (>100 tập), tránh render hàng nghìn nút cùng lúc */}
       {chunks && chunks.length > 1 && (

@@ -6,6 +6,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import PWAUpdatePrompt from './components/PWAUpdatePrompt';
+import { UpdateNotification } from './components/UpdateNotification';
 
 // Lazy load routes — giảm initial bundle
 const Home = lazy(() => import('./pages/home/Home'));
@@ -81,6 +82,7 @@ const App = () => {
         )}
         <Footer/>
         <PWAUpdatePrompt />
+        <UpdateNotification />
       </BrowserRouter>
       <Toaster
         position="top-right"

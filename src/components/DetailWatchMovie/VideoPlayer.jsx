@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Play, Minimize, Maximize } from 'lucide-react';
+import { Play, Minimize, Maximize, Settings } from 'lucide-react';
 import Hls from 'hls.js';
 import { saveWatchPosition, getWatchPosition } from '../../utils/watchHistory';
 
@@ -67,6 +67,7 @@ const formatTime = (s) => {
 const VideoPlayer = ({
   currentVideoUrl,
   currentEmbedUrl,
+  forceEmbed = false,
   isFullscreen,
   setIsFullscreen,
   autoPlay = true,
@@ -78,21 +79,44 @@ const VideoPlayer = ({
   const containerRef = useRef(null);
   const [isLandscape, setIsLandscape] = useState(false);
   const [videoError, setVideoError] = useState(null);
-  const [useEmbed, setUseEmbed] = useState(false);
+  const [useEmbed, setUseEmbed] = useState(forceEmbed);
   const [embedFailed, setEmbedFailed] = useState(false);
   const retryCountRef = useRef(0);
   const [retryKey, setRetryKey] = useState(0);
   const [resumePrompt, setResumePrompt] = useState(null); // { time: number }
   const savePositionTimerRef = useRef(null);
   const adRangesCacheRef = useRef({ details: null, ranges: [] });
+  const hlsRef = useRef(null);
+  const [availableLevels, setAvailableLevels] = useState([]);
+  const [currentQuality, setCurrentQuality] = useState(-1); // -1 = Auto
+  const [showQualityMenu, setShowQualityMenu] = useState(false);
+
+  const getQualityLabel = useCallback((level) => {
+    if (!level) return '';
+    if (level.height) return `${level.height}p`;
+    if (level.bitrate) return `${Math.round(level.bitrate / 1000)}kbps`;
+    return 'Auto';
+  }, []);
+
+  const handleQualityChange = useCallback((levelIndex) => {
+    const hls = hlsRef.current;
+    if (hls) {
+      hls.currentLevel = levelIndex; // -1 = trả về Auto (ABR)
+    }
+    setCurrentQuality(levelIndex);
+    setShowQualityMenu(false);
+  }, []);
 
   useEffect(() => {
     setVideoError(null);
-    setUseEmbed(false);
+    setUseEmbed(forceEmbed);
     setEmbedFailed(false);
     retryCountRef.current = 0;
     setRetryKey(0);
-  }, [currentVideoUrl]);
+    setAvailableLevels([]);
+    setCurrentQuality(-1);
+    setShowQualityMenu(false);
+  }, [currentVideoUrl, currentEmbedUrl, forceEmbed]);
 
   useEffect(() => {
     const handleOrientationChange = () => {
@@ -220,10 +244,13 @@ const VideoPlayer = ({
       });
 
       hlsInstance = hls;
+      hlsRef.current = hls;
       hls.loadSource(sourceUrl);
       hls.attachMedia(video);
 
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+      hls.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
+        setAvailableLevels(hls.levels || []);
+        setCurrentQuality(hls.currentLevel);
         if (autoPlay) {
           video.play().catch(err => console.log('Autoplay prevented:', err));
         }
@@ -232,6 +259,13 @@ const VideoPlayer = ({
           if (savedTime && savedTime > 30) {
             setResumePrompt({ time: savedTime });
           }
+        }
+      });
+
+      // Khi ABR tự đổi level (lúc đang ở chế độ Auto), cập nhật lại nhãn hiển thị
+      hls.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+        if (hls.autoLevelEnabled) {
+          setCurrentQuality(-1);
         }
       });
 
@@ -318,8 +352,9 @@ const VideoPlayer = ({
     return () => {
       video.removeEventListener('timeupdate', handleTimeUpdate);
       if (hlsInstance) hlsInstance.destroy();
+      hlsRef.current = null;
     };
-  }, [currentVideoUrl, autoPlay, retryKey, videoError, embedFailed]);
+  }, [currentVideoUrl, autoPlay, retryKey, videoError, embedFailed, useEmbed, forceEmbed]);
 
   if (!currentVideoUrl) {
     return (

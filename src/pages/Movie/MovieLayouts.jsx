@@ -45,12 +45,31 @@ const MoviePlay = () => {
     const movieData = useMemo(() => {
         if (!movieDetailData) return null;
 
+        // Mỗi server gốc từ API có 2 nguồn phát/tập (link_m3u8 + link_embed).
+        // Tách thành 2 "server" riêng để user chọn thẳng, thay vì chỉ tự động fallback khi lỗi.
+        const expandedEpisodes = [];
+        movieDetailData.episodes?.forEach((server) => {
+            const baseName = formatServerName(server.server_name);
+            const hasEmbed = server.server_data?.some((ep) => !!ep.link_embed);
+
+            expandedEpisodes.push({
+                ...server,
+                server_name: hasEmbed ? `${baseName} - Server 1` : baseName,
+                forceEmbed: false,
+            });
+
+            if (hasEmbed) {
+                expandedEpisodes.push({
+                    ...server,
+                    server_name: `${baseName} - Server 2`,
+                    forceEmbed: true,
+                });
+            }
+        });
+
         return {
             ...transformMovieDetail(movieDetailData),
-            episodes: movieDetailData.episodes?.map(server => ({
-                ...server,
-                server_name: formatServerName(server.server_name)
-            }))
+            episodes: expandedEpisodes,
         };
     }, [movieDetailData]);
 

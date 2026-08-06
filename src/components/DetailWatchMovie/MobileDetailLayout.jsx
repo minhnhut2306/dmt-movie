@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
 import { useMovieImage } from '../../hooks/useMovieImage';
+import { buildBgFallbackChain } from '../../utils/imageHelper';
 import TrailerModal from './TrailerModal';
 import MovieCastSection from './MovieCastSection';
 
@@ -11,8 +12,8 @@ const MobileDetailLayout = ({
 }) => {
   const [showTrailer, setShowTrailer] = useState(false);
 
-  // Dùng useMovieImage để có fallback chain đầy đủ: weserv → wsrv → ảnh gốc → /404.jpg
-  const { currentSrc: backdropSrc } = useMovieImage(movieData.thumb_url, movieData.name, { width: 900, quality: 88 });
+  // Backdrop dùng CSS background-image nên phải fallback bằng chuỗi url() đa nguồn
+  const backdropChain = buildBgFallbackChain(movieData.thumb_url, { width: 900, quality: 88 });
   const { currentSrc: posterSrc, handleLoad: posterHandleLoad, handleError: posterHandleError, setImgRef: posterSetImgRef } = useMovieImage(movieData.poster_url, movieData.name, { width: 500, quality: 90 });
 
   return (
@@ -29,7 +30,7 @@ const MobileDetailLayout = ({
         <div className="relative mb-5">
           <div
             className="h-64 sm:h-80 bg-cover bg-center rounded-xl2 relative overflow-hidden shadow-glass-lg"
-            style={{ backgroundImage: `url(${backdropSrc})` }}
+            style={{ backgroundImage: backdropChain }}
           >
             <div className="absolute inset-0 bg-gradient-to-t from-ink-950 via-ink-950/45 to-transparent" />
             <div className="absolute bottom-4 left-4 right-4 z-10">

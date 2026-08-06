@@ -49,3 +49,27 @@ export function getSafeImageUrl(url, fallbackText = "No Image", opts = {}) {
   const candidates = buildImageCandidates(url, fallbackText, opts);
   return candidates[0]; // Return first candidate
 }
+
+/**
+ * Chuỗi fallback dùng CHO CSS `background-image` (không phải thẻ <img>).
+ * Trình duyệt tự thử url() kế tiếp nếu url() trước lỗi — khác cơ chế onError
+ * của <img>, nên phải build thành 1 chuỗi "url(a), url(b), url(c)" duy nhất.
+ * @param {string} rawUrl
+ * @param {object} [opts] - { width, quality }
+ * @returns {string} giá trị gán thẳng cho style.backgroundImage
+ */
+export function buildBgFallbackChain(rawUrl, opts = {}) {
+  const { width = 1280, quality = 88 } = opts;
+  if (!rawUrl) return "url('/404.jpg')";
+
+  const fullUrl = rawUrl.startsWith('http') ? rawUrl : `https://phimimg.com/${rawUrl}`;
+  try {
+    const u = new URL(fullUrl);
+    const hostPath = `${u.hostname}${u.pathname}${u.search}`;
+    const params = `&w=${width}&output=webp&q=${quality}&af&il`;
+    const weserv = `https://images.weserv.nl/?url=${encodeURIComponent(hostPath)}${params}`;
+    return `url('${weserv}'), url('${fullUrl}'), url('/404.jpg')`;
+  } catch {
+    return `url('${fullUrl}'), url('/404.jpg')`;
+  }
+}

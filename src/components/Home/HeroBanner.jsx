@@ -1,23 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, Star, Calendar, Clock, Loader2, TriangleAlert } from 'lucide-react';
 import { useFeaturedMovies, useMovieImagesBatch } from '../../hooks/useMovies';
-
-// Tạo fallback chain cho background-image CSS (không dùng được onError)
-function buildBgFallbackChain(rawUrl, opts = {}) {
-  const { width = 1280, quality = 88 } = opts;
-  if (!rawUrl) return '/404.jpg';
-  const fullUrl = rawUrl.startsWith('http') ? rawUrl : `https://phimimg.com/${rawUrl}`;
-  try {
-    const u = new URL(fullUrl);
-    const hostPath = `${u.hostname}${u.pathname}${u.search}`;
-    const params = `&w=${width}&output=webp&q=${quality}&af&il`;
-    const weserv = `https://images.weserv.nl/?url=${encodeURIComponent(hostPath)}${params}`;
-    // CSS url() fallback chain: weserv trước, nếu fail browser dùng ảnh gốc
-    return `url('${weserv}'), url('${fullUrl}'), url('/404.jpg')`;
-  } catch {
-    return `url('${fullUrl}'), url('/404.jpg')`;
-  }
-}
+import { buildBgFallbackChain } from '../../utils/imageHelper';
 
 const HeroBanner = ({
   isDragging,

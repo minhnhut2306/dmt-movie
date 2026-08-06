@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft, Star, Calendar, Eye, Globe, Film } from 'lucide-react';
 import { lazy, Suspense } from 'react';
 import MovieCastSection from './MovieCastSection';
+import ServerTabs from '../ServerTabs';
 
 const VideoPlayer = lazy(() => import('./VideoPlayer'));
 const EpisodeList = lazy(() => import('../EpisodeList'));
@@ -19,6 +20,7 @@ const MobileWatchLayout = ({
   const currentVideoUrl = movieData.episodes?.[currentServer]?.server_data?.[currentEpisode]?.link_m3u8;
   const currentEmbedUrl = movieData.episodes?.[currentServer]?.server_data?.[currentEpisode]?.link_embed;
   const currentEpisodeName = movieData.episodes?.[currentServer]?.server_data?.[currentEpisode]?.name;
+  const forceEmbed = !!movieData.episodes?.[currentServer]?.forceEmbed;
 
   return (
     <div className="min-h-screen">
@@ -40,10 +42,22 @@ const MobileWatchLayout = ({
         </p>
       </div>
 
+      <div className="px-3 pt-3">
+        <ServerTabs
+          episodes={movieData.episodes}
+          currentServer={currentServer}
+          onServerChange={(serverIndex) => {
+            setCurrentServer(serverIndex);
+            setCurrentEpisode(0);
+          }}
+        />
+      </div>
+
       <Suspense fallback={<div className="aspect-video bg-ink-900 flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-2 border-white/10 border-t-iris-400" /></div>}>
         <VideoPlayer
           currentVideoUrl={currentVideoUrl}
           currentEmbedUrl={currentEmbedUrl}
+          forceEmbed={forceEmbed}
           isFullscreen={isFullscreen}
           setIsFullscreen={setIsFullscreen}
           slug={movieData.slug}
