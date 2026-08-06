@@ -55,6 +55,8 @@ const MoviePlay = () => {
             expandedEpisodes.push({
                 ...server,
                 server_name: hasEmbed ? `${baseName} - Server 1` : baseName,
+                baseName,
+                variantLabel: hasEmbed ? 'Server 1' : null,
                 forceEmbed: false,
             });
 
@@ -62,6 +64,8 @@ const MoviePlay = () => {
                 expandedEpisodes.push({
                     ...server,
                     server_name: `${baseName} - Server 2`,
+                    baseName,
+                    variantLabel: 'Server 2',
                     forceEmbed: true,
                 });
             }
