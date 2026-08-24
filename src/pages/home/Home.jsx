@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import HeroBanner from '../../components/Home/HeroBanner';
 import GenericMoviesSection from '../../components/Home/GenericMoviesSection';
+import ServiceDownScreen from '../../components/ServiceDownScreen';
 import { useSwipeHandler } from '../../hooks/useSwipeHandler';
 import { MOVIE_SECTIONS } from '../../config/movieSections';
+import { SERVICE_DOWN } from '../../config/serviceStatus';
 
 const Home = () => {
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
@@ -19,6 +21,10 @@ const Home = () => {
   } = useSwipeHandler();
 
   const handleSectionEnd = (movieList, updateFn) => originalHandleSectionEnd(movieList, updateFn);
+
+  if (SERVICE_DOWN) {
+    return <ServiceDownScreen />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-900">

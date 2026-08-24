@@ -25,14 +25,14 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <ScrollToTop />
-        <Navbar />
+        {/* <Navbar /> */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/movie/:slug" element={<MovieLayouts />} />
           <Route path="/category/:categoryType/:categorySlug" element={<CategoryPage/>} />
           <Route path="/search" element={<SearchPage />} />
         </Routes>
-        <Footer/>
+        {/* <Footer/> */}
         <PWAUpdatePrompt />
       </BrowserRouter>
       <Toaster
