@@ -1,10 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { AlertTriangle, ExternalLink, Smartphone, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { AlertTriangle, ExternalLink, Smartphone, Trash2, Construction, Clock } from 'lucide-react';
 import { V1_URL } from '../config/serviceStatus';
 
-// Full-screen thay cho nội dung Home khi server chính tạm dừng hoạt động.
-// Hiện riêng ghi chú cho ai đang mở qua bản cài trên điện thoại (PWA/APK)
-// vì bản đó không tự redirect được — phải tự gỡ và qua dùng bản V1 bằng trình duyệt.
 const ServiceDownScreen = () => {
   const [isStandalone, setIsStandalone] = useState(false);
 
@@ -16,52 +13,104 @@ const ServiceDownScreen = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-16 bg-gray-900">
-      <div className="max-w-md w-full text-center">
-        <div className="w-16 h-16 rounded-2xl bg-ember-500/10 flex items-center justify-center mx-auto mb-5">
-          <AlertTriangle className="w-8 h-8 text-ember-400" />
-        </div>
+    <div className="min-h-screen flex items-center justify-center px-4 py-16 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 relative overflow-hidden">
+      {/* Background animated circles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-red-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
 
-        <h1 className="text-2xl font-display font-bold text-white mb-2">
-          DMT Movie tạm dừng hoạt động
-        </h1>
-        <p className="text-white/55 text-sm leading-relaxed mb-6">
-          Web/App phiên bản này đang gặp sự cố và tạm thời chưa xem phim được.
-          Mời bạn trải nghiệm tạm bản DMT Movie V1 trong lúc chờ khắc phục.
-        </p>
+      <div className="max-w-lg w-full relative z-10">
+        {/* Card container */}
+        <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-3xl p-8 shadow-2xl">
+          {/* Icon with animation */}
+          <div className="relative mb-6">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-red-500/20 to-orange-500/20 flex items-center justify-center mx-auto backdrop-blur-sm border border-red-500/20">
+              <AlertTriangle className="w-10 h-10 text-red-400 animate-pulse" />
+            </div>
+            <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full animate-ping"></div>
+            <div className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full"></div>
+          </div>
 
-        <a
-          href={V1_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center justify-center gap-2 w-full bg-gradient-to-r from-iris-500 to-ember-500 text-white font-semibold text-sm px-5 py-3.5 rounded-xl shadow-glow hover:opacity-90 active:scale-[0.98] transition-all"
-        >
-          <ExternalLink className="w-4 h-4" />
-          Mở DMT Movie V1
-        </a>
+          {/* Title */}
+          <h1 className="text-3xl font-bold text-white mb-3 text-center bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+            DMT Movie Tạm Dừng
+          </h1>
+          {/* Description */}
+          <p className="text-gray-300 text-base leading-relaxed mb-6 text-center">
+            Phiên bản này đang được nâng cấp và sửa lỗi để mang đến trải nghiệm tốt hơn. 
+            Vui lòng sử dụng tạm phiên bản V1 bên dưới.
+          </p>
 
-        {isStandalone && (
-          <div className="mt-5 text-left bg-white/[0.04] border border-white/10 rounded-xl p-4">
-            <div className="flex items-start gap-2.5">
-              <Trash2 className="w-4 h-4 text-white/50 flex-shrink-0 mt-0.5" />
+          {/* Info box */}
+          <div className="mb-6 bg-blue-500/5 border border-blue-500/20 rounded-xl p-4">
+            <div className="flex items-start gap-3">
+              <Clock className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-white text-xs font-semibold mb-1">
-                  Bạn đang mở qua app đã cài trên điện thoại?
+                <p className="text-blue-400 text-sm font-semibold mb-1">
+                  Thời gian dự kiến
                 </p>
-                <p className="text-white/50 text-[11px] leading-relaxed">
-                  App này sẽ không cập nhật được nội dung mới. Hãy gỡ app khỏi
-                  màn hình chính (nhấn giữ icon → Gỡ/Xóa), sau đó bấm nút phía
-                  trên bằng trình duyệt để dùng bản V1.
+                <p className="text-gray-400 text-sm">
+                  Chúng tôi đang khắc phục nhanh nhất có thể. Cảm ơn bạn đã kiên nhẫn!
                 </p>
               </div>
             </div>
           </div>
-        )}
 
-        <p className="text-white/30 text-[11px] mt-6 flex items-center justify-center gap-1.5">
-          <Smartphone className="w-3.5 h-3.5" />
-          Cảm ơn bạn đã thông cảm.
-        </p>
+          {/* CTA Button */}
+          <a
+            href={V1_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group relative block w-full bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white font-bold text-base px-6 py-4 rounded-xl shadow-lg hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="relative flex items-center justify-center gap-3">
+              <ExternalLink className="w-5 h-5" />
+              <span>Mở DMT Movie V1</span>
+            </div>
+          </a>
+
+          {/* PWA Notice */}
+          {isStandalone && (
+            <div className="mt-6 bg-orange-500/5 border border-orange-500/20 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
+                  <Trash2 className="w-5 h-5 text-orange-400" />
+                </div>
+                <div>
+                  <p className="text-orange-400 text-sm font-bold mb-2">
+                    📱 Đang dùng PWA/App đã cài?
+                  </p>
+                  <p className="text-gray-400 text-xs leading-relaxed">
+                    App này không tự động cập nhật. Vui lòng <span className="text-orange-400 font-semibold">gỡ cài đặt</span> (nhấn giữ icon → Gỡ/Xóa), 
+                    sau đó dùng <span className="text-orange-400 font-semibold">trình duyệt</span> để truy cập bản V1.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Footer */}
+          <div className="mt-6 pt-6 border-t border-gray-700/50">
+            <p className="text-gray-500 text-xs flex items-center justify-center gap-2">
+              <Smartphone className="w-4 h-4" />
+              Cảm ơn bạn đã đồng hành cùng DMT Movie 💙
+            </p>
+          </div>
+        </div>
+
+        {/* Additional info cards */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
+          <div className="bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-xl p-4">
+            <div className="text-2xl mb-2">🎬</div>
+            <p className="text-gray-400 text-xs">Hàng nghìn phim đang chờ bạn</p>
+          </div>
+          <div className="bg-gray-800/30 backdrop-blur-sm border border-gray-700/30 rounded-xl p-4">
+            <div className="text-2xl mb-2">⚡</div>
+            <p className="text-gray-400 text-xs">Sẽ sớm trở lại mạnh mẽ hơn</p>
+          </div>
+        </div>
       </div>
     </div>
   );
