@@ -94,63 +94,64 @@ export const useMovieImagesBatch = (slugs = []) => {
 };
 
 // ============================================
-// CONVENIENCE HOOKS - Wrapper cho dễ dùng
+// CONVENIENCE HOOKS — wrapper cho dễ dùng
+// enabled: truyền false để defer fetch (dùng với lazy-load IntersectionObserver)
 // ============================================
-export const useLatestMovies = (page = 1) => 
-  useMovieCategory("getLatestMovies", page);
+export const useLatestMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getLatestMovies', page, { enabled });
 
-export const useFeaturedMovies = () => 
+export const useFeaturedMovies = () =>
   useQuery({
-    queryKey: ["movies", "featured"],
+    queryKey: ['movies', 'featured'],
     queryFn: () => movieApi.getFeaturedMovies(),
     ...DEFAULT_QUERY_OPTIONS,
-    staleTime: 30 * 60 * 1000, // Featured movies cache lâu hơn
+    staleTime: 30 * 60 * 1000,
   });
 
-export const useVietnamMovies = (page = 1) => 
-  useMovieCategory("getVietnamMovies", page);
+export const useVietnamMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getVietnamMovies', page, { enabled });
 
-export const useChinaMovies = (page = 1) => 
-  useMovieCategory("getChinaMovies", page);
+export const useChinaMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getChinaMovies', page, { enabled });
 
-export const useJapanMovies = (page = 1) => 
-  useMovieCategory("getJapanMovies", page);
+export const useJapanMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getJapanMovies', page, { enabled });
 
-export const useSeriesMovies = (page = 1) => 
-  useMovieCategory("getSeriesMovies", page);
+export const useSeriesMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getSeriesMovies', page, { enabled });
 
-export const useSingleMovies = (page = 1) => 
-  useMovieCategory("getSingleMovies", page);
+export const useSingleMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getSingleMovies', page, { enabled });
 
-export const useTVShows = (page = 1) => 
-  useMovieCategory("getTVShows", page);
+export const useTVShows = (enabled = true, page = 1) =>
+  useMovieCategory('getTVShows', page, { enabled });
 
-export const useAnimationMovies = (page = 1) => 
-  useMovieCategory("getAnimationMovies", page);
+export const useAnimationMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getAnimationMovies', page, { enabled });
 
-export const useActionMovies = (page = 1) => 
-  useMovieCategory("getActionMovies", page);
+export const useActionMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getActionMovies', page, { enabled });
 
-export const useHorrorMovies = (page = 1) => 
-  useMovieCategory("getHorrorMovies", page);
+export const useHorrorMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getHorrorMovies', page, { enabled });
 
-export const useAdventureMovies = (page = 1) => 
-  useMovieCategory("getAdventureMovies", page);
+export const useAdventureMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getAdventureMovies', page, { enabled });
 
-export const useHistoryMovies = (page = 1) => 
-  useMovieCategory("getHistoryMovies", page);
+export const useHistoryMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getHistoryMovies', page, { enabled });
 
-export const useDubbedMovies = (page = 1) => 
-  useMovieCategory("getDubbedMovies", page);
+export const useDubbedMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getDubbedMovies', page, { enabled });
 
-export const useVoiceoverMovies = (page = 1) => 
-  useMovieCategory("getVoiceoverMovies", page);
+export const useVoiceoverMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getVoiceoverMovies', page, { enabled });
 
-export const useVietsubMovies = (page = 1) => 
-  useMovieCategory("getVietsubMovies", page);
+export const useVietsubMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getVietsubMovies', page, { enabled });
 
-export const useCinemaMovies = (page = 1) => 
-  useMovieCategory("getCinemaMovies", page);
+export const useCinemaMovies = (enabled = true, page = 1) =>
+  useMovieCategory('getCinemaMovies', page, { enabled });
 
 // ============================================
 // CATEGORY HOOK - Cho CategoryPage

@@ -1,7 +1,36 @@
-import React, { useState, memo } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, TriangleAlert } from 'lucide-react';
 import UnifiedMovieCard from '../UnifiedMovieCard';
+
+/**
+ * Hook lazy-load: chỉ trả về isVisible=true khi phần tử đã vào gần viewport.
+ * rootMargin 300px → bắt đầu fetch trước khi user cuộn tới, UX mượt hơn.
+ */
+const useLazyVisible = (rootMargin = '300px') => {
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || isVisible) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [isVisible, rootMargin]);
+
+  return { ref, isVisible };
+};
 
 const SkeletonRow = () => (
   <div className="flex gap-3 overflow-hidden">
@@ -32,7 +61,11 @@ const GenericMoviesSection = ({
 }) => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const navigate = useNavigate();
-  const { data: apiData, isLoading: loading, error: queryError } = useDataHook();
+
+  // Lazy load: chỉ fetch khi section gần vào viewport
+  const { ref: sectionRef, isVisible } = useLazyVisible('300px');
+
+  const { data: apiData, isLoading: loading, error: queryError } = useDataHook(isVisible);
   const movies = transformFunction(apiData);
   const error = queryError?.message;
 
@@ -60,7 +93,8 @@ const GenericMoviesSection = ({
     }
   };
 
-  const SectionHeading = () => (
+  // Heading dùng chung cho mọi trạng thái — title + nút Xem thêm
+  const headingEl = (
     <div className="flex items-center justify-between mb-4 sm:mb-6 gap-3">
       <h2 className="text-white text-lg sm:text-2xl font-display font-bold flex items-center gap-3">
         <span className="w-1 h-6 rounded-full bg-gradient-to-b from-iris-400 to-ember-400 flex-shrink-0" />
@@ -79,10 +113,11 @@ const GenericMoviesSection = ({
     </div>
   );
 
-  if (loading) {
+  // Chưa vào viewport hoặc đang tải → hiện skeleton (ref phải có để observer hoạt động)
+  if (!isVisible || loading) {
     return (
-      <div className="mb-10 sm:mb-14">
-        <SectionHeading />
+      <div ref={sectionRef} className="mb-10 sm:mb-14">
+        {headingEl}
         <SkeletonRow />
       </div>
     );
@@ -90,8 +125,8 @@ const GenericMoviesSection = ({
 
   if (error) {
     return (
-      <div className="mb-10 sm:mb-14">
-        <SectionHeading />
+      <div ref={sectionRef} className="mb-10 sm:mb-14">
+        {headingEl}
         <div className="flex items-center justify-center h-56 glass-subtle rounded-card">
           <div className="text-center px-4">
             <TriangleAlert className="w-7 h-7 text-ember-400 mx-auto mb-2" />
@@ -111,8 +146,8 @@ const GenericMoviesSection = ({
 
   if (!movies || movies.length === 0) {
     return (
-      <div className="mb-10 sm:mb-14">
-        <SectionHeading />
+      <div ref={sectionRef} className="mb-10 sm:mb-14">
+        {headingEl}
         <div className="flex items-center justify-center h-56 glass-subtle rounded-card">
           <p className="text-white/35 text-sm">Chưa có {title.toLowerCase()}</p>
         </div>
@@ -124,7 +159,7 @@ const GenericMoviesSection = ({
   const maxIndex = Math.max(0, movies.length - itemsPerSlide);
 
   return (
-    <div className="mb-10 sm:mb-14">
+    <div ref={sectionRef} className="mb-10 sm:mb-14">
       <div className="flex items-center justify-between mb-4 sm:mb-6 gap-3">
         <h2 className="text-white text-lg sm:text-2xl font-display font-bold flex items-center gap-3">
           <span className="w-1 h-6 rounded-full bg-gradient-to-b from-iris-400 to-ember-400 flex-shrink-0" />

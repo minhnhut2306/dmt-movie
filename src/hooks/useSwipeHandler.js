@@ -1,162 +1,143 @@
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 
+/**
+ * useSwipeHandler — xử lý kéo/vuốt cho Hero banner và các section carousel.
+ *
+ * PERF FIX: Trạng thái drag (startX, currentX, dragOffset, ...) được lưu bằng
+ * useRef thay vì useState → không trigger re-render toàn trang mỗi pixel di chuyển.
+ * Chỉ 2 state thật sự cần re-render UI: isDragging và activeSection.
+ */
 export const useSwipeHandler = () => {
+  // Chỉ 2 state này cần re-render để CSS transition hoạt động
   const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [startY, setStartY] = useState(0);
-  const [currentX, setCurrentX] = useState(0);
-  const [dragOffset, setDragOffset] = useState(0);
   const [activeSection, setActiveSection] = useState(null);
-  const [isHorizontalSwipe, setIsHorizontalSwipe] = useState(false); 
-  const getItemsPerSlide = () => {
+
+  // Drag data — dùng ref để tránh re-render liên tục khi move
+  const dragRef = useRef({
+    startX: 0,
+    startY: 0,
+    currentX: 0,
+    dragOffset: 0,
+    isHorizontalSwipe: false,
+  });
+
+  // dragOffset cần expose ra ngoài cho style CSS — dùng ref + forceUpdate tối thiểu
+  const [dragOffset, setDragOffset] = useState(0);
+
+  const getItemsPerSlide = useCallback(() => {
     if (typeof window === 'undefined') return 6;
-    return window.innerWidth >= 1024 ? 6 : window.innerWidth >= 768 ? 4 : window.innerWidth >= 640 ? 3 : 2;
-  };
+    return window.innerWidth >= 1024 ? 6
+      : window.innerWidth >= 768 ? 4
+      : window.innerWidth >= 640 ? 3
+      : 2;
+  }, []);
 
-  const handleHeroStart = (e) => {
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY; 
-    setStartX(clientX);
-    setStartY(clientY);
-    setCurrentX(clientX);
-    setIsDragging(true);
-    setActiveSection('hero');
-    setIsHorizontalSwipe(false); 
-    setDragOffset(0);
-  };
-
-  const handleHeroMove = (e) => {
-    if (!isDragging || activeSection !== 'hero') return;
-
+  // ─── Hero ───────────────────────────────────────────────
+  const handleHeroStart = useCallback((e) => {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    const deltaX = clientX - startX;
-    const deltaY = clientY - startY;
-    if (!isHorizontalSwipe && Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-      setIsHorizontalSwipe(true); 
+    dragRef.current = { startX: clientX, startY: clientY, currentX: clientX, dragOffset: 0, isHorizontalSwipe: false };
+    setIsDragging(true);
+    setActiveSection('hero');
+    setDragOffset(0);
+  }, []);
+
+  const handleHeroMove = useCallback((e) => {
+    const d = dragRef.current;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const deltaX = clientX - d.startX;
+    const deltaY = clientY - d.startY;
+
+    if (!d.isHorizontalSwipe && Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+      d.isHorizontalSwipe = true;
     }
 
-    if (isHorizontalSwipe) {
-      e.preventDefault(); 
-      setCurrentX(clientX);
-      const offset = clientX - startX;
-      setDragOffset(offset);
+    if (d.isHorizontalSwipe) {
+      e.preventDefault();
+      d.currentX = clientX;
+      d.dragOffset = deltaX;
+      setDragOffset(deltaX); // chỉ update state khi confirmed horizontal
     }
-  };
+  }, []);
 
-  const handleHeroEnd = (featuredMovies, setCurrentHeroIndex) => {
-    if (!isDragging || activeSection !== 'hero') {
-      setIsDragging(false);
-      setActiveSection(null);
-      setDragOffset(0);
-      setStartX(0);
-      setStartY(0);
-      setCurrentX(0);
-      setIsHorizontalSwipe(false);
-      return;
-    }
+  const handleHeroEnd = useCallback((featuredMovies, setCurrentHeroIndex) => {
+    const d = dragRef.current;
 
-    if (isHorizontalSwipe) {
+    if (d.isHorizontalSwipe) {
       const threshold = 100;
-      const offset = currentX - startX;
-
-      if (Math.abs(offset) > threshold) {
-        if (offset > 0) {
-          setCurrentHeroIndex((prevIndex) =>
-            prevIndex === 0 ? featuredMovies.length - 1 : prevIndex - 1
-          );
+      if (Math.abs(d.dragOffset) > threshold) {
+        if (d.dragOffset > 0) {
+          setCurrentHeroIndex(prev => prev === 0 ? featuredMovies.length - 1 : prev - 1);
         } else {
-          setCurrentHeroIndex((prevIndex) =>
-            (prevIndex + 1) % featuredMovies.length
-          );
+          setCurrentHeroIndex(prev => (prev + 1) % featuredMovies.length);
         }
       }
     }
 
+    dragRef.current = { startX: 0, startY: 0, currentX: 0, dragOffset: 0, isHorizontalSwipe: false };
     setIsDragging(false);
     setActiveSection(null);
     setDragOffset(0);
-    setStartX(0);
-    setStartY(0);
-    setCurrentX(0);
-    setIsHorizontalSwipe(false);
-  };
+  }, []);
 
-  const handleSectionStart = (e, sectionId) => {
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY; 
-    setStartX(clientX);
-    setStartY(clientY);
-    setCurrentX(clientX);
-    setIsDragging(true);
-    setActiveSection(sectionId);
-    setIsHorizontalSwipe(false); 
-    setDragOffset(0);
-  };
-
-  const handleSectionMove = (e) => {
-    if (!isDragging || activeSection === 'hero') return;
-
+  // ─── Section carousel ───────────────────────────────────
+  const handleSectionStart = useCallback((e, sectionId) => {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    const deltaX = clientX - startX;
-    const deltaY = clientY - startY;
+    dragRef.current = { startX: clientX, startY: clientY, currentX: clientX, dragOffset: 0, isHorizontalSwipe: false };
+    setIsDragging(true);
+    setActiveSection(sectionId);
+    setDragOffset(0);
+  }, []);
 
-  
-    if (!isHorizontalSwipe && Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-      setIsHorizontalSwipe(true);
+  const handleSectionMove = useCallback((e) => {
+    const d = dragRef.current;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const deltaX = clientX - d.startX;
+    const deltaY = clientY - d.startY;
+
+    if (!d.isHorizontalSwipe && Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
+      d.isHorizontalSwipe = true;
     }
 
-    if (isHorizontalSwipe) {
-      e.preventDefault(); 
-      setCurrentX(clientX);
-      const offset = clientX - startX;
-      setDragOffset(offset);
+    if (d.isHorizontalSwipe) {
+      e.preventDefault();
+      d.currentX = clientX;
+      d.dragOffset = deltaX;
+      setDragOffset(deltaX);
     }
-  };
+  }, []);
 
-  const handleSectionEnd = (movieList, setCurrentSlideIndex) => {
-    if (!isDragging || activeSection === 'hero') {
-      setIsDragging(false);
-      setActiveSection(null);
-      setDragOffset(0);
-      setStartX(0);
-      setStartY(0);
-      setCurrentX(0);
-      setIsHorizontalSwipe(false);
-      return;
-    }
+  const handleSectionEnd = useCallback((movieList, setCurrentSlideIndex) => {
+    const d = dragRef.current;
+    const currentActiveSection = activeSection;
 
-    if (isHorizontalSwipe) {
+    if (d.isHorizontalSwipe && currentActiveSection !== 'hero') {
       const threshold = 80;
-      const offset = currentX - startX;
       const itemsPerSlide = getItemsPerSlide();
       const maxIndex = Math.max(0, movieList.length - itemsPerSlide);
 
-      if (Math.abs(offset) > threshold) {
+      if (Math.abs(d.dragOffset) > threshold) {
         setCurrentSlideIndex(prev => {
-          const currentIndex = prev[activeSection] || 0;
+          const currentIndex = prev[currentActiveSection] || 0;
           let newIndex;
-
-          if (offset > 0) {
+          if (d.dragOffset > 0) {
             newIndex = Math.max(currentIndex - itemsPerSlide, 0);
           } else {
             newIndex = Math.min(currentIndex + itemsPerSlide, maxIndex);
           }
-
-          return { ...prev, [activeSection]: newIndex };
+          return { ...prev, [currentActiveSection]: newIndex };
         });
       }
     }
 
+    dragRef.current = { startX: 0, startY: 0, currentX: 0, dragOffset: 0, isHorizontalSwipe: false };
     setIsDragging(false);
     setActiveSection(null);
     setDragOffset(0);
-    setStartX(0);
-    setStartY(0);
-    setCurrentX(0);
-    setIsHorizontalSwipe(false);
-  };
+  }, [activeSection, getItemsPerSlide]);
 
   return {
     isDragging,
@@ -168,6 +149,6 @@ export const useSwipeHandler = () => {
     handleHeroEnd,
     handleSectionStart,
     handleSectionMove,
-    handleSectionEnd
+    handleSectionEnd,
   };
 };
