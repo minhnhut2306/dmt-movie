@@ -45,14 +45,13 @@ export function normalizeImageUrl(url) {
 }
 
 /**
- * Tạo danh sách URL ảnh để thử lần lượt khi load fail
+ * Tạo danh sách URL ảnh để thử lần lượt khi load fail.
  * Hỗ trợ rawUrl là 1 string HOẶC một mảng [poster, thumbnail] để fallback chéo.
- * @param {string|string[]} rawUrl - URL hoặc mảng URL gốc từ API
- * @param {string} _fallbackText - (không dùng) giữ để tương thích nơi gọi cũ
- * @param {object} [opts] - Tùy chọn kích thước/chất lượng ảnh
- * @param {number} [opts.width=500] - Chiều rộng resize (px)
- * @param {number} [opts.quality=85] - Chất lượng nén (1-100)
- * @returns {string[]} - Mảng URLs để thử theo thứ tự, kết thúc bằng /404.jpg
+ *
+ * LƯU Ý QUAN TRỌNG:
+ * - Luôn đặt URL trực tiếp lên ĐẦU TIÊN để tải ngay lập tức, không qua trung gian.
+ * - weserv.nl và wsrv.nl hiện CHẶN chính sách ("Domain or TLD blocked by policy")
+ *   đối với phimimg.com và ex-cdn.com, nên TUYỆT ĐỐI không proxy các domain này qua weserv.
  */
 // eslint-disable-next-line no-unused-vars
 export function buildImageCandidates(rawUrl, _fallbackText = 'No Image', opts = {}) {
@@ -69,18 +68,26 @@ export function buildImageCandidates(rawUrl, _fallbackText = 'No Image', opts = 
   const candidates = [];
 
   for (const fullUrl of normalizedUrls) {
-    try {
-      const u = new URL(fullUrl);
-      const hostPath = `${u.hostname}${u.pathname}${u.search}`;
-      const opts2 = `&w=${width}&output=webp&q=${quality}&af&il`;
-      // Thêm proxy weserv và wsrv để cache + nén webp
-      candidates.push(`https://images.weserv.nl/?url=${encodeURIComponent(hostPath)}${opts2}`);
-      candidates.push(`https://wsrv.nl/?url=${encodeURIComponent(hostPath)}${opts2}`);
-    } catch {
-      // Invalid URL, skip proxies
-    }
-    // Luôn có URL gốc để fallback nếu proxy lỗi hoặc bị chặn
+    // 1. Luôn ưu tiên tải trực tiếp từ CDN gốc
     candidates.push(fullUrl);
+
+    // 2. Chỉ gửi qua proxy weserv/wsrv nếu domain không nằm trong danh sách bị chặn bởi weserv
+    const isBlockedByWeserv =
+      fullUrl.includes('phimimg.com') ||
+      fullUrl.includes('ex-cdn.com') ||
+      fullUrl.includes('danviet.vn');
+
+    if (!isBlockedByWeserv) {
+      try {
+        const u = new URL(fullUrl);
+        const hostPath = `${u.hostname}${u.pathname}${u.search}`;
+        const opts2 = `&w=${width}&output=webp&q=${quality}&af&il`;
+        candidates.push(`https://images.weserv.nl/?url=${encodeURIComponent(hostPath)}${opts2}`);
+        candidates.push(`https://wsrv.nl/?url=${encodeURIComponent(hostPath)}${opts2}`);
+      } catch {
+        // Invalid URL, skip proxies
+      }
+    }
   }
 
   candidates.push(placeholder);
@@ -88,28 +95,22 @@ export function buildImageCandidates(rawUrl, _fallbackText = 'No Image', opts = 
 }
 
 /**
- * Legacy function - giữ để backward compatibility
+ * Lấy URL ảnh an toàn và nhanh nhất:
+ * Luôn chuẩn hóa URL về link CDN trực tiếp, không qua proxy bị lỗi.
  */
+// eslint-disable-next-line no-unused-vars
 export function getSafeImageUrl(url, fallbackText = "No Image", opts = {}) {
-  const candidates = buildImageCandidates(url, fallbackText, opts);
-  return candidates[0];
+  if (!url) return '/404.jpg';
+  const normalized = normalizeImageUrl(url);
+  return normalized || '/404.jpg';
 }
 
 /**
  * Chuỗi fallback dùng CHO CSS `background-image` (không phải thẻ <img>).
  */
+// eslint-disable-next-line no-unused-vars
 export function buildBgFallbackChain(rawUrl, opts = {}) {
-  const { width = 1280, quality = 88 } = opts;
   if (!rawUrl) return "url('/404.jpg')";
-
   const fullUrl = normalizeImageUrl(rawUrl);
-  try {
-    const u = new URL(fullUrl);
-    const hostPath = `${u.hostname}${u.pathname}${u.search}`;
-    const params = `&w=${width}&output=webp&q=${quality}&af&il`;
-    const weserv = `https://images.weserv.nl/?url=${encodeURIComponent(hostPath)}${params}`;
-    return `url('${weserv}'), url('${fullUrl}'), url('/404.jpg')`;
-  } catch {
-    return `url('${fullUrl}'), url('/404.jpg')`;
-  }
+  return `url('${fullUrl}'), url('/404.jpg')`;
 }
