@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Play, Star } from 'lucide-react';
+import { Play, Star, Loader2 } from 'lucide-react';
 import { useMovieImage } from '../hooks/useMovieImage';
 import { useQueryClient } from '@tanstack/react-query';
 import { movieApi } from '../api';
@@ -40,7 +40,7 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
   const displayQuality = movie?.quality;
   const displayEpisode = movie?.episode;
 
-  // Image loading with fallback chain
+  // Image loading with fallback chain (hỗ trợ fallback chéo poster -> thumbnail nếu 1 trong 2 lỗi)
   const {
     currentSrc,
     isLoaded,
@@ -49,7 +49,7 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
     handleError,
     setImgRef,
   } = useMovieImage(
-    movie?.poster || movie?.poster_url || movie?.thumbnail,
+    [movie?.poster, movie?.poster_url, movie?.thumbnail, movie?.thumb_url],
     displayTitle
   );
 
@@ -72,9 +72,11 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
         onMouseEnter={handleMouseEnter}
       >
         <div className="relative overflow-hidden rounded-card shadow-glass ring-1 ring-white/5 transition-shadow duration-300 group-hover:shadow-glow group-hover:ring-iris-400/30">
-          {/* Loading skeleton shimmer */}
+          {/* Loading spinner */}
           {!isLoaded && (
-            <div className="absolute inset-0 aspect-[2/3] z-10 skeleton" />
+            <div className="absolute inset-0 aspect-[2/3] z-10 skeleton flex items-center justify-center">
+              <Loader2 className="w-7 h-7 text-iris-400 animate-spin opacity-80" />
+            </div>
           )}
 
           {/* Image */}
@@ -152,9 +154,11 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
         onMouseEnter={handleMouseEnter}
       >
         <div className="relative overflow-hidden rounded-card shadow-glass ring-1 ring-white/5 transition-shadow duration-300 group-hover:shadow-glow group-hover:ring-iris-400/30">
-          {/* Loading skeleton shimmer */}
+          {/* Loading spinner */}
           {!isLoaded && (
-            <div className="absolute inset-0 aspect-[2/3] z-10 skeleton" />
+            <div className="absolute inset-0 aspect-[2/3] z-10 skeleton flex items-center justify-center">
+              <Loader2 className="w-7 h-7 text-iris-400 animate-spin opacity-80" />
+            </div>
           )}
 
           {/* Image */}
@@ -259,9 +263,11 @@ const UnifiedMovieCard = ({ movie, variant = 'grid', className = '' }) => {
       >
         <div className="relative overflow-hidden rounded-card bg-ink-800 shadow-glass ring-1 ring-white/5 transition-all duration-300 ease-out hover:-translate-y-1 active:scale-[0.98] hover:shadow-glow hover:ring-iris-400/30">
           <div className="relative w-full aspect-[2/3]">
-            {/* Loading skeleton shimmer */}
+            {/* Loading spinner */}
             {!isLoaded && (
-              <div className="absolute inset-0 skeleton" />
+              <div className="absolute inset-0 skeleton flex items-center justify-center">
+                <Loader2 className="w-7 h-7 text-iris-400 animate-spin opacity-80" />
+              </div>
             )}
 
             {/* Image */}

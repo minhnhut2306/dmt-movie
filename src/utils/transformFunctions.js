@@ -1,10 +1,4 @@
-// ============================================
-// OPTIMIZED TRANSFORM - Single function
-// ============================================
-const normalizeUrl = (url) => {
-  if (!url) return "";
-  return url.startsWith("http") ? url : `https://phimimg.com/${url}`;
-};
+import { normalizeImageUrl } from "./imageHelper";
 
 const TYPE_MAP = {
   series: "Phim Bộ",
@@ -27,8 +21,8 @@ export const transformMovies = (data, options = {}) => {
     id: movie._id,
     title: movie.name,
     originalTitle: movie.origin_name,
-    poster: normalizeUrl(movie.poster_url),
-    thumbnail: normalizeUrl(movie.thumb_url),
+    poster: normalizeImageUrl(movie.poster_url),
+    thumbnail: normalizeImageUrl(movie.thumb_url),
     rating: movie.tmdb?.vote_average > 0 ? movie.tmdb.vote_average.toFixed(1) : null,
     year: movie.year,
     duration: movie.time,
@@ -91,8 +85,8 @@ export const transformLatestMovies = (data) => {
     id: movie._id,
     title: movie.name,
     originalTitle: movie.origin_name,
-    poster: movie.poster_url,
-    thumbnail: movie.thumb_url,
+    poster: normalizeImageUrl(movie.poster_url),
+    thumbnail: normalizeImageUrl(movie.thumb_url),
     rating: movie.tmdb?.vote_average?.toFixed(1),
     year: movie.year,
     duration: movie.time,

@@ -8,9 +8,15 @@ export const useMovieImage = (rawUrl, fallbackText = 'No Image', opts = {}) => {
   const imgRef = useRef(null);
   const { width, quality } = opts;
 
+  // Dùng chuỗi serialized key để tránh re-calc nếu truyền array literal mỗi lần render
+  const urlKey = Array.isArray(rawUrl)
+    ? rawUrl.filter(Boolean).join('|')
+    : (rawUrl || '');
+
   const candidates = useMemo(
     () => buildImageCandidates(rawUrl, fallbackText, { width, quality }),
-    [rawUrl, fallbackText, width, quality]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [urlKey, fallbackText, width, quality]
   );
 
   // Reset khi URL thay đổi (e.g. navigate sang phim khác)
@@ -18,9 +24,9 @@ export const useMovieImage = (rawUrl, fallbackText = 'No Image', opts = {}) => {
     setSrcIndex(0);
     setIsLoaded(false);
     setHasError(false);
-  }, [rawUrl]);
+  }, [urlKey]);
 
-  const currentSrc = candidates[srcIndex];
+  const currentSrc = candidates[srcIndex] || '/404.jpg';
 
   // Nếu ảnh đã có sẵn trong cache trình duyệt, onLoad có thể không fire lại
   // → check img.complete ngay khi gắn ref để bỏ qua spinner.

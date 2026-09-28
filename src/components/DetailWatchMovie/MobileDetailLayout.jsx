@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube } from 'lucide-react';
+import { ArrowLeft, Star, Calendar, Clock, Globe, Users, Film, Eye, Play, Youtube, Loader2 } from 'lucide-react';
 import { useMovieImage } from '../../hooks/useMovieImage';
 import { useBackgroundImage } from '../../hooks/useBackgroundImage';
 import TrailerModal from './TrailerModal';
@@ -14,8 +14,8 @@ const MobileDetailLayout = ({
 
   // Preload backdrop qua JS để có loading state thật, tránh flash /404.jpg
   // trong lúc ảnh thật còn đang tải mạng.
-  const { src: backdropSrc, isLoaded: backdropLoaded } = useBackgroundImage(movieData.thumb_url, { width: 900, quality: 88 });
-  const { currentSrc: posterSrc, handleLoad: posterHandleLoad, handleError: posterHandleError, setImgRef: posterSetImgRef } = useMovieImage(movieData.poster_url, movieData.name, { width: 500, quality: 90 });
+  const { src: backdropSrc, isLoaded: backdropLoaded } = useBackgroundImage([movieData.thumb_url, movieData.poster_url], { width: 900, quality: 88 });
+  const { currentSrc: posterSrc, isLoaded: posterLoaded, handleLoad: posterHandleLoad, handleError: posterHandleError, setImgRef: posterSetImgRef } = useMovieImage([movieData.poster_url, movieData.thumb_url], movieData.name, { width: 500, quality: 90 });
 
   return (
     <div className="min-h-screen">
@@ -56,12 +56,17 @@ const MobileDetailLayout = ({
         </div>
 
         <div className="flex gap-3.5 mb-5">
-          <div className="w-24 sm:w-32 flex-shrink-0">
+          <div className="w-24 sm:w-32 flex-shrink-0 relative aspect-[2/3] rounded-card overflow-hidden shadow-glass ring-1 ring-white/5">
+            {!posterLoaded && (
+              <div className="absolute inset-0 skeleton flex items-center justify-center">
+                <Loader2 className="w-5 h-5 text-iris-400 animate-spin opacity-80" />
+              </div>
+            )}
             <img
               ref={posterSetImgRef}
               src={posterSrc}
               alt={movieData.name}
-              className="w-full rounded-card shadow-glass ring-1 ring-white/5"
+              className={`w-full h-full object-cover transition-opacity duration-200 ${posterLoaded ? 'opacity-100' : 'opacity-0'}`}
               referrerPolicy="no-referrer"
               onLoad={posterHandleLoad}
               onError={posterHandleError}
