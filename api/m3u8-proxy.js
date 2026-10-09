@@ -54,7 +54,7 @@ export default async function handler(req, res) {
       const rewritten = text.split('\n').map(line => {
         const trimmed = line.trim();
         if (trimmed && !trimmed.startsWith('#')) {
-          const absUrl = trimmed.startsWith('http') ? trimmed : baseUrl + trimmed;
+          const absUrl = toAbsoluteUrl(trimmed, baseUrl);
           return `/api/m3u8-proxy?url=${encodeURIComponent(absUrl)}`;
         }
         return line;
@@ -77,7 +77,7 @@ export default async function handler(req, res) {
       const line = lines[i].trim();
 
       if (line === '#EXT-X-DISCONTINUITY') {
-        const nextSeg = lines.slice(i + 1, i + 6).find(l => l.trim().endsWith('.ts'));
+        const nextSeg = lines.slice(i + 1, i + 6).find(l => isMediaSegmentLine(l.trim()));
         if (nextSeg && dropSet.has(nextSeg.trim())) {
           skipNextSegment = true;
           continue;
@@ -102,13 +102,12 @@ export default async function handler(req, res) {
         continue;
       }
 
-      if (line.endsWith('.ts')) {
+      if (isMediaSegmentLine(line)) {
         if (dropSet.has(line)) {
           skipNextSegment = false;
           continue;
         }
-        const absUrl = line.startsWith('http') ? line : baseUrl + line;
-        filtered.push(absUrl);
+        filtered.push(toAbsoluteUrl(line, baseUrl));
         skipNextSegment = false;
         continue;
       }
@@ -136,11 +135,24 @@ function isSpecificAdUrl(path) {
     /\/commercial\//.test(path);
 }
 
+function getPathWithoutQuery(path) {
+  return path.split('?')[0].split('#')[0];
+}
+
+function isMediaSegmentLine(path) {
+  return /\.(ts|m4s|mp4|m4v|aac|vtt)$/i.test(getPathWithoutQuery(path));
+}
+
 // Pattern chung chung — nhiều nguồn phim thật cũng đặt tên segment kiểu này
 // (vd /v2/segment_5.ts là url thật), nên chỉ cắt khi VỪA khớp tên VỪA nằm
 // trong 1 khoảng có cấu trúc giống block QC thật (xem findRoundDurationRanges)
 function isGenericAdUrl(path) {
-  return /\/v\d+\//.test(path) || /segment_\d+\.ts/.test(path);
+  return /\/v\d+\//.test(path) || /segment_\d+\.(ts|m4s|mp4|m4v)$/i.test(getPathWithoutQuery(path));
+}
+
+function toAbsoluteUrl(url, baseUrl) {
+  if (/^https?:\/\//i.test(url)) return url;
+  return new URL(url, baseUrl).toString();
 }
 
 function isRoundDuration(d) {
@@ -195,7 +207,7 @@ function buildAdDropSet(lines) {
       pendingDuration = match ? parseFloat(match[1]) : null;
       continue;
     }
-    if (line.endsWith('.ts')) {
+    if (isMediaSegmentLine(line)) {
       const duration = pendingDuration ?? 0;
       segments.push({ url: line, duration, start: accumulated });
       accumulated += duration;

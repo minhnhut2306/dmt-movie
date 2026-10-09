@@ -18,18 +18,105 @@ function trackRequest(ctx, path) {
   );
 }
 
-function isAdSegment(path) {
-  return (
-    path.includes('/adjump/') ||
+function getPathWithoutQuery(path) {
+  return path.split('?')[0].split('#')[0];
+}
+
+function isMediaSegmentLine(path) {
+  return /\.(ts|m4s|mp4|m4v|aac|vtt)$/i.test(getPathWithoutQuery(path));
+}
+
+function isRoundDuration(d) {
+  return Number.isInteger(d) || Math.abs(d - Math.round(d)) < 0.05;
+}
+
+// Dấu hiệu server QC rõ ràng — luôn cắt, không cần xác nhận thêm
+function isSpecificAdUrl(path) {
+  return path.includes('/adjump/') ||
     path.includes('convertv7/') ||
     path.includes('convertv8/') ||
-    /\/v\d+\//.test(path) ||
-    /segment_\d+\.ts/.test(path)
-  );
+    path.includes('/ads/') ||
+    path.includes('/ad/') ||
+    /\/commercial\//.test(path);
+}
+
+// Pattern chung chung — nhiều nguồn phim thật cũng đặt tên segment kiểu này,
+// nên chỉ cắt khi nằm trong một cụm có cấu trúc giống block QC thật.
+function isGenericAdUrl(path) {
+  return /\/v\d+\//.test(path) || /segment_\d+\.(ts|m4s|mp4|m4v)$/i.test(getPathWithoutQuery(path));
+}
+
+function findRoundDurationRanges(segments) {
+  const ranges = [];
+  let accumulated = 0;
+  let roundStart = null;
+  let roundCount = 0;
+
+  const flush = (endAccumulated) => {
+    if (roundCount >= 6) {
+      const duration = endAccumulated - roundStart;
+      if (duration >= 15 && duration <= 120) {
+        ranges.push({ start: roundStart, end: endAccumulated });
+      }
+    }
+    roundStart = null;
+    roundCount = 0;
+  };
+
+  for (const seg of segments) {
+    if (isRoundDuration(seg.duration)) {
+      if (roundStart === null) roundStart = accumulated;
+      roundCount++;
+    } else {
+      flush(accumulated);
+    }
+    accumulated += seg.duration;
+  }
+  flush(accumulated);
+
+  return ranges;
+}
+
+function buildAdDropSet(lines) {
+  const segments = [];
+  let pendingDuration = null;
+  let accumulated = 0;
+
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (line.startsWith('#EXTINF')) {
+      const match = line.match(/^#EXTINF:([\d.]+)/);
+      pendingDuration = match ? parseFloat(match[1]) : null;
+      continue;
+    }
+    if (isMediaSegmentLine(line)) {
+      const duration = pendingDuration ?? 0;
+      segments.push({ url: line, duration, start: accumulated });
+      accumulated += duration;
+      pendingDuration = null;
+    }
+  }
+
+  const ranges = findRoundDurationRanges(segments);
+  const dropSet = new Set();
+  for (const seg of segments) {
+    if (isSpecificAdUrl(seg.url)) {
+      dropSet.add(seg.url);
+    } else if (isGenericAdUrl(seg.url) && ranges.some(r => seg.start >= r.start && seg.start < r.end)) {
+      dropSet.add(seg.url);
+    }
+  }
+  return dropSet;
+}
+
+function toAbsoluteUrl(url, baseUrl) {
+  if (/^https?:\/\//i.test(url)) return url;
+  return new URL(url, baseUrl).toString();
 }
 
 function filterMediaPlaylist(text, baseUrl) {
   const lines = text.split('\n');
+  const dropSet = buildAdDropSet(lines);
   const filtered = [];
   let skipNextSegment = false;
 
@@ -37,8 +124,8 @@ function filterMediaPlaylist(text, baseUrl) {
     const line = lines[i].trim();
 
     if (line === '#EXT-X-DISCONTINUITY') {
-      const nextSeg = lines.slice(i + 1, i + 6).find(l => l.trim().endsWith('.ts'));
-      if (nextSeg && isAdSegment(nextSeg.trim())) {
+      const nextSeg = lines.slice(i + 1, i + 6).find(l => isMediaSegmentLine(l.trim()));
+      if (nextSeg && dropSet.has(nextSeg.trim())) {
         skipNextSegment = true;
         continue;
       }
@@ -54,7 +141,7 @@ function filterMediaPlaylist(text, baseUrl) {
 
     if (line.startsWith('#EXTINF')) {
       const nextLine = lines[i + 1]?.trim();
-      if (nextLine && isAdSegment(nextLine)) {
+      if (nextLine && dropSet.has(nextLine)) {
         skipNextSegment = true;
         continue;
       }
@@ -62,13 +149,12 @@ function filterMediaPlaylist(text, baseUrl) {
       continue;
     }
 
-    if (line.endsWith('.ts') || line.endsWith('.t') || line.endsWith('.m4s') || line.endsWith('.mp4')) {
-      if (isAdSegment(line)) {
+    if (isMediaSegmentLine(line)) {
+      if (dropSet.has(line)) {
         skipNextSegment = false;
         continue;
       }
-      const absUrl = line.startsWith('http') ? line : baseUrl + line;
-      filtered.push(absUrl);
+      filtered.push(toAbsoluteUrl(line, baseUrl));
       skipNextSegment = false;
       continue;
     }
@@ -83,7 +169,7 @@ function rewriteMasterPlaylist(text, baseUrl, workerUrl) {
   return text.split('\n').map(line => {
     const trimmed = line.trim();
     if (trimmed && !trimmed.startsWith('#')) {
-      const absUrl = trimmed.startsWith('http') ? trimmed : baseUrl + trimmed;
+      const absUrl = toAbsoluteUrl(trimmed, baseUrl);
       return `${workerUrl}?url=${encodeURIComponent(absUrl)}`;
     }
     return line;
