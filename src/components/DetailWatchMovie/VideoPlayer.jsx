@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Play, Minimize, Maximize, Settings } from 'lucide-react';
 import Hls from 'hls.js';
 import { saveWatchPosition, getWatchPosition } from '../../utils/watchHistory';
+import { preparePlaybackSource } from '../../utils/preparePlaybackSource';
 
 const isRoundDuration = (d) => Number.isInteger(d) || Math.abs(d - Math.round(d)) < 0.05;
 
@@ -172,10 +173,14 @@ const VideoPlayer = ({
     if (useEmbed && !embedFailed) return;
 
     const video = videoRef.current;
-
-
-
-    
+    if (!video) return;
+    const sourceController = new AbortController();
+    const retryTimers = new Set();
+    const handlePreparationError = err => {
+      if (sourceController.signal.aborted) return;
+      console.error('[AD_BLOCK] Could not prepare playback', err);
+      setVideoError('proxy');
+    };
     const proxyBase = import.meta.env.VITE_PROXY_URL || '';
     const proxyUrl = proxyBase
       ? `${proxyBase}?url=${encodeURIComponent(currentVideoUrl)}`
@@ -186,8 +191,23 @@ const VideoPlayer = ({
     // iOS/Safari: native HLS, không dùng HLS.js — vẫn cần qua proxy để lọc QC
     if (!Hls.isSupported()) {
       if (video?.canPlayType('application/vnd.apple.mpegurl')) {
-        video.src = proxyUrl;
-        if (autoPlay) video.play().catch(() => {});
+        const handleNativeError = () => {
+          console.error('[AD_BLOCK] Native playback failed', { code: video.error?.code });
+          setVideoError('proxy');
+        };
+        video.addEventListener('error', handleNativeError);
+        preparePlaybackSource(currentVideoUrl, proxyUrl, sourceController.signal).then(source => {
+          if (sourceController.signal.aborted) return;
+          video.src = source;
+          if (autoPlay) video.play().catch(() => {});
+        }).catch(handlePreparationError);
+        return () => {
+          sourceController.abort();
+          video.removeEventListener('error', handleNativeError);
+          video.pause();
+          video.removeAttribute('src');
+          video.load();
+        };
       }
       return;
     }
@@ -210,7 +230,6 @@ const VideoPlayer = ({
     };
 
     let hlsInstance = null;
-    let directFallbackTriggered = false;
 
     const createHls = (sourceUrl) => {
       if (hlsInstance) hlsInstance.destroy();
@@ -297,39 +316,28 @@ const VideoPlayer = ({
 
       hls.on(Hls.Events.ERROR, (event, data) => {
         if (data.fatal) {
-          if (sourceUrl === proxyUrl && !directFallbackTriggered) {
-            directFallbackTriggered = true;
-            console.log('[PROXY] Proxy failed! Error:', data.type, data.details, '→ fallback to direct HLS');
-            createHls(currentVideoUrl);
-            return;
-          }
+          console.error('[AD_BLOCK] Playback failed', { type: data.type, details: data.details });
 
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
               retryCountRef.current += 1;
               if (retryCountRef.current <= 2) {
-                setTimeout(() => hls.startLoad(), 1000 * retryCountRef.current);
+                const timer = setTimeout(() => {
+                  retryTimers.delete(timer);
+                  if (!sourceController.signal.aborted) hls.startLoad();
+                }, 1000 * retryCountRef.current);
+                retryTimers.add(timer);
               } else {
-                if (currentEmbedUrl) {
-                  hls.destroy();
-                  setUseEmbed(true);
-                } else {
-                  setVideoError('network');
-                  hls.destroy();
-                }
+                setVideoError('proxy');
+                hls.destroy();
               }
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
               hls.recoverMediaError();
               break;
             default:
-              if (currentEmbedUrl) {
-                hls.destroy();
-                setUseEmbed(true);
-              } else {
-                setVideoError('fatal');
-                hls.destroy();
-              }
+              setVideoError('fatal');
+              hls.destroy();
               break;
           }
         }
@@ -338,7 +346,9 @@ const VideoPlayer = ({
       return hls;
     };
 
-    const hls = createHls(embedFailed ? currentVideoUrl : proxyUrl);
+    preparePlaybackSource(currentVideoUrl, proxyUrl, sourceController.signal).then(source => {
+      if (!sourceController.signal.aborted) createHls(source);
+    }).catch(handlePreparationError);
 
     let lastSavedTime = 0;
     const handleTimeUpdate = () => {
@@ -352,6 +362,8 @@ const VideoPlayer = ({
     video.addEventListener('timeupdate', handleTimeUpdate);
 
     return () => {
+      sourceController.abort();
+      retryTimers.forEach(clearTimeout);
       video.removeEventListener('timeupdate', handleTimeUpdate);
       if (hlsInstance) hlsInstance.destroy();
       hlsRef.current = null;

@@ -1,15 +1,39 @@
+import { randomUUID } from 'node:crypto';
+import { getCache } from '@vercel/functions';
+
 // Cache m3u8 trong 30s để tránh fetch lại liên tục
 const cache = new Map();
 const CACHE_TTL = 30000; // 30 giây
+const PREPARED_TTL = 6 * 60 * 60;
+const preparedCache = getCache({ namespace: 'dmt-filtered-hls-v1' });
+const localPreparedCache = new Map();
 
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Expose-Headers', 'X-Ad-Blocked-Count, X-Ad-Blocked-Groups, X-Ad-Filter-Mode');
   
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  if (req.method === 'POST') return prepareBrowserPlaylists(req, res);
+  if (req.method !== 'GET') return res.status(405).send('Method not allowed');
+  if (req.query.prepared) {
+    try {
+      const bundle = await readPreparedBundle(req.query.prepared);
+      const entry = bundle?.entries?.[Number(req.query.index || 0)];
+      if (!entry) return res.status(410).send('Filtered playlist expired; retry playback');
+      res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+      res.setHeader('Cache-Control', 'private, max-age=300');
+      setAdHeaders(res, entry.droppedCount, entry.groupCount, 'browser-prepared');
+      return res.status(200).send(entry.data);
+    } catch (err) {
+      console.error('[AD_BLOCK_ERROR]', err.message);
+      return res.status(503).send('Filtered playlist cache unavailable');
+    }
   }
 
   const { url, debug } = req.query;
@@ -23,6 +47,7 @@ export default async function handler(req, res) {
   // Check cache
   const cached = cache.get(decodedUrl);
   if (!debug && cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    setAdHeaders(res, cached.droppedCount || 0, cached.groupCount || 0, 'server');
     res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
     res.setHeader('Cache-Control', 'public, max-age=30');
     return res.status(200).send(cached.data);
@@ -43,11 +68,13 @@ export default async function handler(req, res) {
     clearTimeout(timeoutId);
 
     if (!response.ok) {
+      console.error('[AD_BLOCK_ERROR]', JSON.stringify({ sourceUrl: decodedUrl, upstreamStatus: response.status }));
       return res.status(502).send(`Upstream error: ${response.status} ${response.statusText}`);
     }
 
     const text = await response.text();
-    const baseUrl = decodedUrl.replace(/[^/]+$/, '');
+    const baseUrl = new URL('.', response.url || decodedUrl).toString();
+    if (!text.trimStart().startsWith('#EXTM3U')) return res.status(502).send('Invalid upstream playlist');
 
     // Nếu là master playlist (chứa bandwidth) → rewrite sub-playlist URL
     if (text.includes('#EXT-X-STREAM-INF')) {
@@ -83,8 +110,9 @@ export default async function handler(req, res) {
     // Nếu là media playlist → lọc QC và rewrite segment URLs thành absolute
     const analyzed = analyzeMediaPlaylist(text, baseUrl);
     const result = analyzed.result;
+    logAdBlockResult(decodedUrl, analyzed.analysis, 'server');
 
-    if (!debug) cache.set(decodedUrl, { data: result, timestamp: Date.now() });
+    if (!debug) cache.set(decodedUrl, { data: result, timestamp: Date.now(), droppedCount: analyzed.analysis.droppedCount, groupCount: analyzed.analysis.adGroups.length });
 
     if (debug) {
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -98,10 +126,106 @@ export default async function handler(req, res) {
 
     res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
     res.setHeader('Cache-Control', 'public, max-age=30');
+    setAdHeaders(res, analyzed.analysis.droppedCount, analyzed.analysis.adGroups.length, 'server');
     res.status(200).send(result);
   } catch (err) {
     res.status(500).send('Proxy error: ' + err.message);
   }
+}
+
+function setAdHeaders(res, droppedCount, groupCount, mode) {
+  res.setHeader('X-Ad-Blocked-Count', String(droppedCount));
+  res.setHeader('X-Ad-Blocked-Groups', String(groupCount));
+  res.setHeader('X-Ad-Filter-Mode', mode);
+}
+
+function logAdBlockResult(sourceUrl, analysis, mode) {
+  console.info('[AD_BLOCK]', JSON.stringify({ sourceUrl, mode,
+    status: analysis.droppedCount ? 'segments_removed' : 'no_matching_segments',
+    segmentCount: analysis.segmentCount, droppedCount: analysis.droppedCount,
+    adGroups: analysis.adGroups,
+  }));
+}
+
+async function readPreparedBundle(token) {
+  if (typeof token !== 'string' || !/^[a-f0-9-]{36}$/.test(token)) return null;
+  if (process.env.VERCEL) return preparedCache.get(token);
+  const entry = localPreparedCache.get(token);
+  if (!entry || entry.expires < Date.now()) {
+    localPreparedCache.delete(token);
+    return null;
+  }
+  return entry.bundle;
+}
+
+async function prepareBrowserPlaylists(req, res) {
+  try {
+    const origin = req.headers?.origin;
+    if (!origin || new URL(origin).host !== req.headers?.host) {
+      return res.status(403).send('Same-origin request required');
+    }
+    const { sourceUrl, playlists } = req.body || {};
+    if (!Array.isArray(playlists) || playlists.length < 1 || playlists.length > 16 ||
+        Buffer.byteLength(JSON.stringify(playlists)) > 750000) {
+      return res.status(400).send('Invalid playlist bundle');
+    }
+    const token = randomUUID();
+    const indexByUrl = new Map();
+    playlists.forEach((entry, index) => {
+      if (typeof entry.text !== 'string' || !entry.text.trimStart().startsWith('#EXTM3U') ||
+          !/^https?:$/.test(new URL(entry.url).protocol) ||
+          !/^https?:$/.test(new URL(entry.baseUrl || entry.url).protocol) || indexByUrl.has(entry.url)) {
+        throw new Error('Invalid playlist');
+      }
+      indexByUrl.set(entry.url, index);
+    });
+    const rootIndex = indexByUrl.get(sourceUrl);
+    if (rootIndex === undefined) return res.status(400).send('Missing root playlist');
+    const playlistUrl = index => `/api/m3u8-proxy?prepared=${token}&index=${index}`;
+    let totalDropped = 0;
+    const entries = playlists.map(entry => {
+      const sourceBase = entry.baseUrl || entry.url;
+      const baseUrl = new URL('.', sourceBase).toString();
+      if (entry.text.includes('#EXT-X-STREAM-INF')) {
+        const rewriteChild = uri => {
+          const index = indexByUrl.get(new URL(uri, sourceBase).toString());
+          if (index === undefined) throw new Error('Missing child playlist');
+          return playlistUrl(index);
+        };
+        const data = entry.text.split('\n').map(raw => {
+          const line = raw.trim();
+          if (line.startsWith('#EXT-X-I-FRAME-STREAM-INF')) return '';
+          if (line && !line.startsWith('#')) return rewriteChild(line);
+          if (line.startsWith('#EXT-X-MEDIA:')) return rewriteUriAttributes(line, rewriteChild);
+          return rewriteUriAttributes(line, uri => toAbsoluteUrl(uri, baseUrl));
+        }).join('\n');
+        return { data, droppedCount: 0, groupCount: 0 };
+      }
+      if (!entry.text.includes('#EXT-X-ENDLIST')) throw new Error('Browser fallback requires VOD');
+      const analyzed = analyzeMediaPlaylist(entry.text, baseUrl);
+      logAdBlockResult(entry.url, analyzed.analysis, 'browser-prepared');
+      totalDropped += analyzed.analysis.droppedCount;
+      return { data: analyzed.result, droppedCount: analyzed.analysis.droppedCount, groupCount: analyzed.analysis.adGroups.length };
+    });
+    const bundle = { entries };
+    if (Buffer.byteLength(JSON.stringify(bundle)) > 1500000) return res.status(413).send('Filtered playlists too large');
+    if (process.env.VERCEL) {
+      await preparedCache.set(token, bundle, { ttl: PREPARED_TTL });
+      if (!await preparedCache.get(token)) throw new Error('Playlist cache write failed');
+    } else {
+      for (const [key, entry] of localPreparedCache) if (entry.expires < Date.now()) localPreparedCache.delete(key);
+      localPreparedCache.set(token, { bundle, expires: Date.now() + PREPARED_TTL * 1000 });
+    }
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).json({ url: playlistUrl(rootIndex), droppedCount: totalDropped });
+  } catch (err) {
+    console.error('[AD_BLOCK_ERROR]', JSON.stringify({ mode: 'browser-prepared', message: err.message }));
+    return res.status(502).send('Could not prepare filtered playlists');
+  }
+}
+
+function rewriteUriAttributes(line, rewrite) {
+  return line.replace(/URI="([^"]+)"/g, (_, uri) => `URI="${rewrite(uri)}"`);
 }
 
 // Dấu hiệu server QC rõ ràng — luôn cắt, không cần xác nhận thêm
@@ -329,7 +453,7 @@ function analyzeMediaPlaylist(text, baseUrl) {
       skipNextSegment = false;
       continue;
     }
-    filtered.push(line);
+    filtered.push(rewriteUriAttributes(line, uri => toAbsoluteUrl(uri, baseUrl)));
   }
 
   return { result: filtered.join('\n'), analysis };
