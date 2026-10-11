@@ -186,8 +186,19 @@ const VideoPlayer = ({
     // iOS/Safari: native HLS, không dùng HLS.js — vẫn cần qua proxy để lọc QC
     if (!Hls.isSupported()) {
       if (video?.canPlayType('application/vnd.apple.mpegurl')) {
+        const handleNativeError = () => {
+          console.error('[AD_BLOCK] Native playback failed', { proxyUrl, code: video.error?.code });
+          setVideoError('proxy');
+        };
+        video.addEventListener('error', handleNativeError);
         video.src = proxyUrl;
         if (autoPlay) video.play().catch(() => {});
+        return () => {
+          video.removeEventListener('error', handleNativeError);
+          video.pause();
+          video.removeAttribute('src');
+          video.load();
+        };
       }
       return;
     }
@@ -210,7 +221,6 @@ const VideoPlayer = ({
     };
 
     let hlsInstance = null;
-    let directFallbackTriggered = false;
 
     const createHls = (sourceUrl) => {
       if (hlsInstance) hlsInstance.destroy();
@@ -297,12 +307,7 @@ const VideoPlayer = ({
 
       hls.on(Hls.Events.ERROR, (event, data) => {
         if (data.fatal) {
-          if (sourceUrl === proxyUrl && !directFallbackTriggered) {
-            directFallbackTriggered = true;
-            console.log('[PROXY] Proxy failed! Error:', data.type, data.details, '→ fallback to direct HLS');
-            createHls(currentVideoUrl);
-            return;
-          }
+          console.error('[AD_BLOCK] Playback failed', { type: data.type, details: data.details, sourceUrl });
 
           switch (data.type) {
             case Hls.ErrorTypes.NETWORK_ERROR:
@@ -310,26 +315,16 @@ const VideoPlayer = ({
               if (retryCountRef.current <= 2) {
                 setTimeout(() => hls.startLoad(), 1000 * retryCountRef.current);
               } else {
-                if (currentEmbedUrl) {
-                  hls.destroy();
-                  setUseEmbed(true);
-                } else {
-                  setVideoError('network');
-                  hls.destroy();
-                }
+                setVideoError('proxy');
+                hls.destroy();
               }
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
               hls.recoverMediaError();
               break;
             default:
-              if (currentEmbedUrl) {
-                hls.destroy();
-                setUseEmbed(true);
-              } else {
-                setVideoError('fatal');
-                hls.destroy();
-              }
+              setVideoError('fatal');
+              hls.destroy();
               break;
           }
         }
@@ -338,7 +333,7 @@ const VideoPlayer = ({
       return hls;
     };
 
-    const hls = createHls(embedFailed ? currentVideoUrl : proxyUrl);
+    createHls(proxyUrl);
 
     let lastSavedTime = 0;
     const handleTimeUpdate = () => {
@@ -406,7 +401,9 @@ const VideoPlayer = ({
           </div>
           <p className="text-xl font-semibold mb-2">Không thể phát video</p>
           <p className="text-gray-400 mt-1 text-sm max-w-xs mx-auto">
-            Link video đã hết hạn hoặc không còn khả dụng. Vui lòng thử lại sau hoặc chọn phim khác.
+            {videoError === 'proxy'
+              ? 'Nguồn phim hoặc bộ lọc quảng cáo đang không khả dụng. Vui lòng thử lại sau hoặc chọn tập khác.'
+              : 'Link video đã hết hạn hoặc không còn khả dụng. Vui lòng thử lại sau hoặc chọn phim khác.'}
           </p>
           <button
             onClick={() => {

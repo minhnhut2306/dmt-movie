@@ -7,6 +7,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Expose-Headers', 'X-Ad-Blocked-Count, X-Ad-Blocked-Groups');
   
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -23,6 +24,11 @@ export default async function handler(req, res) {
   // Check cache
   const cached = cache.get(decodedUrl);
   if (!debug && cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    if (cached.analysis) {
+      logAdBlockResult(decodedUrl, cached.analysis, true);
+      res.setHeader('X-Ad-Blocked-Count', cached.analysis.droppedCount.toString());
+      res.setHeader('X-Ad-Blocked-Groups', cached.analysis.adGroups.length.toString());
+    }
     res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
     res.setHeader('Cache-Control', 'public, max-age=30');
     return res.status(200).send(cached.data);
@@ -43,6 +49,7 @@ export default async function handler(req, res) {
     clearTimeout(timeoutId);
 
     if (!response.ok) {
+      console.error('[AD_BLOCK_ERROR]', JSON.stringify({ sourceUrl: decodedUrl, upstreamStatus: response.status }));
       return res.status(502).send(`Upstream error: ${response.status} ${response.statusText}`);
     }
 
@@ -85,7 +92,7 @@ export default async function handler(req, res) {
     const result = analyzed.result;
     logAdBlockResult(decodedUrl, analyzed.analysis);
 
-    if (!debug) cache.set(decodedUrl, { data: result, timestamp: Date.now() });
+    if (!debug) cache.set(decodedUrl, { data: result, analysis: analyzed.analysis, timestamp: Date.now() });
 
     if (debug) {
       res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -103,6 +110,7 @@ export default async function handler(req, res) {
     res.setHeader('X-Ad-Blocked-Groups', analyzed.analysis.adGroups.length.toString());
     res.status(200).send(result);
   } catch (err) {
+    console.error('[AD_BLOCK_ERROR]', JSON.stringify({ sourceUrl: decodedUrl, message: err.message }));
     res.status(500).send('Proxy error: ' + err.message);
   }
 }
@@ -137,11 +145,11 @@ function toAbsoluteUrl(url, baseUrl) {
   return new URL(url, baseUrl).toString();
 }
 
-function logAdBlockResult(sourceUrl, analysis) {
-  if (!analysis?.droppedCount) return;
-
+function logAdBlockResult(sourceUrl, analysis, cacheHit = false) {
   console.log('[AD_BLOCK]', JSON.stringify({
     sourceUrl,
+    status: analysis.droppedCount > 0 ? 'segments_removed' : 'no_matching_segments',
+    cacheHit,
     segmentCount: analysis.segmentCount,
     droppedCount: analysis.droppedCount,
     adGroups: analysis.adGroups,
