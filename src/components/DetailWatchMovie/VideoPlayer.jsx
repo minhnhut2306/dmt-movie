@@ -174,6 +174,8 @@ const VideoPlayer = ({
     const video = videoRef.current;
 
 
+
+    
     const proxyBase = import.meta.env.VITE_PROXY_URL || '';
     const proxyUrl = proxyBase
       ? `${proxyBase}?url=${encodeURIComponent(currentVideoUrl)}`
