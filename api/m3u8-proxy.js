@@ -83,6 +83,7 @@ export default async function handler(req, res) {
     // Nếu là media playlist → lọc QC và rewrite segment URLs thành absolute
     const analyzed = analyzeMediaPlaylist(text, baseUrl);
     const result = analyzed.result;
+    logAdBlockResult(decodedUrl, analyzed.analysis);
 
     if (!debug) cache.set(decodedUrl, { data: result, timestamp: Date.now() });
 
@@ -98,6 +99,8 @@ export default async function handler(req, res) {
 
     res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
     res.setHeader('Cache-Control', 'public, max-age=30');
+    res.setHeader('X-Ad-Blocked-Count', analyzed.analysis.droppedCount.toString());
+    res.setHeader('X-Ad-Blocked-Groups', analyzed.analysis.adGroups.length.toString());
     res.status(200).send(result);
   } catch (err) {
     res.status(500).send('Proxy error: ' + err.message);
@@ -132,6 +135,18 @@ function isGenericAdUrl(path) {
 function toAbsoluteUrl(url, baseUrl) {
   if (/^https?:\/\//i.test(url)) return url;
   return new URL(url, baseUrl).toString();
+}
+
+function logAdBlockResult(sourceUrl, analysis) {
+  if (!analysis?.droppedCount) return;
+
+  console.log('[AD_BLOCK]', JSON.stringify({
+    sourceUrl,
+    segmentCount: analysis.segmentCount,
+    droppedCount: analysis.droppedCount,
+    adGroups: analysis.adGroups,
+    droppedPreview: analysis.droppedPreview?.slice(0, 12),
+  }));
 }
 
 function isRoundDuration(d) {
