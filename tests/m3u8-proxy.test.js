@@ -86,3 +86,43 @@ test('failed browser and server filtering never returns the raw source', async (
   globalThis.fetch = async () => new Response('Not Found', { status: 404 });
   await assert.rejects(preparePlaybackSource('https://example.test/missing.m3u8', '/api/m3u8-proxy?url=test', new AbortController().signal), /Filtered playback unavailable/);
 });
+
+test('hanging source requests time out and try only the server filter', async () => {
+  const signals = [];
+  globalThis.fetch = (url, { signal }) => {
+    signals.push(signal);
+    if (url === '/filtered') return Promise.resolve(new Response('#EXTM3U\n#EXT-X-ENDLIST'));
+    return new Promise(() => {});
+  };
+  const result = await preparePlaybackSource('https://example.test/video.m3u8', '/filtered',
+    new AbortController().signal, { requestTimeoutMs: 20 });
+  assert.equal(result, '/filtered');
+  assert.equal(signals.length, 2);
+  assert.equal(signals[0].aborted, true);
+});
+
+test('hanging response bodies and server requests cannot spin forever', async () => {
+  const signals = [];
+  globalThis.fetch = async (url, { signal }) => {
+    signals.push(signal);
+    return { ok: true, text: () => new Promise(() => {}) };
+  };
+  await assert.rejects(preparePlaybackSource('https://example.test/video.m3u8', '/filtered',
+    new AbortController().signal, { requestTimeoutMs: 20 }), /Server playlist timed out/);
+  assert.equal(signals.length, 2);
+  assert.ok(signals.every(signal => signal.aborted));
+});
+
+test('cancelling preparation aborts the request without starting a fallback', async () => {
+  const controller = new AbortController();
+  let calls = 0;
+  globalThis.fetch = (url, { signal }) => {
+    calls++;
+    controller.abort();
+    assert.equal(signal.aborted, true);
+    return new Promise(() => {});
+  };
+  await assert.rejects(preparePlaybackSource('https://example.test/video.m3u8', '/filtered',
+    controller.signal), { name: 'AbortError' });
+  assert.equal(calls, 1);
+});

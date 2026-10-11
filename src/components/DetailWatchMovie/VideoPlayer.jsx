@@ -176,6 +176,14 @@ const VideoPlayer = ({
     if (!video) return;
     const sourceController = new AbortController();
     const retryTimers = new Set();
+    let startupTimer;
+    const handleLoadedData = () => clearTimeout(startupTimer);
+    const startPlaybackTimeout = () => {
+      startupTimer = setTimeout(() => {
+        console.error('[AD_BLOCK] Video startup timed out', { readyState: video.readyState, networkState: video.networkState });
+        setVideoError('timeout');
+      }, 30000);
+    };
     const handlePreparationError = err => {
       if (sourceController.signal.aborted) return;
       console.error('[AD_BLOCK] Could not prepare playback', err);
@@ -189,26 +197,33 @@ const VideoPlayer = ({
     console.log('[PROXY] Using proxy URL =', proxyUrl.split('?')[0]);
 
     // iOS/Safari: native HLS, không dùng HLS.js — vẫn cần qua proxy để lọc QC
-    if (!Hls.isSupported()) {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (!Hls.isSupported() || (isIOS && video.canPlayType('application/vnd.apple.mpegurl'))) {
       if (video?.canPlayType('application/vnd.apple.mpegurl')) {
         const handleNativeError = () => {
           console.error('[AD_BLOCK] Native playback failed', { code: video.error?.code });
           setVideoError('proxy');
         };
         video.addEventListener('error', handleNativeError);
+        video.addEventListener('loadeddata', handleLoadedData);
         preparePlaybackSource(currentVideoUrl, proxyUrl, sourceController.signal).then(source => {
           if (sourceController.signal.aborted) return;
+          startPlaybackTimeout();
           video.src = source;
           if (autoPlay) video.play().catch(() => {});
         }).catch(handlePreparationError);
         return () => {
           sourceController.abort();
+          clearTimeout(startupTimer);
           video.removeEventListener('error', handleNativeError);
+          video.removeEventListener('loadeddata', handleLoadedData);
           video.pause();
           video.removeAttribute('src');
           video.load();
         };
       }
+      setVideoError('unsupported');
       return;
     }
 
@@ -230,6 +245,7 @@ const VideoPlayer = ({
     };
 
     let hlsInstance = null;
+    let mediaRecoveryCount = 0;
 
     const createHls = (sourceUrl) => {
       if (hlsInstance) hlsInstance.destroy();
@@ -333,7 +349,13 @@ const VideoPlayer = ({
               }
               break;
             case Hls.ErrorTypes.MEDIA_ERROR:
-              hls.recoverMediaError();
+              mediaRecoveryCount++;
+              if (mediaRecoveryCount <= 2) {
+                hls.recoverMediaError();
+              } else {
+                setVideoError('media');
+                hls.destroy();
+              }
               break;
             default:
               setVideoError('fatal');
@@ -347,7 +369,10 @@ const VideoPlayer = ({
     };
 
     preparePlaybackSource(currentVideoUrl, proxyUrl, sourceController.signal).then(source => {
-      if (!sourceController.signal.aborted) createHls(source);
+      if (!sourceController.signal.aborted) {
+        startPlaybackTimeout();
+        createHls(source);
+      }
     }).catch(handlePreparationError);
 
     let lastSavedTime = 0;
@@ -360,11 +385,14 @@ const VideoPlayer = ({
     };
 
     video.addEventListener('timeupdate', handleTimeUpdate);
+    video.addEventListener('loadeddata', handleLoadedData);
 
     return () => {
       sourceController.abort();
+      clearTimeout(startupTimer);
       retryTimers.forEach(clearTimeout);
       video.removeEventListener('timeupdate', handleTimeUpdate);
+      video.removeEventListener('loadeddata', handleLoadedData);
       if (hlsInstance) hlsInstance.destroy();
       hlsRef.current = null;
     };
@@ -418,7 +446,9 @@ const VideoPlayer = ({
           </div>
           <p className="text-xl font-semibold mb-2">Không thể phát video</p>
           <p className="text-gray-400 mt-1 text-sm max-w-xs mx-auto">
-            Link video đã hết hạn hoặc không còn khả dụng. Vui lòng thử lại sau hoặc chọn phim khác.
+            {videoError === 'timeout' || videoError === 'proxy'
+              ? 'Nguồn phim phản hồi chậm hoặc không thể tải. Vui lòng thử lại hoặc chọn nguồn khác.'
+              : 'Link video đã hết hạn hoặc không còn khả dụng. Vui lòng thử lại sau hoặc chọn phim khác.'}
           </p>
           <button
             onClick={() => {
