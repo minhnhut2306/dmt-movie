@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     return res.status(200).end();
   }
 
-  const { url } = req.query;
+  const { url, debug } = req.query;
   
   if (!url) {
     return res.status(400).send('Missing url');
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
 
   // Check cache
   const cached = cache.get(decodedUrl);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+  if (!debug && cached && Date.now() - cached.timestamp < CACHE_TTL) {
     res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
     res.setHeader('Cache-Control', 'public, max-age=30');
     return res.status(200).send(cached.data);
@@ -60,7 +60,20 @@ export default async function handler(req, res) {
         return line;
       }).join('\n');
 
-      cache.set(decodedUrl, { data: rewritten, timestamp: Date.now() });
+      if (!debug) cache.set(decodedUrl, { data: rewritten, timestamp: Date.now() });
+
+      if (debug) {
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Cache-Control', 'no-store');
+        return res.status(200).send(JSON.stringify({
+          type: 'master',
+          sourceUrl: decodedUrl,
+          variants: text.split('\n')
+            .map(line => line.trim())
+            .filter(line => line && !line.startsWith('#'))
+            .map(line => toAbsoluteUrl(line, baseUrl)),
+        }, null, 2));
+      }
 
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
       res.setHeader('Cache-Control', 'public, max-age=30');
@@ -68,54 +81,20 @@ export default async function handler(req, res) {
     }
 
     // Nếu là media playlist → lọc QC và rewrite segment URLs thành absolute
-    const lines = text.split('\n');
-    const dropSet = buildAdDropSet(lines);
-    const filtered = [];
-    let skipNextSegment = false;
+    const analyzed = analyzeMediaPlaylist(text, baseUrl);
+    const result = analyzed.result;
 
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim();
+    if (!debug) cache.set(decodedUrl, { data: result, timestamp: Date.now() });
 
-      if (line === '#EXT-X-DISCONTINUITY') {
-        const nextSeg = lines.slice(i + 1, i + 6).find(l => isMediaSegmentLine(l.trim()));
-        if (nextSeg && dropSet.has(nextSeg.trim())) {
-          skipNextSegment = true;
-          continue;
-        }
-        if (skipNextSegment) {
-          skipNextSegment = false;
-          continue;
-        }
-        filtered.push(line);
-        continue;
-      }
-
-      if (line.startsWith('#EXT-X-KEY') && skipNextSegment) continue;
-
-      if (line.startsWith('#EXTINF')) {
-        const nextLine = lines[i + 1]?.trim();
-        if (nextLine && dropSet.has(nextLine)) {
-          skipNextSegment = true;
-          continue;
-        }
-        filtered.push(line);
-        continue;
-      }
-
-      if (isMediaSegmentLine(line)) {
-        if (dropSet.has(line)) {
-          skipNextSegment = false;
-          continue;
-        }
-        filtered.push(toAbsoluteUrl(line, baseUrl));
-        skipNextSegment = false;
-        continue;
-      }
-      filtered.push(line);
+    if (debug) {
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(200).send(JSON.stringify({
+        type: 'media',
+        sourceUrl: decodedUrl,
+        ...analyzed.analysis,
+      }, null, 2));
     }
-    const result = filtered.join('\n');
-
-    cache.set(decodedUrl, { data: result, timestamp: Date.now() });
 
     res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
     res.setHeader('Cache-Control', 'public, max-age=30');
@@ -195,13 +174,48 @@ function findRoundDurationRanges(segments) {
 
 // Duyệt toàn bộ playlist 1 lượt để biết segment nào thực sự nên bị cắt,
 // trước khi ghép lại output ở vòng lặp chính bên dưới
-function buildAdDropSet(lines) {
+function buildAdDropAnalysis(lines) {
   const segments = [];
+  const groups = new Map();
   let pendingDuration = null;
   let accumulated = 0;
+  let groupId = 0;
+
+  groups.set(groupId, {
+    id: groupId,
+    startedByDiscontinuity: false,
+    endedByDiscontinuity: false,
+    keyNone: false,
+    duration: 0,
+    segments: [],
+    genericCount: 0,
+    specificCount: 0,
+  });
+
+  const currentGroup = () => groups.get(groupId);
 
   for (const rawLine of lines) {
     const line = rawLine.trim();
+    if (line === '#EXT-X-DISCONTINUITY') {
+      currentGroup().endedByDiscontinuity = true;
+      groupId++;
+      groups.set(groupId, {
+        id: groupId,
+        startedByDiscontinuity: true,
+        endedByDiscontinuity: false,
+        keyNone: false,
+        duration: 0,
+        segments: [],
+        genericCount: 0,
+        specificCount: 0,
+      });
+      pendingDuration = null;
+      continue;
+    }
+    if (line.startsWith('#EXT-X-KEY')) {
+      if (/METHOD=NONE/i.test(line)) currentGroup().keyNone = true;
+      continue;
+    }
     if (line.startsWith('#EXTINF')) {
       const match = line.match(/^#EXTINF:([\d.]+)/);
       pendingDuration = match ? parseFloat(match[1]) : null;
@@ -209,20 +223,114 @@ function buildAdDropSet(lines) {
     }
     if (isMediaSegmentLine(line)) {
       const duration = pendingDuration ?? 0;
-      segments.push({ url: line, duration, start: accumulated });
+      const seg = { url: line, duration, start: accumulated, groupId };
+      segments.push(seg);
+      const group = currentGroup();
+      group.duration += duration;
+      group.segments.push(seg);
+      if (isGenericAdUrl(line)) group.genericCount++;
+      if (isSpecificAdUrl(line)) group.specificCount++;
       accumulated += duration;
       pendingDuration = null;
     }
   }
 
   const ranges = findRoundDurationRanges(segments);
+  const adGroups = [...groups.values()].filter(group => (
+    group.segments.length >= 2 &&
+    group.duration >= 15 &&
+    group.duration <= 120 &&
+    group.genericCount / group.segments.length >= 0.8 &&
+    group.startedByDiscontinuity &&
+    (group.endedByDiscontinuity || group.keyNone)
+  ));
+  const adGroupIds = new Set(adGroups.map(group => group.id));
   const dropSet = new Set();
   for (const seg of segments) {
     if (isSpecificAdUrl(seg.url)) {
       dropSet.add(seg.url);
     } else if (isGenericAdUrl(seg.url) && ranges.some(r => seg.start >= r.start && seg.start < r.end)) {
       dropSet.add(seg.url);
+    } else if (isGenericAdUrl(seg.url) && adGroupIds.has(seg.groupId)) {
+      dropSet.add(seg.url);
     }
   }
-  return dropSet;
+
+  return {
+    dropSet,
+    segmentCount: segments.length,
+    droppedCount: dropSet.size,
+    ranges,
+    adGroups: adGroups.map(group => ({
+      id: group.id,
+      duration: Number(group.duration.toFixed(2)),
+      segments: group.segments.length,
+      genericCount: group.genericCount,
+      keyNone: group.keyNone,
+      startedByDiscontinuity: group.startedByDiscontinuity,
+      endedByDiscontinuity: group.endedByDiscontinuity,
+      firstUrl: group.segments[0]?.url,
+      lastUrl: group.segments[group.segments.length - 1]?.url,
+    })),
+    droppedPreview: segments
+      .filter(seg => dropSet.has(seg.url))
+      .slice(0, 30)
+      .map(seg => ({
+        start: Number(seg.start.toFixed(2)),
+        duration: seg.duration,
+        groupId: seg.groupId,
+        url: seg.url,
+      })),
+  };
+}
+
+function analyzeMediaPlaylist(text, baseUrl) {
+  const lines = text.split('\n');
+  const analysis = buildAdDropAnalysis(lines);
+  const { dropSet } = analysis;
+  const filtered = [];
+  let skipNextSegment = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+
+    if (line === '#EXT-X-DISCONTINUITY') {
+      const nextSeg = lines.slice(i + 1, i + 6).find(l => isMediaSegmentLine(l.trim()));
+      if (nextSeg && dropSet.has(nextSeg.trim())) {
+        skipNextSegment = true;
+        continue;
+      }
+      if (skipNextSegment) {
+        skipNextSegment = false;
+        continue;
+      }
+      filtered.push(line);
+      continue;
+    }
+
+    if (line.startsWith('#EXT-X-KEY') && skipNextSegment) continue;
+
+    if (line.startsWith('#EXTINF')) {
+      const nextLine = lines[i + 1]?.trim();
+      if (nextLine && dropSet.has(nextLine)) {
+        skipNextSegment = true;
+        continue;
+      }
+      filtered.push(line);
+      continue;
+    }
+
+    if (isMediaSegmentLine(line)) {
+      if (dropSet.has(line)) {
+        skipNextSegment = false;
+        continue;
+      }
+      filtered.push(toAbsoluteUrl(line, baseUrl));
+      skipNextSegment = false;
+      continue;
+    }
+    filtered.push(line);
+  }
+
+  return { result: filtered.join('\n'), analysis };
 }

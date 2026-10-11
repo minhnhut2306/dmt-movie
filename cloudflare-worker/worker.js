@@ -77,13 +77,48 @@ function findRoundDurationRanges(segments) {
   return ranges;
 }
 
-function buildAdDropSet(lines) {
+function buildAdDropAnalysis(lines) {
   const segments = [];
+  const groups = new Map();
   let pendingDuration = null;
   let accumulated = 0;
+  let groupId = 0;
+
+  groups.set(groupId, {
+    id: groupId,
+    startedByDiscontinuity: false,
+    endedByDiscontinuity: false,
+    keyNone: false,
+    duration: 0,
+    segments: [],
+    genericCount: 0,
+    specificCount: 0,
+  });
+
+  const currentGroup = () => groups.get(groupId);
 
   for (const rawLine of lines) {
     const line = rawLine.trim();
+    if (line === '#EXT-X-DISCONTINUITY') {
+      currentGroup().endedByDiscontinuity = true;
+      groupId++;
+      groups.set(groupId, {
+        id: groupId,
+        startedByDiscontinuity: true,
+        endedByDiscontinuity: false,
+        keyNone: false,
+        duration: 0,
+        segments: [],
+        genericCount: 0,
+        specificCount: 0,
+      });
+      pendingDuration = null;
+      continue;
+    }
+    if (line.startsWith('#EXT-X-KEY')) {
+      if (/METHOD=NONE/i.test(line)) currentGroup().keyNone = true;
+      continue;
+    }
     if (line.startsWith('#EXTINF')) {
       const match = line.match(/^#EXTINF:([\d.]+)/);
       pendingDuration = match ? parseFloat(match[1]) : null;
@@ -91,22 +126,65 @@ function buildAdDropSet(lines) {
     }
     if (isMediaSegmentLine(line)) {
       const duration = pendingDuration ?? 0;
-      segments.push({ url: line, duration, start: accumulated });
+      const seg = { url: line, duration, start: accumulated, groupId };
+      segments.push(seg);
+      const group = currentGroup();
+      group.duration += duration;
+      group.segments.push(seg);
+      if (isGenericAdUrl(line)) group.genericCount++;
+      if (isSpecificAdUrl(line)) group.specificCount++;
       accumulated += duration;
       pendingDuration = null;
     }
   }
 
   const ranges = findRoundDurationRanges(segments);
+  const adGroups = [...groups.values()].filter(group => (
+    group.segments.length >= 2 &&
+    group.duration >= 15 &&
+    group.duration <= 120 &&
+    group.genericCount / group.segments.length >= 0.8 &&
+    group.startedByDiscontinuity &&
+    (group.endedByDiscontinuity || group.keyNone)
+  ));
+  const adGroupIds = new Set(adGroups.map(group => group.id));
   const dropSet = new Set();
   for (const seg of segments) {
     if (isSpecificAdUrl(seg.url)) {
       dropSet.add(seg.url);
     } else if (isGenericAdUrl(seg.url) && ranges.some(r => seg.start >= r.start && seg.start < r.end)) {
       dropSet.add(seg.url);
+    } else if (isGenericAdUrl(seg.url) && adGroupIds.has(seg.groupId)) {
+      dropSet.add(seg.url);
     }
   }
-  return dropSet;
+
+  return {
+    dropSet,
+    segmentCount: segments.length,
+    droppedCount: dropSet.size,
+    ranges,
+    adGroups: adGroups.map(group => ({
+      id: group.id,
+      duration: Number(group.duration.toFixed(2)),
+      segments: group.segments.length,
+      genericCount: group.genericCount,
+      keyNone: group.keyNone,
+      startedByDiscontinuity: group.startedByDiscontinuity,
+      endedByDiscontinuity: group.endedByDiscontinuity,
+      firstUrl: group.segments[0]?.url,
+      lastUrl: group.segments[group.segments.length - 1]?.url,
+    })),
+    droppedPreview: segments
+      .filter(seg => dropSet.has(seg.url))
+      .slice(0, 30)
+      .map(seg => ({
+        start: Number(seg.start.toFixed(2)),
+        duration: seg.duration,
+        groupId: seg.groupId,
+        url: seg.url,
+      })),
+  };
 }
 
 function toAbsoluteUrl(url, baseUrl) {
@@ -114,9 +192,22 @@ function toAbsoluteUrl(url, baseUrl) {
   return new URL(url, baseUrl).toString();
 }
 
-function filterMediaPlaylist(text, baseUrl) {
+function logAdBlockResult(sourceUrl, analysis) {
+  if (!analysis?.droppedCount) return;
+
+  console.log('[AD_BLOCK]', JSON.stringify({
+    sourceUrl,
+    segmentCount: analysis.segmentCount,
+    droppedCount: analysis.droppedCount,
+    adGroups: analysis.adGroups,
+    droppedPreview: analysis.droppedPreview?.slice(0, 12),
+  }));
+}
+
+function analyzeMediaPlaylist(text, baseUrl) {
   const lines = text.split('\n');
-  const dropSet = buildAdDropSet(lines);
+  const analysis = buildAdDropAnalysis(lines);
+  const { dropSet } = analysis;
   const filtered = [];
   let skipNextSegment = false;
 
@@ -162,7 +253,11 @@ function filterMediaPlaylist(text, baseUrl) {
     filtered.push(line);
   }
 
-  return filtered.join('\n');
+  return { result: filtered.join('\n'), analysis };
+}
+
+function filterMediaPlaylist(text, baseUrl) {
+  return analyzeMediaPlaylist(text, baseUrl).result;
 }
 
 function rewriteMasterPlaylist(text, baseUrl, workerUrl) {
@@ -194,6 +289,7 @@ export default {
     if (!targetUrl) {
       return new Response('Missing url parameter', { status: 400 });
     }
+    const debug = url.searchParams.get('debug') === '1';
 
     trackRequest(ctx, url.pathname);
 
@@ -203,7 +299,7 @@ export default {
 
     const cache = caches.default;
     const cacheKey = new Request(request.url);
-    const cachedResponse = await cache.match(cacheKey);
+    const cachedResponse = debug ? null : await cache.match(cacheKey);
     if (cachedResponse) {
       // Đảm bảo cached response luôn có CORS header
       const newHeaders = new Headers(cachedResponse.headers);
@@ -239,11 +335,37 @@ export default {
 
       const text = await response.text();
       let result;
+      let debugPayload = null;
 
       if (text.includes('#EXT-X-STREAM-INF')) {
         result = rewriteMasterPlaylist(text, baseUrl, workerUrl);
+        debugPayload = {
+          type: 'master',
+          sourceUrl: decodedUrl,
+          variants: text.split('\n')
+            .map(line => line.trim())
+            .filter(line => line && !line.startsWith('#'))
+            .map(line => toAbsoluteUrl(line, baseUrl)),
+        };
       } else {
-        result = filterMediaPlaylist(text, baseUrl);
+        const analyzed = analyzeMediaPlaylist(text, baseUrl);
+        result = analyzed.result;
+        logAdBlockResult(decodedUrl, analyzed.analysis);
+        debugPayload = {
+          type: 'media',
+          sourceUrl: decodedUrl,
+          ...analyzed.analysis,
+        };
+      }
+
+      if (debug) {
+        return new Response(JSON.stringify(debugPayload, null, 2), {
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+            'Access-Control-Allow-Origin': '*',
+            'Cache-Control': 'no-store',
+          },
+        });
       }
 
       const finalResponse = new Response(result, {
@@ -251,6 +373,8 @@ export default {
           'Content-Type': 'application/vnd.apple.mpegurl',
           'Access-Control-Allow-Origin': '*',
           'Cache-Control': `public, max-age=${CACHE_TTL}`,
+          'X-Ad-Blocked-Count': debugPayload?.droppedCount?.toString() || '0',
+          'X-Ad-Blocked-Groups': debugPayload?.adGroups?.length?.toString() || '0',
         },
       });
 
