@@ -31,7 +31,7 @@ const MoviePlay = () => {
     const [currentEpisode, setCurrentEpisode] = useState(0);
     const [currentServer, setCurrentServer] = useState(0);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [isMobile, setIsMobile] = useState(false);
+    const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
     const [watchedEpisodes, setWatchedEpisodes] = useState({});
     const blockedKeywords = ['hay-de-cho-to-toa-sang', 'hay-để-cho-tô-tỏa-sáng'];
     const isBlockedSlug = blockedKeywords.some(keyword => slug?.toLowerCase().includes(keyword.toLowerCase()));
@@ -135,6 +135,8 @@ const MoviePlay = () => {
 
     useEffect(() => {
         const checkMobile = () => {
+            // Keep the mounted player when fullscreen or rotation crosses the breakpoint.
+            if (activeLayout === 'watch') return;
             setIsMobile(window.innerWidth < 768);
         };
 
@@ -142,7 +144,7 @@ const MoviePlay = () => {
         window.addEventListener('resize', checkMobile);
 
         return () => window.removeEventListener('resize', checkMobile);
-    }, []);
+    }, [activeLayout]);
 
     useEffect(() => {
         const history = getWatchHistory(slug);

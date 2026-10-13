@@ -43,12 +43,30 @@
     display: none;
   }
   
-  /* Landscape orientation optimization */
-  @media (orientation: landscape) and (max-width: 1024px) {
-    body {
-      overflow: hidden;
-    }
-  }
+}
+
+.video-player-shell:fullscreen,
+.video-player-shell:-webkit-full-screen,
+.video-player-shell[data-expanded="true"] {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  border-radius: 0;
+}
+
+.video-player-shell[data-expanded="true"] {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  height: 100dvh;
+}
+
+.video-player-shell:fullscreen > .video-player-stage,
+.video-player-shell:-webkit-full-screen > .video-player-stage,
+.video-player-shell[data-expanded="true"] > .video-player-stage {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
 }
 
 @layer components {

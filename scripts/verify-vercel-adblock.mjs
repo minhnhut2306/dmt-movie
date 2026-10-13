@@ -104,6 +104,20 @@ try {
     assert.equal(preparation.body.droppedCount, expectedDropped);
     assert.equal(media?.headers['x-ad-blocked-count'], String(expectedDropped));
     assert.ok(!/convertv[78]\/|\/v8\/.*segment_/.test(media.text));
+    if (process.env.DMT_FULLSCREEN) {
+      const video = await page.locator('video').elementHandle();
+      const source = await video.evaluate(node => node.src);
+      await page.getByRole('button', { name: 'Toàn màn hình', exact: true }).click();
+      await page.getByRole('button', { name: 'Thoát toàn màn hình', exact: true }).waitFor();
+      await page.setViewportSize({ width: 915, height: 412 });
+      assert.equal(await video.evaluate(node => node.isConnected), true);
+      assert.equal(await video.evaluate(node => node.src), source);
+      await page.screenshot({ path: path.join(process.env.TEMP, 'dmt-real-video-fullscreen.png') });
+      await page.getByRole('button', { name: 'Thoát toàn màn hình', exact: true }).click();
+      await page.setViewportSize({ width: 412, height: 915 });
+      assert.equal(await video.evaluate(node => node.isConnected), true);
+      console.log('FULLSCREEN stable video and source');
+    }
     await page.evaluate(() => {
       const video = document.querySelector('video');
       video.currentTime = 880;

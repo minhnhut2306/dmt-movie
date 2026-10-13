@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Play, Minimize, Maximize, Settings } from 'lucide-react';
+import { Play, Minimize, Maximize, Settings, RefreshCw } from 'lucide-react';
 import Hls from 'hls.js';
 import { saveWatchPosition, getWatchPosition } from '../../utils/watchHistory';
 import { preparePlaybackSource } from '../../utils/preparePlaybackSource';
+import { usePlayerFullscreen } from '../../hooks/usePlayerFullscreen';
 
 const isRoundDuration = (d) => Number.isInteger(d) || Math.abs(d - Math.round(d)) < 0.05;
 
@@ -78,10 +79,8 @@ const VideoPlayer = ({
 }) => {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
-  const [isLandscape, setIsLandscape] = useState(false);
   const [videoError, setVideoError] = useState(null);
   const [useEmbed, setUseEmbed] = useState(forceEmbed);
-  const [embedFailed, setEmbedFailed] = useState(false);
   const retryCountRef = useRef(0);
   const [retryKey, setRetryKey] = useState(0);
   const [resumePrompt, setResumePrompt] = useState(null); // { time: number }
@@ -91,6 +90,20 @@ const VideoPlayer = ({
   const [availableLevels, setAvailableLevels] = useState([]);
   const [currentQuality, setCurrentQuality] = useState(-1); // -1 = Auto
   const [showQualityMenu, setShowQualityMenu] = useState(false);
+  const { expanded, toggleFullscreen } = usePlayerFullscreen(
+    containerRef, videoRef, setIsFullscreen, !useEmbed && !videoError, !!videoError,
+  );
+  const fullscreenButton = (
+    <button
+      type="button"
+      onClick={toggleFullscreen}
+      className="absolute top-3 right-3 z-20 w-11 h-11 flex items-center justify-center bg-black/70 text-white rounded-lg hover:bg-black/90"
+      aria-label={isFullscreen ? 'Thoát toàn màn hình' : 'Toàn màn hình'}
+      title={isFullscreen ? 'Thoát toàn màn hình' : 'Toàn màn hình'}
+    >
+      {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+    </button>
+  );
 
   const getQualityLabel = useCallback((level) => {
     if (!level) return '';
@@ -111,7 +124,6 @@ const VideoPlayer = ({
   useEffect(() => {
     setVideoError(null);
     setUseEmbed(forceEmbed);
-    setEmbedFailed(false);
     retryCountRef.current = 0;
     setRetryKey(0);
     setAvailableLevels([]);
@@ -120,57 +132,9 @@ const VideoPlayer = ({
   }, [currentVideoUrl, currentEmbedUrl, forceEmbed]);
 
   useEffect(() => {
-    const handleOrientationChange = () => {
-      const isLandscapeMode = window.matchMedia('(orientation: landscape)').matches;
-      setIsLandscape(isLandscapeMode);
-      if (isLandscapeMode && window.innerWidth < 1024) {
-        setIsFullscreen(true);
-      }
-    };
-
-    let resizeTimer;
-    const handleResize = () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(handleOrientationChange, 150);
-    };
-
-    handleOrientationChange();
-    window.addEventListener('orientationchange', handleOrientationChange);
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      clearTimeout(resizeTimer);
-      window.removeEventListener('orientationchange', handleOrientationChange);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [setIsFullscreen]);
-
-  const toggleNativeFullscreen = async () => {
-    if (!document.fullscreenElement) {
-      try {
-        await containerRef.current?.requestFullscreen();
-        setIsFullscreen(true);
-      } catch (err) {
-        console.error('Fullscreen error:', err);
-      }
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
-    }
-  };
-
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, [setIsFullscreen]);
-
-  useEffect(() => {
     if (!currentVideoUrl) return;
     if (videoError) return;
-    if (useEmbed && !embedFailed) return;
+    if (useEmbed) return;
 
     const video = videoRef.current;
     if (!video) return;
@@ -396,9 +360,9 @@ const VideoPlayer = ({
       if (hlsInstance) hlsInstance.destroy();
       hlsRef.current = null;
     };
-  }, [currentVideoUrl, autoPlay, retryKey, videoError, embedFailed, useEmbed, forceEmbed]);
+  }, [currentVideoUrl, autoPlay, retryKey, videoError, useEmbed, forceEmbed]);
 
-  if (!currentVideoUrl) {
+  if (!currentVideoUrl && !(useEmbed && currentEmbedUrl)) {
     return (
       <div className="bg-gray-800 flex items-center justify-center aspect-video">
         <div className="text-center text-white p-4">
@@ -410,34 +374,40 @@ const VideoPlayer = ({
     );
   }
 
-  if (useEmbed && currentEmbedUrl && !embedFailed) {
+  if (useEmbed && currentEmbedUrl && !videoError) {
     return (
       <div
         ref={containerRef}
-        className={`${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''} ${isLandscape && !isFullscreen ? 'h-screen' : ''}`}
+        className="video-player-shell"
+        data-expanded={expanded}
       >
-        <div className={`bg-black ${isFullscreen || isLandscape ? 'h-full' : 'aspect-video'} relative`}>
+        <div className="video-player-stage bg-black aspect-video relative">
           <iframe
+            key={retryKey}
             src={currentEmbedUrl}
             className="w-full h-full"
             allow="autoplay; fullscreen"
+            allowFullScreen
+            title="Video Server 2"
             frameBorder="0"
-            onError={() => setEmbedFailed(true)}
+            onError={() => setVideoError('embed')}
           />
-          <div className="absolute bottom-3 right-3 z-10 opacity-0 hover:opacity-100 transition-opacity duration-300">
-            <button
-              onClick={() => setEmbedFailed(true)}
-              className="bg-black/70 text-gray-400 hover:text-white text-xs px-3 py-1.5 rounded-lg backdrop-blur-sm transition-colors"
-            >
-              Video không phát? Thử cách khác
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setRetryKey(key => key + 1)}
+            className="absolute top-3 right-16 z-20 w-11 h-11 flex items-center justify-center bg-black/70 text-white rounded-lg hover:bg-black/90"
+            aria-label="Tải lại video"
+            title="Tải lại video"
+          >
+            <RefreshCw className="w-5 h-5" />
+          </button>
+          {fullscreenButton}
         </div>
       </div>
     );
   }
 
-  if (videoError || (embedFailed && !currentEmbedUrl)) {
+  if (videoError || (useEmbed && !currentEmbedUrl)) {
     return (
       <div className="bg-gray-800 flex items-center justify-center aspect-video">
         <div className="text-center text-white p-4">
@@ -455,8 +425,7 @@ const VideoPlayer = ({
               retryCountRef.current = 0;
               setRetryKey(k => k + 1);
               setVideoError(null);
-              setUseEmbed(false);
-              setEmbedFailed(false);
+              setUseEmbed(forceEmbed);
             }}
             className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm transition-colors"
           >
@@ -470,9 +439,10 @@ const VideoPlayer = ({
   return (
     <div
       ref={containerRef}
-      className={`${isFullscreen ? 'fixed inset-0 z-50 bg-black' : ''} ${isLandscape && !isFullscreen ? 'h-screen' : ''}`}
+      className="video-player-shell"
+      data-expanded={expanded}
     >
-      <div className={`bg-black ${isFullscreen || isLandscape ? 'h-full' : 'aspect-video'} relative group`}>
+      <div className="video-player-stage bg-black aspect-video relative group">
         <video
           ref={videoRef}
           controls
@@ -532,16 +502,7 @@ const VideoPlayer = ({
           </div>
         )}
 
-        {/* Fullscreen button desktop */}
-        <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity hidden lg:block">
-          <button
-            onClick={toggleNativeFullscreen}
-            className="bg-black/70 text-white p-2 rounded-lg hover:bg-black/90 transition-all backdrop-blur-sm"
-            title={isFullscreen ? 'Thoát toàn màn hình' : 'Toàn màn hình'}
-          >
-            {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
-          </button>
-        </div>
+        {fullscreenButton}
 
         {resumePrompt && (
           <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 w-max max-w-[90%]">
