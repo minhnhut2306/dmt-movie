@@ -107,13 +107,16 @@ try {
     if (process.env.DMT_FULLSCREEN) {
       const video = await page.locator('video').elementHandle();
       const source = await video.evaluate(node => node.src);
-      await page.getByRole('button', { name: 'Toàn màn hình', exact: true }).click();
-      await page.getByRole('button', { name: 'Thoát toàn màn hình', exact: true }).waitFor();
+      assert.equal(await video.evaluate(node => node.controls), true);
+      assert.equal(await page.getByRole('button', { name: /^(Toàn màn hình|Thoát toàn màn hình)$/ }).count(), 0);
+      await video.evaluate(node => node.requestFullscreen());
+      await page.waitForFunction(() => document.fullscreenElement?.tagName === 'VIDEO');
       await page.setViewportSize({ width: 915, height: 412 });
       assert.equal(await video.evaluate(node => node.isConnected), true);
       assert.equal(await video.evaluate(node => node.src), source);
       await page.screenshot({ path: path.join(process.env.TEMP, 'dmt-real-video-fullscreen.png') });
-      await page.getByRole('button', { name: 'Thoát toàn màn hình', exact: true }).click();
+      await page.evaluate(() => document.exitFullscreen());
+      await page.waitForFunction(() => !document.fullscreenElement);
       await page.setViewportSize({ width: 412, height: 915 });
       assert.equal(await video.evaluate(node => node.isConnected), true);
       console.log('FULLSCREEN stable video and source');

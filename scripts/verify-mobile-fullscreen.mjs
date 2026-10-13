@@ -64,54 +64,65 @@ try {
     await page.goto(`${base}/movie/fullscreen-test`);
     await page.getByRole('button', { name: 'Xem Phim', exact: true }).click();
     await page.locator('video').waitFor();
+    assert.equal(await page.locator('video').evaluate(node => node.controls), true);
+    assert.equal(await page.getByRole('button', { name: /^(Toàn màn hình|Thoát toàn màn hình)$/ }).count(), 0);
     // Switch to Server 2 and verify no implicit return to the HLS player.
     await page.getByRole('button', { name: 'Server 2', exact: true }).click();
     const iframe = await page.locator('iframe[title="Video Server 2"]').elementHandle();
     await page.frameLocator('iframe[title="Video Server 2"]').getByText('Server 2 fixture').waitFor();
+    assert.equal(await iframe.evaluate(node => node.allowFullscreen), true);
     const beforeEmbed = preparations;
-    await page.getByRole('button', { name: 'Toàn màn hình', exact: true }).click();
-    await page.getByRole('button', { name: 'Thoát toàn màn hình', exact: true }).waitFor();
+    const supportsElementFullscreen = mode === 'mobile' || mode === 'desktop';
+    // Let the embedded player's own control enter fullscreen.
+    if (supportsElementFullscreen) {
+      await page.frameLocator('iframe[title="Video Server 2"]').getByRole('button', { name: 'Child fullscreen' }).click();
+      await page.waitForFunction(() => document.fullscreenElement?.tagName === 'IFRAME');
+    }
     const landscape = mode === 'desktop' ? { width: 600, height: 900 } : { width: 915, height: 412 };
     await page.setViewportSize(landscape);
     assert.equal(await iframe.evaluate(node => node.isConnected), true, `${mode}: iframe remounted`);
     assert.equal(embedLoads, 1, `${mode}: iframe reloaded`);
     assert.equal(preparations, beforeEmbed, `${mode}: switched to Server 1`);
-    const shell = await page.locator('.video-player-shell').boundingBox();
-    const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
-    assert.ok(Math.abs(shell.width - viewport.width) < 2 && Math.abs(shell.height - viewport.height) < 2);
-    assert.equal(await page.evaluate(() => !!document.elementFromPoint(10, 10)?.closest('.video-player-shell')), true);
+    if (supportsElementFullscreen) {
+      const bounds = await iframe.boundingBox();
+      const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
+      assert.ok(Math.abs(bounds.width - viewport.width) < 2 && Math.abs(bounds.height - viewport.height) < 2);
+      assert.equal(await page.evaluate(() => !!document.elementFromPoint(10, 10)?.closest('.video-player-shell')), true);
+    }
     await page.screenshot({ path: path.join(process.env.TEMP, `dmt-fullscreen-${mode}.png`) });
-    await page.getByRole('button', { name: 'Thoát toàn màn hình', exact: true }).click();
-    await page.getByRole('button', { name: 'Toàn màn hình', exact: true }).waitFor();
-    assert.equal(await iframe.evaluate(node => node.isConnected), true);
-    if (mode === 'mobile') {
-      await page.evaluate(() => {
-        window.originalFullscreen = Element.prototype.requestFullscreen;
-        Element.prototype.requestFullscreen = () => Promise.reject(new DOMException('Denied', 'NotAllowedError'));
-      });
-      await page.getByRole('button', { name: 'Toàn màn hình', exact: true }).click();
-      assert.equal(await iframe.evaluate(node => node.isConnected), true);
-      assert.equal(await page.getByText('Không thể phát video', { exact: true }).count(), 0);
-      await page.evaluate(() => { Element.prototype.requestFullscreen = window.originalFullscreen; });
-    }
-    // The iframe's own fullscreen button must also leave the selected source intact.
-    if (mode === 'mobile' || mode === 'desktop') {
-      await page.frameLocator('iframe[title="Video Server 2"]').getByRole('button', { name: 'Child fullscreen' }).click();
-      await page.waitForFunction(() => document.fullscreenElement?.tagName === 'IFRAME');
+    if (supportsElementFullscreen) {
       await page.evaluate(() => document.exitFullscreen());
-      assert.equal(await iframe.evaluate(node => node.isConnected), true);
+      await page.waitForFunction(() => !document.fullscreenElement);
     }
+    assert.equal(await iframe.evaluate(node => node.isConnected), true);
     await page.getByRole('button', { name: 'Server 1', exact: true }).click();
     const video = await page.locator('video').elementHandle();
     await page.waitForFunction(() => document.querySelector('video')?.src.startsWith('blob:'));
+    const source = await video.evaluate(node => node.src);
     const beforeVideo = preparations;
-    await page.getByRole('button', { name: 'Toàn màn hình', exact: true }).click();
-    await page.getByRole('button', { name: 'Thoát toàn màn hình', exact: true }).waitFor();
+    if (supportsElementFullscreen) {
+      await video.evaluate(node => node.requestFullscreen());
+      await page.waitForFunction(() => document.fullscreenElement?.tagName === 'VIDEO');
+    } else if (mode === 'native-ios') {
+      await video.evaluate(node => node.webkitEnterFullscreen());
+      await page.waitForFunction(() => document.querySelector('video')?.webkitDisplayingFullscreen);
+    }
+    // Browsers without a fullscreen API still keep their native video controls
+    // and the same mounted player when the viewport crosses the layout breakpoint.
     await page.setViewportSize({ width: 412, height: 915 });
     assert.equal(await video.evaluate(node => node.isConnected), true, `${mode}: video remounted`);
+    assert.equal(await video.evaluate(node => node.src), source, `${mode}: video source changed`);
     assert.equal(preparations, beforeVideo, `${mode}: playback restarted`);
-    await page.getByRole('button', { name: 'Thoát toàn màn hình', exact: true }).click();
-    await page.getByRole('button', { name: 'Toàn màn hình', exact: true }).waitFor();
+    if (supportsElementFullscreen) {
+      await page.evaluate(() => document.exitFullscreen());
+      await page.waitForFunction(() => !document.fullscreenElement);
+    } else if (mode === 'native-ios') {
+      await video.evaluate(node => node.webkitExitFullscreen());
+      await page.waitForFunction(() => !document.querySelector('video')?.webkitDisplayingFullscreen);
+    }
+    assert.equal(await video.evaluate(node => node.isConnected), true);
+    assert.equal(await video.evaluate(node => node.controls), true);
+    assert.equal(await page.getByRole('button', { name: /^(Toàn màn hình|Thoát toàn màn hình)$/ }).count(), 0);
     assert.equal(await page.evaluate(() => document.body.style.overflow), '');
     await page.getByRole('button', { name: 'Server 2', exact: true }).click();
     await page.locator('iframe[title="Video Server 2"]').waitFor();

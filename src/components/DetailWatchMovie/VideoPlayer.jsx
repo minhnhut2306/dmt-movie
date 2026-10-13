@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Play, Minimize, Maximize, Settings, RefreshCw } from 'lucide-react';
+import { Play, Settings, RefreshCw } from 'lucide-react';
 import Hls from 'hls.js';
 import { saveWatchPosition, getWatchPosition } from '../../utils/watchHistory';
 import { preparePlaybackSource } from '../../utils/preparePlaybackSource';
@@ -70,7 +70,6 @@ const VideoPlayer = ({
   currentVideoUrl,
   currentEmbedUrl,
   forceEmbed = false,
-  isFullscreen,
   setIsFullscreen,
   autoPlay = true,
   slug,
@@ -90,19 +89,8 @@ const VideoPlayer = ({
   const [availableLevels, setAvailableLevels] = useState([]);
   const [currentQuality, setCurrentQuality] = useState(-1); // -1 = Auto
   const [showQualityMenu, setShowQualityMenu] = useState(false);
-  const { expanded, toggleFullscreen } = usePlayerFullscreen(
+  const { expanded } = usePlayerFullscreen(
     containerRef, videoRef, setIsFullscreen, !useEmbed && !videoError, !!videoError,
-  );
-  const fullscreenButton = (
-    <button
-      type="button"
-      onClick={toggleFullscreen}
-      className="absolute top-3 right-3 z-20 w-11 h-11 flex items-center justify-center bg-black/70 text-white rounded-lg hover:bg-black/90"
-      aria-label={isFullscreen ? 'Thoát toàn màn hình' : 'Toàn màn hình'}
-      title={isFullscreen ? 'Thoát toàn màn hình' : 'Toàn màn hình'}
-    >
-      {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
-    </button>
   );
 
   const getQualityLabel = useCallback((level) => {
@@ -395,13 +383,12 @@ const VideoPlayer = ({
           <button
             type="button"
             onClick={() => setRetryKey(key => key + 1)}
-            className="absolute top-3 right-16 z-20 w-11 h-11 flex items-center justify-center bg-black/70 text-white rounded-lg hover:bg-black/90"
+            className="absolute top-3 right-3 z-20 w-11 h-11 flex items-center justify-center bg-black/70 text-white rounded-lg hover:bg-black/90"
             aria-label="Tải lại video"
             title="Tải lại video"
           >
             <RefreshCw className="w-5 h-5" />
           </button>
-          {fullscreenButton}
         </div>
       </div>
     );
@@ -501,8 +488,6 @@ const VideoPlayer = ({
             </div>
           </div>
         )}
-
-        {fullscreenButton}
 
         {resumePrompt && (
           <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 w-max max-w-[90%]">
